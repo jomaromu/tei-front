@@ -1,0 +1,71 @@
+<!-- style="display: none" -->
+<div
+  class="alert alert-danger text-center animate__animated animate__fadeInDown animate__faster"
+  role="alert"
+  #alertWarning
+>
+  Hay campos inválidos
+</div>
+
+<div class="container-fluid">
+  <div id="img-login" class="contenedores-login">
+    <img
+      src="../../../assets/design-room2.jpg"
+      alt="Todo en Impresiones"
+      title="Bienvenido"
+    />
+  </div>
+
+  <div id="form-login" class="contenedores-login">
+    <form [formGroup]="formulario" (ngSubmit)="entrar()">
+      <img
+        src="../../../assets/tei-scaled.png"
+        alt="Todo en Impresiones - Logo"
+        title="TEI"
+      />
+      <h6>Bienvenido</h6>
+      <div id="contenedor-controls">
+        <!-- Correo -->
+        <div>
+          <label for="email" class="form-label">Correo</label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            formControlName="correo"
+            placeholder="algo@algo.com"
+            [ngClass]="{
+              'border-danger':
+                !validarCorreo && !formulario.controls.correo.pristine
+            }"
+          />
+        </div>
+
+        <!-- password -->
+        <div>
+          <label for="password" class="form-label">Contraseña</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            formControlName="password"
+            placeholder="********"
+            [ngClass]="{
+              'border-danger':
+                !validarPassword && !formulario.controls.password.pristine
+            }"
+          />
+
+          <div id="txt-olvide-pass">
+            <label class="chk-password">Olvidé mi contraseña</label>
+          </div>
+
+          <div id="button-submit">
+            <button type="submit" class="btn btn-primary">Entrar</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

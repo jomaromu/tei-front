@@ -1,0 +1,184 @@
+<div class="wrap-sidebar">
+  <div id="logo">
+    <img src="../../../assets/tei-scaled.png" alt="TEI" title="TEI" />
+  </div>
+
+  <div id="perfil">
+    <p>{{ usuario?.usuario?.nombre }} {{ usuario?.usuario?.apellido }}</p>
+    <span *ngFor="let item of roles">
+      <a *ngIf="item.id === role">{{ item.nombre }}</a>
+    </span>
+    <a role="button">Ver perfil</a>
+  </div>
+
+  <!-- primer nivel -->
+  <!-- <div class="group-items" *ngIf="role === 'SuperRole' || role === 'AdminRole'">
+        <a class="item-sidebar" routerLink="/dashboard/admin">
+            <i class="fas fa-chart-bar"></i>
+            <span>Dashboard</span>
+        </a>
+    </div> -->
+
+  <div class="group-items">
+    <a class="item-sidebar" routerLink="/dashboard/mi-bandeja">
+      <i class="fas fa-inbox"></i>
+      <span>Mi bandeja</span>
+    </a>
+  </div>
+
+  <div class="group-items" *ngIf="rolePermitido">
+    <a class="item-sidebar" routerLink="/dashboard/nuevo-pedido">
+      <i class="fas fa-shopping-cart"></i>
+      <span>Crear Pedido</span>
+    </a>
+  </div>
+
+  <div class="group-items" *ngIf="role === 'SuperRole' || role === 'AdminRole'">
+    <a
+      class="item-sidebar"
+      data-bs-toggle="collapse"
+      href="#catalogos"
+      aria-expanded="false"
+      aria-controls="catalogos"
+      id="catalogo"
+    >
+      <i class="fas fa-book"></i>
+      <span>Catálogo</span>
+      <i class="fas fa-angle-right" id="row-catalogo"></i>
+    </a>
+  </div>
+
+  <!-- segundo nivel -->
+  <div class="collapse" id="catalogos">
+    <div class="group-items subs">
+      <a class="item-sidebar subs-items" routerLink="/dashboard/sucursales">
+        <span>Sucursales</span>
+      </a>
+    </div>
+
+    <div class="group-items subs">
+      <a class="item-sidebar subs-items" routerLink="/dashboard/usuarios">
+        <span>Colaboradores</span>
+      </a>
+    </div>
+
+    <div class="group-items subs">
+      <a class="item-sidebar subs-items" routerLink="/dashboard/clientes">
+        <span>Clientes</span>
+      </a>
+    </div>
+
+    <div class="group-items subs">
+      <a class="item-sidebar subs-items" routerLink="/dashboard/categorias">
+        <span>Categorías</span>
+      </a>
+    </div>
+
+    <div class="group-items subs">
+      <a class="item-sidebar subs-items" routerLink="/dashboard/productos">
+        <span>Productos</span>
+      </a>
+    </div>
+
+    <div class="group-items subs">
+      <a
+        class="item-sidebar"
+        data-bs-toggle="collapse"
+        href="#collapseExample2"
+        aria-expanded="false"
+        aria-controls="collapseExample"
+        id="pedidos"
+      >
+        <i></i>
+        <span>Pedidos</span>
+        <i class="fas fa-angle-right" id="row-pedidos"></i>
+      </a>
+    </div>
+
+    <!-- tercer nivel -->
+    <div class="collapse" id="collapseExample2">
+      <!-- <div class="group-items subs">
+                <a class="item-sidebar subs-items" routerLink="prioridad-pedido">
+                    <span>Prioridad</span>
+                </a>
+            </div> -->
+
+      <div class="group-items subs">
+        <a
+          class="item-sidebar subs-items"
+          routerLink="/dashboard/origen-pedido"
+        >
+          <span>Origen</span>
+        </a>
+      </div>
+
+      <div class="group-items subs">
+        <a
+          class="item-sidebar subs-items"
+          routerLink="/dashboard/archivos-pedido"
+        >
+          <span>Archivos</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="group-items subs">
+      <a class="item-sidebar subs-items" routerLink="/dashboard/metodos-pagos">
+        <span>M. Pagos</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="group-items" *ngIf="role === 'SuperRole' || role === 'AdminRole'">
+    <a class="item-sidebar" routerLink="facturacion">
+      <i class="fas fa-file-invoice-dollar"></i>
+      <span>Facturación</span>
+    </a>
+  </div>
+
+  <!-- primer nivel reportes -->
+  <div class="group-items" *ngIf="role === 'SuperRole' || role === 'AdminRole'">
+    <a
+      class="item-sidebar"
+      data-bs-toggle="collapse"
+      href="#reportes"
+      aria-expanded="false"
+      aria-controls="reportes"
+      id="reporte"
+    >
+      <i class="fas fa-chart-pie"></i>
+      <span>Reportes</span>
+      <i class="fas fa-angle-right" id="row-reportes"></i>
+    </a>
+  </div>
+
+  <!-- segundo nivel -->
+  <div class="collapse" id="reportes">
+    <div class="group-items subs">
+      <a class="item-sidebar subs-items" routerLink="/dashboard/reportes">
+        <span>P. Pedidos</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="group-items">
+    <a class="item-sidebar" routerLink="/dashboard/ayuda">
+      <i class="fas fa-question-circle"></i>
+      <span>Ayuda</span>
+    </a>
+  </div>
+
+  <!-- <div class="group-items">
+        <a class="item-sidebar" routerLink="/dashboard/bitacora">
+            <i class="fas fa-file-invoice"></i>
+            <span>Bitácora</span>
+        </a>
+    </div> -->
+
+  <div class="group-items">
+    <a class="item-sidebar" role="button">
+      <i class="fas fa-sign-out-alt"></i>
+      <span (click)="salir()">Salir</span>
+    </a>
+  </div>
+</div>

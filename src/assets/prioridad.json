@@ -1,0 +1,10 @@
+[
+    {
+        "nombre": "Urgente",
+        "importancia": 0
+    },
+    {
+        "nombre": "Normal",
+        "importancia": 1
+    }
+]

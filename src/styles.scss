@@ -1,0 +1,282 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap");
+
+html,
+body {
+  height: 100% !important;
+  background-color: rgb(239, 242, 245) !important;
+  // border: 1px solid red;
+  position: relative;
+  overflow: auto;
+}
+
+a {
+  text-decoration: none;
+}
+
+$primary: rgb(0, 177, 157);
+$secondary: rgb(0, 159, 141);
+$gray: rgb(229, 229, 229);
+$bacground-dashboard: rgb(239, 242, 245);
+$dark-gray: rgb(224, 224, 224);
+$title: rgb(0, 83, 94);
+$white: rgb(255, 255, 255);
+$danger: rgb(248, 215, 218);
+$border-sidebar: darken($primary, 5);
+$sidebar-height: 100vh;
+
+// $font-family: 'Roboto', sans-serif;
+$font-family: "Nunito Sans", sans-serif;
+
+// $box-shadow: 1px 1px 4px 1px rgb(207, 207, 207);
+$box-shadow: 1px 1px 5px
+  lighten(
+    $color: $gray,
+    $amount: 0,
+  );
+$botones-shadow: 1px 1px 3px 3px rgb(206, 206, 206);
+$text-shadow: 1px 3px 3px rgb(206, 206, 206);
+
+$width-sidebar: 200px;
+
+$map-fonts: (
+  "ssm": 8px,
+  "sm": 12px,
+  "xm": 14px,
+  "smd": 16px,
+  "smx": 18px,
+  "sml": 20px,
+  "smlx": 22px,
+  "md": 24px,
+  "lg": 36px,
+  "xl": 48px,
+);
+
+@mixin estado-pedido($bgColor, $colorFont) {
+  background-color: $bgColor;
+
+  td {
+    color: $colorFont !important;
+  }
+}
+
+@mixin button($name-tag, $bg-color, $color) {
+  @include flex-center;
+  flex-direction: row;
+  outline: none;
+  border: none;
+  background-color: $bg-color;
+  color: $color;
+  height: 35px;
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: $botones-shadow;
+  transition: 0.3s all ease-in-out;
+
+  font: {
+    size: map-get($map: $map-fonts, $key: "xm");
+  }
+}
+
+%sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: $primary;
+  height: 100vh;
+  width: $width-sidebar;
+  height: $sidebar-height;
+}
+
+@mixin ancho-alto($ancho, $alto) {
+  width: $ancho;
+  height: $alto;
+}
+
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: $font-family;
+}
+
+@mixin alert-warning {
+  position: absolute;
+  margin: 0 auto;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  width: 420px;
+}
+
+%fondo {
+  position: fixed;
+  @include ancho-alto(100vw, 100vh);
+  @include flex-center();
+  display: none;
+  background-color: rgba($gray, 0.5);
+  z-index: 99;
+  top: 0;
+  left: 0;
+}
+
+@mixin header-creaciones() {
+  #wrap-head {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  #head-titulo {
+    // border: 1px solid red;
+    @include flex-center;
+    flex-direction: row;
+    color: darken($color: $secondary, $amount: 10);
+    text-shadow: $text-shadow;
+
+    font: {
+      size: map-get($map: $map-fonts, $key: "sml");
+      weight: 600;
+    }
+  }
+
+  button {
+    @include button(button, $primary, $gray);
+  }
+
+  button:hover {
+    background-color: $secondary;
+  }
+
+  i {
+    margin-right: 7px;
+    text-shadow: $text-shadow;
+  }
+
+  .fa-plus {
+    text-shadow: 1px 1px 3px rgb(160, 160, 160);
+  }
+}
+
+@mixin body-creaciones {
+  form > #body {
+    display: grid;
+    grid-template-columns: 48% 48%;
+    grid-row-gap: 15px;
+    margin-top: 50px;
+    width: 100%;
+    // background-color: blue;
+    justify-content: space-between;
+
+    .ctrl-creacion {
+      // background-color: red;
+      // width: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+
+      input {
+        outline: none;
+        box-shadow: none;
+        border-radius: 0;
+        border-top: 0;
+        border-left: 0;
+        border-right: 0;
+      }
+
+      label {
+        width: 80px;
+        margin-right: 15px;
+      }
+    }
+  }
+
+  #wrap-buttons-creacion > button {
+    width: 140px;
+    box-shadow: none;
+    border: 1px solid darken($color: $gray, $amount: 10);
+  }
+
+  #wrap-buttons-creacion > button:first-child {
+    background-color: $white;
+    color: $primary;
+  }
+
+  #wrap-buttons-creacion > button:first-child:hover {
+    color: darken($color: $primary, $amount: 20);
+    font-weight: 400;
+  }
+}
+
+@mixin creaciones($width, $height) {
+  border-radius: 8px;
+  min-width: 650px;
+  width: $width;
+  min-height: $height;
+  background-color: $white;
+  padding: 25px;
+  box-shadow: $box-shadow;
+  position: relative;
+
+  @include header-creaciones();
+  @include body-creaciones();
+}
+
+%tabla-basic {
+  thead {
+    background-color: $primary;
+
+    tr,
+    td,
+    th {
+      color: darken($color: $gray, $amount: 0);
+
+      font: {
+        weight: 200;
+      }
+    }
+  }
+
+  tbody {
+    tr,
+    td,
+    th {
+      color: darken($color: $gray, $amount: 45);
+
+      font: {
+        weight: 200;
+      }
+    }
+  }
+}
+
+%tables {
+  border: 1px solid $gray;
+  box-shadow: $box-shadow;
+  padding: 15px;
+  background-color: $white;
+  position: relative;
+  overflow-y: scroll;
+  @include header-creaciones();
+
+  div {
+    color: darken($color: $gray, $amount: 40);
+
+    font: {
+      family: $font-family;
+    }
+  }
+
+  tr,
+  th,
+  td {
+    font: {
+      family: $font-family;
+    }
+  }
+
+  @extend %tabla-basic;
+}

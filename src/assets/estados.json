@@ -1,0 +1,62 @@
+[
+  {
+    "nombre": "Sin diseñar",
+    "id": 0,
+    "color": "#b2aeae"
+  },
+  {
+    "nombre": "Diseñado",
+    "id": 1,
+    "color": "#c2c21b"
+  },
+  {
+    "nombre": "Corrección",
+    "id": 2,
+    "color": "#c4211b"
+  },
+  {
+    "nombre": "Aprobado",
+    "id": 3,
+    "color": "#099e22"
+  },
+  {
+    "nombre": "Impreso",
+    "id": 4,
+    "color": "#089ec4"
+  },
+  {
+    "nombre": "Devuelto Prod",
+    "id": 5,
+    "color": "#a008a5"
+  },
+  {
+    "nombre": "Info. Incompleta",
+    "id": 6,
+    "color": "#13b3db"
+  },
+  {
+    "nombre": "Prod pesonaliza",
+    "id": 7,
+    "color": "#3b3a3a"
+  },
+  {
+    "nombre": "Foto enviada",
+    "id": 8,
+    "color": "#3b3355"
+  },
+  {
+    "nombre": "Reimpresion",
+    "id": 9,
+    "color": "#041375"
+  },
+  {
+    "nombre": "Prod. Completo",
+    "id": 10,
+    "color": "#591d01"
+  },
+  {
+    "nombre": "Laser. Prod.",
+    "id": 11,
+    "color": "#035361"
+  }
+]

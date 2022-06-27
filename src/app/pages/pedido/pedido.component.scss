@@ -1,0 +1,437 @@
+@import '../../../styles';
+
+.tab-pane {
+    overflow: hidden;
+}
+
+.no-drop {
+    cursor: no-drop;
+}
+
+#wrap-pedido {
+
+    // border: 1px solid red;
+    width: 850px;
+    min-height: 100px;
+    background-color: $white;
+    margin: 100px auto;
+    font-family: $font-family;
+    box-shadow: $box-shadow;
+    border-radius: 5px;
+
+    .nav-tabs {
+        background-color: $gray;
+    }
+
+    #myTabContent {
+        padding: 25px;
+    }
+
+    button {
+
+        i {
+            margin-right: 7px;
+        }
+
+        color: darken($color: $primary, $amount: 12);
+
+        font: {
+            // family: $font-family;
+            weight: 600;
+
+        }
+    }
+}
+
+h6 {
+    // border: 1px solid red;
+    color: darken($color: $primary, $amount: 12);
+    text-shadow: $text-shadow;
+
+    font: {
+        weight: 600;
+
+    }
+}
+
+// informacion
+
+.wrapper-tap {
+    // border: 1px solid red;
+    display: flex;
+    flex-direction: column;
+    margin: 15px 50px;
+}
+
+.wrap-info {
+    // background-color: blue;
+    // border: 1px solid blue;
+    display: grid;
+    grid-template-columns: 35% 55%;
+    column-gap: 10%;
+
+    h6 {
+        // border: 1px solid red;
+        color: darken($color: $primary, $amount: 12);
+        text-shadow: $text-shadow;
+
+        font: {
+            weight: 600;
+
+        }
+    }
+
+    .wrap-inputs {
+        // border: 1px solid green;
+        display: flex;
+        flex-direction: column;
+        width: 300px;
+
+        label {
+            margin-bottom: 0;
+
+            font: {
+                size: map-get($map: $map-fonts, $key: 'xm')
+            }
+        }
+
+        input {
+            margin-bottom: 15px;
+            cursor: no-drop;
+        }
+    }
+
+    form {
+        display: grid;
+        grid-template-columns: 45% 45%;
+        column-gap: 10%;
+        margin-bottom: 75px;
+
+        label {
+            margin-bottom: 0;
+
+            font: {
+                size: map-get($map: $map-fonts, $key: 'xm')
+            }
+        }
+
+        input,
+        select {
+            margin-bottom: 15px;
+        }
+
+        .fa-feather-alt {
+            margin-left: 5px;
+            color: $secondary;
+            width: 25px;
+            // border: 1px solid gray;
+
+            font: {
+                size: map-get($map: $map-fonts, $key: 'smx');
+            }
+
+            transition: 0.3s all ease-in-out;
+        }
+
+        .fa-feather-alt:hover {
+            color: darken($color: $primary, $amount: 20);
+        }
+    }
+}
+
+.wrap-info:first-child {
+    margin-bottom: 40px;
+}
+
+#wrap-buttons-acciones {
+
+    // background-color: red;
+    position: absolute;
+    display: grid;
+    grid-template-columns: 160px 160px;
+    // justify-content: flex-end;
+    column-gap: 25px;
+    bottom: 25px;
+    right: 25px;
+
+    .buttons {
+        height: 35px;
+        width: 150px;
+        box-shadow: none !important;
+        border: 1px solid darken($color: $gray, $amount: 10) !important;
+        transition: 0.3s all ease-in-out;
+        font-weight: 200;
+    }
+
+    .buttons:hover {
+        box-shadow: $box-shadow !important;
+    }
+
+    button:first-child {
+        @include button('', $white, $primary);
+    }
+
+    #wrap-acciones {
+
+        button {
+            @include button('', $secondary, $white);
+        }
+
+        #collapse-acciones {
+            position: absolute;
+
+            button {
+                // background-color: darken($color: $secondary, $amount: 10);
+                margin-bottom: 10px;
+
+                font: {
+                    weight: 200;
+                }
+            }
+        }
+    }
+
+}
+
+// producto
+#tap-producto {
+    // border: 1px solid blue;
+    min-height: 500px;
+
+    h6 {
+        // border: 1px solid red;
+        color: darken($color: $primary, $amount: 12);
+        text-shadow: $text-shadow;
+        margin-bottom: 30px;
+
+        font: {
+            weight: 600;
+
+        }
+    }
+
+    #detalle-producto {
+        // background-color: red;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        column-gap: 35px;
+
+        #wrap-input-producto {
+            grid-column: 1 / span 2;
+            grid-row: 1;
+        }
+
+        #wrap-input-comentario {
+            grid-column: 3;
+            grid-row: 1 / span 2;
+        }
+
+        .inputs-producto {
+            margin-bottom: 15px;
+
+            button {
+
+                @include button('', $secondary, $white);
+                height: 30px;
+
+                font: {
+                    weight: 200;
+                }
+
+            }
+
+            button:hover {
+                box-shadow: $box-shadow !important;
+            }
+        }
+
+        .inputs-producto:not(.itbms) {
+            // margin: 0;
+
+            input {
+                margin: 0;
+            }
+
+            label {
+                margin: 0;
+
+                font: {
+                    size: map-get($map: $map-fonts, $key: 'xm')
+                }
+            }
+        }
+
+        #wrap-input-producto {
+
+            position: relative;
+
+            #placeholder-producto {
+                display: none;
+                border-right: 1px solid lighten($color: gray, $amount: 30);
+                border-left: 1px solid lighten($color: gray, $amount: 30);
+                border-bottom: 1px solid lighten($color: gray, $amount: 30);
+                border-radius: 5px;
+                position: absolute;
+                width: 100%;
+                z-index: 99;
+                background-color: $white;
+                max-height: 100px;
+                overflow-y: scroll;
+                padding: 5px;
+
+                a {
+                    // border: 1px solid blue;
+                    width: 100%;
+                    display: block;
+                    padding: 5px;
+                }
+
+                a:hover {
+                    background-color: $gray;
+                }
+            }
+
+        }
+    }
+
+    #tabla-detalles-producto {
+        margin: 50px 0 100px;
+
+        #total-compra>table>tbody>tr {
+            line-height: 15px;
+
+        }
+    }
+}
+
+// archivos
+#tap-archivos {
+
+    // margin: 50px 0 100px 0;
+
+    a {
+        font: {
+            weight: bold;
+        }
+    }
+
+    #archivos {
+        margin: 0 0 100px;
+        // margin: 50px 0 100px 0;
+
+        #wrap-tabla {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+
+            button {
+                @include button('', $primary, $gray);
+                align-self: flex-end;
+                margin-bottom: 25px;
+
+                font: {
+                    weight: 200;
+                }
+            }
+
+            button:hover {
+                box-shadow: $box-shadow !important;
+            }
+        }
+    }
+}
+
+// seguimiento
+#tap-seguimiento {
+
+    table {
+        margin: 50px 0 100px 0;
+
+        tr,
+        td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        i {
+            font-size: map-get($map: $map-fonts, $key: 'smlx');
+            color: $secondary;
+            transition: 0.3s ease all;
+
+            &:hover {
+                color: darken($color: $secondary, $amount: 10);
+            }
+        }
+    }
+}
+
+// pagos
+#tap-pagos {
+
+    a {
+        font: {
+            weight: bold;
+        }
+    }
+
+    #pagos {
+        margin: 0 0 100px;
+        // margin: 50px 0 100px 0;
+
+        #wrap-tabla {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+
+            button {
+                @include button('', $primary, $gray);
+                align-self: flex-end;
+                margin-bottom: 25px;
+
+                font: {
+                    weight: 200;
+                }
+            }
+
+            button:hover {
+                box-shadow: $box-shadow !important;
+            }
+        }
+    }
+}
+
+.diseniado {
+  @include estado-pedido(#c2c21b, $white);
+}
+
+.correccion {
+  @include estado-pedido(#c4211b, $white);
+}
+
+.aprobado {
+  @include estado-pedido(#099e22, $white);
+}
+
+.impreso {
+  @include estado-pedido(#089ec4, $white);
+}
+
+.devuelto {
+  @include estado-pedido(#a008a5, $white);
+}
+
+.prod-solu {
+  @include estado-pedido(#6d0731, $white);
+}
+
+.prod-per {
+  @include estado-pedido(#3b3a3a, $white);
+}
+
+.foto-env {
+  @include estado-pedido(#3b3355, $white);
+}
+
+.laser-prod {
+  @include estado-pedido(#035361, $white);
+}

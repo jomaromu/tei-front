@@ -1,0 +1,103 @@
+@import "../../../styles";
+
+.wrap-busqueda {
+  background-color: $white;
+  width: calc(100% - #{$width-sidebar});
+  height: 70px;
+  // box-shadow: $box-shadow;
+  box-shadow: 1px 1px 5px lighten($color: $gray, $amount: 5);
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: $width-sidebar;
+  z-index: 9;
+}
+
+#box-busqueda {
+  color: darken($color: $dark-gray, $amount: 20);
+  @include flex-center;
+
+  input {
+    padding: 10px;
+    width: 150px;
+    outline: none;
+    border: 1px solid darken($color: $dark-gray, $amount: 5);
+    border-radius: 5px;
+    margin-right: 7px;
+    caret-color: darken($color: $dark-gray, $amount: 20);
+    height: 35px;
+    color: darken($color: $dark-gray, $amount: 60);
+
+    font: {
+      family: $font-family;
+      size: map-get($map: $map-fonts, $key: "smd");
+    }
+  }
+
+  input::placeholder {
+    color: darken($color: $gray, $amount: 25);
+  }
+
+  i {
+    size: map-get($map: $map-fonts, $key: "smd");
+    cursor: pointer;
+    transition: 0.3s all ease-in-out;
+  }
+
+  i:hover {
+    color: darken($color: $dark-gray, $amount: 70);
+    cursor: pointer;
+  }
+}
+
+.ctrl-ayuda {
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
+#ayuda {
+  color: darken($color: $dark-gray, $amount: 25);
+  @include flex-center;
+  transition: 0.3s all ease-in-out;
+
+  font: {
+    size: map-get($map: $map-fonts, $key: "smd");
+  }
+
+  i {
+    margin-right: 6px;
+  }
+}
+
+#ayuda:hover {
+  color: darken($color: $dark-gray, $amount: 70);
+  cursor: pointer;
+}
+
+#fondo {
+  @extend %fondo;
+
+  div#ayuda {
+    width: 500px;
+    height: 250px;
+    border: 1px solid darken($color: $gray, $amount: 10);
+    background-color: $white;
+    cursor: inherit;
+    border-radius: 5px;
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 25px;
+
+    p {
+      word-break: break-all;
+      width: 100%;
+    }
+  }
+}

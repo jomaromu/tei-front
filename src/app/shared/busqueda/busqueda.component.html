@@ -1,0 +1,40 @@
+<div id="fondo" #fondo>
+  <i
+    class="fas fa-times-circle"
+    role="button"
+    style="
+      position: absolute;
+      top: 100px;
+      right: 200px;
+      font-size: 24px;
+      color: rgb(204, 31, 0);
+    "
+    (click)="cerrarFondo()"
+  ></i>
+
+  <div id="ayuda" class="animate__animated" #ayuda>
+    <div id="wrap-ayuda" style="width: 100%" *ngFor="let ayuda of ayudas">
+      <p style="font-weight: bold">{{ ayuda.nombre }}</p>
+      <p>{{ ayuda.descripcion }}</p>
+      <hr style="border: 1px solid gray; width: 100%" />
+    </div>
+  </div>
+</div>
+
+<div class="wrap-busqueda">
+  <div id="box-busqueda" class="ctrl-ayuda">
+    <input
+      type="text"
+      id="txtBusqueda"
+      placeholder="Buscar..."
+      (keyup.enter)="buscarPedidos($event)"
+      #txtBusqueda
+    />
+    <!-- <i class="fas fa-search"></i> -->
+  </div>
+
+  <div id="ayuda" class="ctrl-ayuda">
+    <i class="far fa-question-circle"></i>
+    <span (click)="mostrarAyudas()">Ayuda</span>
+  </div>
+</div>

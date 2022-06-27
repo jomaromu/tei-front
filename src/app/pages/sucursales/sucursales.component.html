@@ -1,0 +1,82 @@
+<app-busqueda></app-busqueda>
+
+<div id="fondo" #fondo>
+
+    <div id="wrap-craeciones" class="animate__animated" #wrapCreaciones>
+
+        <div id="wrap-head">
+
+            <div id="head-titulo">
+                <i class="fas fa-user-plus"></i>
+                <span>{{tituloBotonHeader}}</span>
+            </div>
+
+            <i class="fas fa-times" style="cursor: pointer; font-size: 20px;" (click)="cerrarCreacion($event)"
+                #cerrar></i>
+        </div>
+
+        <div id="wrap-body">
+            <form [formGroup]="forma" (ngSubmit)="guardar()">
+
+                <div id="body">
+
+                    <!-- nombre -->
+                    <div class="ctrl-creacion">
+                        <label class="col-sm-2 col-form-label">Nombre:</label>
+                        <input type="text" class="form-control" [ngClass]="{'borde-rojo': checkNombre}"
+                            formControlName="nombre">
+                    </div>
+
+                    <!-- pais -->
+                    <div class="ctrl-creacion">
+                        <label class="col-sm-2 col-form-label">País:</label>
+                        <select class="form-select" [ngClass]="{'borde-rojo': checkPais}" formControlName="pais">
+                            <option selected value="Panamá">Panamá</option>
+                            <option [value]="pais" *ngFor="let pais of paises">{{pais}}</option>
+                        </select>
+                    </div>
+
+                    <!-- Telefono -->
+                    <div class="ctrl-creacion">
+                        <label class="col-sm-2 col-form-label">Teléfono:</label>
+                        <input type="number" class="form-control" [ngClass]="{'borde-rojo': checkTelefono}"
+                            formControlName="telefono">
+                    </div>
+
+
+                    <!-- Ciudad -->
+                    <div class="ctrl-creacion">
+                        <label class="col-sm-2 col-form-label">Ciudad:</label>
+                        <input type="text" class="form-control" [ngClass]="{'borde-rojo': checkCiudad}"
+                            formControlName="ciudad">
+                    </div>
+
+                    <!-- Dirección -->
+                    <div class="ctrl-creacion">
+                        <label class="col-sm-2 col-form-label">Dirección:</label>
+                        <input type="text" class="form-control" [ngClass]="{'borde-rojo': checkDireccion}"
+                            formControlName="direccion">
+                    </div>
+
+                    <!-- estado -->
+                    <div class="form-check form-switch" *ngIf="!crear"
+                        style="display: flex; flex-direction: row; justify-content: flex-start; align-items: flex-end; padding-left: 0;">
+                        <label class="form-check-label">Estado:</label>
+                        <input class="form-check-input" type="checkbox" formControlName="estado" role="switch"
+                            id="estado" style="margin-left: 30px;" checked>
+                    </div>
+                </div>
+
+                <div id="wrap-buttons-creacion">
+                    <button type="submit">Guardar</button>
+                    <button type="button" (click)="cerrarCreacion($event)">Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+
+<app-tables-catalogos [catalogo]="catalogo" (abrirAlertCat)="abrirAlert($event)"></app-tables-catalogos>
+<app-loading></app-loading>

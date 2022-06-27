@@ -1,0 +1,14 @@
+@import '../../../styles.scss';
+
+#wrapLoading {
+
+    position: fixed;
+    @include ancho-alto(100vw, 100vh);
+    @include flex-center();
+    display: none;
+    background-color: rgba($gray, 0.5);
+    z-index: 999;
+    top: 0;
+    left: 0;
+
+}

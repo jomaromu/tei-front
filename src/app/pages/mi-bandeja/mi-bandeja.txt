@@ -1,0 +1,477 @@
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ElementRef,
+  OnDestroy,
+} from "@angular/core";
+import { FormBuilder, FormGroup } from "@angular/forms";
+import { Store } from "@ngrx/store";
+import { first, take } from "rxjs/operators";
+import { AppState } from "../../reducers/globarReducers";
+import { SucursalService } from "../../services/sucursal.service";
+import { Sucursal, SucursalesDB } from "../../interfaces/sucursales";
+import { UserService } from "../../services/user.service";
+import { UsuarioWorker, Usuario } from "../../interfaces/resp-worker";
+import { PedidoService } from "../../services/pedido.service";
+import { Pedido, PedidoDB } from "../../interfaces/pedido";
+import { ObjTotales } from "../../reducers/totales-pedido/totales.actions";
+import * as busquedaActions from "../../reducers/busqueda/busqueda.actions";
+import { PedidoSocketService } from "./../../services/sockets/pedido-socket.service";
+import { Subscription } from "rxjs";
+import * as historialBandejasActions from "../../reducers/historial-bandejas/historial-bandejas.actions";
+import { MiBandeja } from "../../reducers/historial-bandejas/historial-bandejas.reducer";
+
+@Component({
+  selector: "app-mi-bandeja",
+  templateUrl: "./mi-bandeja.component.html",
+  styleUrls: ["./mi-bandeja.component.scss"],
+})
+export class MiBandejaComponent implements OnInit, OnDestroy {
+  @ViewChild("selectUser", { static: false })
+  selectUser: ElementRef<HTMLElement>;
+
+  forma: FormGroup;
+  role: string;
+  optBandeja: Array<any>;
+  sucursales: Sucursal;
+  usuarios: Array<UsuarioWorker>;
+  pedidos: Pedido;
+  worker: Usuario;
+  datosHistorialBandeja: MiBandeja;
+  sub1: Subscription;
+
+  userFake = { id: "null", nombre: "Todas" };
+
+  objTotal: ObjTotales = {
+    pedido: 0,
+    subtotal: 0,
+    itbms: 0,
+    pagos: 0,
+    total: 0,
+  };
+
+  subs: Subscription;
+
+  constructor(
+    private fb: FormBuilder,
+    private store: Store<AppState>,
+    private sucursalService: SucursalService,
+    private userService: UserService,
+    private pedidoService: PedidoService,
+    private pedidoSocketService: PedidoSocketService
+  ) {}
+
+  ngOnInit(): void {
+    this.busqueda();
+    this.crearFormulario();
+    // this.formularioFake();
+    // this.cargarPedidosSocket();
+  }
+
+  crearFormulario(): void {
+    this.store
+      .select("login")
+      // .pipe(take(3))
+      .subscribe((worker) => {
+        this.worker = worker;
+
+        console.log(this.worker.usuario.colaborador_role);
+
+        if (
+          worker.ok === true &&
+          (worker.usuario.colaborador_role === "SuperRole" ||
+            worker.usuario.colaborador_role === "AdminRole")
+        ) {
+          this.role = worker.usuario.colaborador_role;
+          this.formularioAdmin("SuperRole");
+          // this.cargarTodosPedidos();
+          this.cargarPedidosUsuarios(worker);
+        } else if (
+          worker.ok === true &&
+          worker.usuario.colaborador_role === "VendedorVIPRole"
+        ) {
+          this.formularioVendVIP("VendedorVIPRole");
+          this.cargarPedidosUsuarios(worker);
+        } else if (
+          worker.ok === true &&
+          worker.usuario.colaborador_role === "VendedorNormalRole"
+        ) {
+          this.role = "normal";
+          // this.cargarPedidosVendedor(worker);
+          this.cargarPedidosUsuarios(worker);
+        } else if (
+          worker.ok === true &&
+          worker.usuario.colaborador_role === "ProduccionVIPRole"
+        ) {
+          this.forma.controls.usuarios.disable();
+          this.forma.controls.selBandeja.disable();
+
+          // this.cargarPedidosPorRole();
+          this.cargarPedidosUsuarios(worker);
+
+          this.formularioProduccionVIP("ProduccionVIPRole");
+        } else if (
+          worker.ok === true &&
+          worker.usuario.colaborador_role === "ProduccionNormalRole"
+        ) {
+          this.role = "normal";
+          // this.cargarPedidosProduccion(worker);
+          this.cargarPedidosUsuarios(worker);
+        } else if (
+          worker.ok === true &&
+          worker.usuario.colaborador_role === "DiseniadorRole"
+        ) {
+          this.role = "normal";
+          // this.cargarPedidosDiseniador(worker);
+          this.cargarPedidosUsuarios(worker);
+        } else if (
+          worker.ok === true &&
+          worker.usuario.colaborador_role === "DiseniadorVIPRole"
+        ) {
+          this.formularioDiseVIP("DiseniadorVIPRole");
+          this.cargarPedidosUsuarios(worker);
+        }
+      });
+  }
+
+  seleccionarBandeja(role: string): void {
+    // this.datosHistorialBandeja = {
+    //   bandeja
+    // }
+
+    // console.log('ok');
+
+    this.store
+      .select("historialBandeja")
+      .pipe(first())
+      .subscribe((historial) => {
+        // console.log(role);
+
+        switch (role) {
+          case "ProduccionVIPRole":
+            this.optBandeja = [{ nombre: "Producción", id: "prod" }];
+            this.forma.controls.selBandeja.setValue(this.optBandeja[0].id);
+
+            break;
+          case "SuperRole" || "AdminRole":
+            // this.forma.controls.selBandeja.setValue(this.optBandeja[0].id);
+            // console.log(historial.bandeja);
+            this.optBandeja = [
+              { nombre: "Todas", id: "null" },
+              { nombre: "Producción", id: "prod" },
+              { nombre: "Vendedor", id: "vend" },
+              { nombre: "Diseñador", id: "dise" },
+              // { nombre: 'Admin', id: 'admin' },
+            ];
+            // this.forma.controls.selBandeja.setValue(historial.bandeja);
+            // this.forma.controls.sucursal.setValue(historial.sucursal);
+            // this.forma.controls.usuarios.setValue(historial.usuario);
+
+            break;
+          case "VendedorVIPRole":
+            this.optBandeja = [
+              { nombre: "Todas", id: "null" },
+              { nombre: "Mi bandeja", id: "miband" },
+              { nombre: "Vendedor", id: "vend" },
+              // { nombre: 'Diseñador', id: 'dise' },
+              // { nombre: 'Admin', id: 'admin' },
+            ];
+            this.forma.controls.selBandeja.setValue(this.optBandeja[1].id);
+            break;
+          case "DiseniadorVIPRole":
+            this.optBandeja = [
+              { nombre: "Todas", id: "null" },
+              { nombre: "Mi bandeja", id: "miband" },
+              { nombre: "Diseñador", id: "dise" },
+            ];
+            this.forma.controls.selBandeja.setValue(this.optBandeja[1].id);
+            break;
+        }
+      });
+
+    // this.forma.controls.selBandeja.setValue(this.optBandeja[0].id);
+  }
+
+  cargarSucursales(): void {
+    this.store
+      .select("login")
+      .pipe(first())
+      .subscribe((worker) => {
+        this.sucursalService
+          .obtenerSucursales(worker.token)
+          .pipe(first())
+          .subscribe((sucursales: Sucursal) => {
+            this.sucursales = sucursales;
+            const sucursalFake: SucursalesDB = {
+              _id: "null",
+              nombre: "Todas",
+            };
+
+            this.sucursales.sucursalesDB.unshift(sucursalFake);
+            this.forma.controls.sucursal.setValue(
+              sucursales.sucursalesDB[0]._id
+            );
+          });
+      });
+  }
+
+  detectarUsuarios(): void {
+    this.store
+      .select("login")
+      .pipe(first())
+      .subscribe((worker) => {
+        let valBandeja = this.forma.controls.selBandeja.value;
+        let valSucursal = this.forma.controls.sucursal.value;
+
+        if (!valBandeja) {
+          valBandeja = "null";
+        }
+
+        if (!valSucursal) {
+          valSucursal = "null";
+        }
+
+        const data = {
+          role: valBandeja,
+          sucursal: valSucursal,
+          token: worker.token,
+        };
+
+        this.userService
+          .obtenerUsuarios(worker.token)
+          .pipe(first())
+          .subscribe((resp: Usuario) => {
+            // console.log(resp);
+            // return;
+            if (resp.usuarios.length === 0) {
+              this.forma.controls.usuarios.setValue("null");
+            } else {
+              switch (valBandeja) {
+                case "dise":
+                  this.forma.controls.usuarios.enable();
+
+                  this.usuarios = resp.usuarios.filter((usuario) => {
+                    if (
+                      usuario.colaborador_role === "DiseniadorRole" ||
+                      usuario.colaborador_role === "DiseniadorVIPRole"
+                    ) {
+                      return usuario;
+                    }
+                  });
+                  this.forma.controls.usuarios.setValue(this.usuarios[0]._id);
+                  break;
+                case "vend":
+                  this.forma.controls.usuarios.enable();
+
+                  this.usuarios = resp.usuarios.filter((usuario) => {
+                    if (
+                      usuario.colaborador_role === "VendedorNormalRole" ||
+                      usuario.colaborador_role === "VendedorVIPRole"
+                    ) {
+                      return usuario;
+                    }
+                  });
+                  this.forma.controls.usuarios.setValue(this.usuarios[0]._id);
+                  break;
+                case "prod":
+                  // this.forma.controls.usuarios.setValue(this.usuarios[0]._id);
+                  this.forma.controls.usuarios.setValue("null");
+                  this.forma.controls.usuarios.disable();
+                  break;
+                default:
+                  this.forma.controls.usuarios.disable();
+                  this.forma.controls.usuarios.setValue("null");
+                  this.usuarios = [];
+              }
+            }
+          });
+      });
+  }
+
+  formularioAdmin(role: string): void {
+    this.forma.controls.usuarios.setValue(this.userFake);
+    this.forma.controls.usuarios.disable();
+
+    this.forma = this.fb.group({
+      selBandeja: ["null"],
+      sucursal: ["null"],
+      usuarios: ["null"],
+    });
+
+    this.seleccionarBandeja(role);
+    this.cargarSucursales();
+    // this.cargarColaboradores();
+  }
+
+  formularioProduccionVIP(role: string): void {
+    this.forma.controls.usuarios.setValue({ nombre: "Producción", id: "prod" });
+
+    this.forma = this.fb.group({
+      selBandeja: ["null"],
+      sucursal: ["null"],
+      usuarios: ["null"],
+    });
+
+    this.seleccionarBandeja(role);
+    this.cargarSucursales();
+    // this.cargarColaboradores();
+  }
+
+  formularioDiseVIP(role: string): void {
+    this.forma.controls.usuarios.disable();
+
+    this.forma = this.fb.group({
+      selBandeja: ["null"],
+      sucursal: ["null"],
+      usuarios: ["null"],
+    });
+
+    this.seleccionarBandeja(role);
+    this.cargarSucursales();
+  }
+
+  formularioVendVIP(role: string): void {
+    this.forma.controls.usuarios.disable();
+
+    this.forma = this.fb.group({
+      selBandeja: ["null"],
+      sucursal: ["null"],
+      usuarios: ["null"],
+    });
+
+    this.seleccionarBandeja(role);
+    this.cargarSucursales();
+  }
+
+  cargarPedidosUsuarios(worker: Usuario): void {
+    // console.log(worker);
+    // return;
+    this.store.select("page").subscribe((page) => {
+      // console.log(page);
+
+      const data: any = {
+        token: worker.token,
+        role: worker.usuario.colaborador_role,
+        idSucursalWorker: worker.usuario.sucursal._id,
+        idUsuario: worker.usuario._id,
+        page: page.toString(),
+      };
+
+      this.pedidoService
+        .obtenerPedidosPorRole(data)
+        .subscribe((pedidos: Pedido) => {
+          // console.log(pedidos);
+          this.pedidos = pedidos;
+        });
+    });
+  }
+
+  aplicarFiltro(): void {
+    const valBandeja = this.forma.controls.selBandeja.value;
+    const valUser = this.forma.controls.usuarios.value;
+    const valSucursal = this.forma.controls.sucursal.value;
+
+    this.store
+      // .select('login')
+      // .pipe(first())
+      .subscribe(async (datosReducer) => {
+        const colaborador = datosReducer.login;
+        const historial = datosReducer.historialBandeja;
+
+        const data = {
+          token: colaborador.token,
+          bandejas: valBandeja,
+          userID: valUser,
+          // colRole: valUser,
+          colRole: colaborador.usuario.colaborador_role,
+          sucursal: valSucursal,
+        };
+
+        console.log(valBandeja);
+
+        this.datosHistorialBandeja = {
+          bandeja: data.bandejas,
+          sucursal: data.sucursal,
+          usuario: data.userID,
+        };
+
+        // if (data.bandejas !== 'null') {
+        //   data.bandejas = valBandeja;
+        // }
+
+        // if (valUser !== 'null') {
+        //   const dataUser = this.usuarios.find((user) => {
+        //     return user._id === valUser;
+        //   });
+
+        //   data.colRole = dataUser.colaborador_role;
+        //   data.userID = dataUser._id;
+        // }
+
+        // if (data.sucursal !== 'null') {
+        //   data.sucursal = valSucursal;
+        // }
+
+        this.pedidoService
+          .busquedaBandejas(data)
+          // .pipe(take(5))
+          .subscribe((resp: Pedido) => {
+            this.pedidos = resp;
+            // console.log(this.pedidos);
+            // console.log(this.datosHistorialBandeja);
+          });
+      });
+
+    // setTimeout(() => {
+    //   this.pedidoService.historial(this.datosHistorialBandeja);
+    // }, 1000);
+  }
+
+  limpiarForma(): void {
+    // this.forma.reset();
+
+    this.store.select("login").subscribe((worker) => {
+      if (
+        worker.usuario.colaborador_role === "AdminRole" ||
+        worker.usuario.colaborador_role === "SuperRole" ||
+        worker.usuario.colaborador_role === "VendedorVIPRole" ||
+        worker.usuario.colaborador_role === "DiseniadorVIPRole"
+      ) {
+        this.forma.controls.selBandeja.setValue("null");
+      }
+      this.forma.controls.sucursal.setValue("null");
+      this.forma.controls.usuarios.setValue("null");
+      this.forma.controls.usuarios.disable();
+      this.usuarios = [];
+    });
+  }
+
+  formularioFake(): void {
+    this.forma = this.fb.group({
+      selBandeja: ["null"],
+      sucursal: ["null"],
+      usuarios: ["null"],
+    });
+  }
+
+  recibirPedidos(pedidos: Array<PedidoDB>): void {
+    this.pedidos.pedidosDB = pedidos;
+  }
+
+  busqueda(): void {
+    this.store.dispatch(busquedaActions.crearBusqueda({ criterio: "" }));
+  }
+
+  cargarPedidosSocket(): void {
+    this.pedidoSocketService.escuchar("recibir-pedidos").subscribe((resp) => {
+      // console.log(resp);
+    });
+  }
+
+  ngOnDestroy(): void {
+    //Called once, before the instance is destroyed.
+    //Add 'implements OnDestroy' to the class.
+    // this.sub1.unsubscribe();
+  }
+}

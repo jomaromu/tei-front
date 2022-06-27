@@ -1,0 +1,128 @@
+<app-editar-cliente (emitirPedido)="recibirPedido($event)"></app-editar-cliente>
+<div id="wrapper">
+  <div id="wrap-craeciones" class="animate__animated" #wrapCreaciones>
+    <div id="wrap-head">
+      <div id="head-titulo">
+        <i class="fas fa-user-plus" style="margin-right: 30px"></i>
+        <span>Nuevo Pedido</span>
+      </div>
+    </div>
+
+    <div id="wrap-body">
+      <form [formGroup]="forma" (ngSubmit)="guardar()">
+        <div id="body">
+          <!-- nombre cliente -->
+          <div class="ctrl-creacion">
+            <label class="col-sm-2 col-form-label">Cliente:</label>
+            <input
+              type="search"
+              class="form-control"
+              [attr.data-idCliente]="idCliente"
+              (keyup)="buscarClienteNombre($event)"
+              [ngClass]="{ 'borde-rojo': checkNombre }"
+              formControlName="nombre"
+              #nombre
+            />
+            <div id="placeHolderCliente" #placeHolderCliente>
+              <a
+                *ngFor="let cliente of clientes"
+                role="button"
+                (click)="detectarCliente(cliente)"
+              >
+                <!-- {{cliente.nombre}} {{cliente.telefono}} -->
+                <span>{{ cliente.nombre }}</span>
+                <span>{{ cliente.telefono }}</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Sucursal -->
+          <div class="ctrl-creacion">
+            <label class="col-sm-2 col-form-label">Sucursal:</label>
+            <select
+              class="form-select"
+              [ngClass]="{ 'borde-rojo': checkSucursal }"
+              formControlName="sucursal"
+            >
+              <option
+                [value]="sucursal._id"
+                *ngFor="let sucursal of sucursales?.sucursalesDB"
+              >
+                {{ sucursal?.nombre }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Telefono -->
+          <div class="ctrl-creacion">
+            <label class="col-sm-2 col-form-label">Teléfono:</label>
+            <input
+              type="search"
+              class="form-control"
+              [attr.data-idCliente]="idCliente"
+              (keyup)="buscarClienteTelefono($event)"
+              [ngClass]="{ 'borde-rojo': checkTelefono }"
+              formControlName="telefono"
+            />
+            <div id="placeHolderCliente" #placeHolderClienteCel>
+              <a
+                *ngFor="let cliente of clientes"
+                role="button"
+                (click)="detectarCliente(cliente)"
+              >
+                <!-- {{cliente.nombre}} -->
+                <span>{{ cliente.nombre }}</span>
+                <span>{{ cliente.telefono }}</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Fecha de entrega -->
+          <div class="ctrl-creacion">
+            <label class="col-sm-2 col-form-label">F. Entrega:</label>
+            <input
+              type="date"
+              class="form-control"
+              [value]="fecha"
+              id="fecha"
+              (change)="fechaEntregaManual($event)"
+              [ngClass]="{ 'borde-rojo': checkFecha }"
+              formControlName="fecha"
+            />
+          </div>
+
+          <div
+            style="
+              display: flex;
+              flex-direction: row;
+              justify-content: flex-end;
+            "
+          >
+            <i
+              class="fas fa-user-edit"
+              style="font-size: 20px; color: rgb(0, 83, 94)"
+              role="button"
+              *ngIf="editarCliente"
+              (click)="abrirAlert({ tipo: 'editar', idCat: idCliente })"
+            ></i>
+            <i
+              class="fas fa-user-plus"
+              style="
+                font-size: 20px;
+                color: rgb(0, 83, 94);
+                align-self: flex-end;
+              "
+              role="button"
+              routerLink="/dashboard/clientes"
+            ></i>
+          </div>
+        </div>
+
+        <div id="wrap-buttons-creacion">
+          <button type="submit">Crear pedido</button>
+          <button type="button" (click)="limpiarForma()">Limpiar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+[
+    {
+        "nombre": "Pedido Pendiente",
+        "id": 0
+    },
+    {
+        "nombre": "Diseño gráfico",
+        "id": 1
+    },
+    {
+        "nombre": "Producción",
+        "id": 2
+    },
+
+    {
+        "nombre": "Por entregar",
+        "id": 3
+    },
+    {
+        "nombre": "Entregado",
+        "id": 4
+    },
+    {
+        "nombre": "Cancelado",
+        "id": 5
+    }
+]

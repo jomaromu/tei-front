@@ -1,0 +1,15 @@
+@import '../../../styles.scss';
+
+// .borde-rojo {
+//     border: 1px solid tomato;
+// }
+
+#wrap-tables-catalogos {
+
+    @extend %tables;
+    // border: 5px solid black;
+    width: 80%;
+    max-height: 500px;
+    margin: 150px auto;
+    overflow-y: scroll;
+}

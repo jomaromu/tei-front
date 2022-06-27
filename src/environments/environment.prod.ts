@@ -1,0 +1,16 @@
+export const environment = {
+  production: true,
+  urlWorker: 'http://137.184.29.242:3001',
+  urlClient: 'http://137.184.29.242:3002',
+  urlSucursal: 'http://137.184.29.242:3003',
+  urlPedido: 'http://137.184.29.242:3004',
+  urlProducto: 'http://137.184.29.242:3005',
+  urlAyuda: 'http://137.184.29.242:3006',
+  urlOrigen: 'http://137.184.29.242:3007',
+  urlCategoria: 'http://137.184.29.242:3008',
+  urlPagos: 'http://137.184.29.242:3009',
+  urlProductosPedido: 'http://137.184.29.242:3010',
+  urlArchivos: 'http://137.184.29.242:3011',
+  urlMetodoPago: 'http://137.184.29.242:3012',
+  urlRoleWorker: 'http://137.184.29.242:3013',
+};

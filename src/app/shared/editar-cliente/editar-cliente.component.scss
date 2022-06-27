@@ -1,0 +1,27 @@
+@import "../../../styles.scss";
+
+#fondo {
+  @extend %fondo;
+  // display: flex !important;
+}
+
+.borde-rojo {
+  border: 1px solid tomato;
+}
+
+#wrap-craeciones {
+  @include creaciones(700px, 530px);
+}
+
+#wrap-buttons-creacion {
+  // background-color: red;
+  // margin-top: 50px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 320px;
+  position: absolute;
+  right: 25px;
+  bottom: 50px;
+  z-index: 9999 !important;
+}

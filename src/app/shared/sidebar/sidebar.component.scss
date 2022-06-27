@@ -1,0 +1,92 @@
+@import '../../../styles';
+
+// @mixin group-items {}
+
+.wrap-sidebar {
+    @extend %sidebar;
+    z-index: 99;
+    padding-top: 40px;
+    overflow: auto;
+
+    #logo,
+    #perfil {
+        // border: 1px solid red;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 25px;
+        color: darken($color: $white, $amount: 2);
+    }
+
+    #logo>img {
+        width: 90%;
+    }
+
+    #perfil {
+        // background-color: blue;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+
+        a {
+            // margin-top: -15px;
+            text-decoration: none;
+            color: darken($color: $white, $amount: 2);
+            font-size: map-get($map: $map-fonts, $key: 'xm');
+        }
+    }
+}
+
+.group-items {
+
+    border-bottom: 1px solid $border-sidebar;
+    padding: 6px 0;
+    transition: 0.3s all ease;
+
+    font: {
+        family: $font-family;
+        weight: 200;
+        size: map-get($map: $map-fonts, $key: 'xm');
+    }
+
+    a {
+        // border: 1px solid red;
+        color: darken($color: $white, $amount: 2);
+        margin-left: 20px;
+        text-decoration: none;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        i {
+            // border: 1px solid red;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            width: 20px;
+        }
+
+        i:last-child {
+            margin-left: 15px;
+        }
+
+        span {
+            // border: 1px solid blue;
+            width: 100px;
+        }
+    }
+
+    .subs-items {
+        margin-left: 60px;
+    }
+
+}
+
+.group-items:hover {
+    background-color: darken($color: $secondary, $amount: 10);
+}
+
+.subs {
+    background-color: $secondary;
+}

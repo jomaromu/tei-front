@@ -1,0 +1,112 @@
+<div id="wrap-loading" #loading>
+  <div class="spinner-border text-primary" id="wrap-spinner" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+<div class="wrap-tables-catalogos" style="overflow: auto">
+  <div id="wrap-head">
+    <div id="head-titulo">
+      <!-- <i [class]="catalogo.iconoTituloHeader"></i>
+          <span>{{catalogo.tituloHeader}}</span> -->
+      <i class="fas fa-chart-pie"></i>
+      <span>Reportes de productos pedidos</span>
+    </div>
+
+    <!-- <button (click)="alertCatalogo('crear', 'null')">
+          <i [class]="catalogo.iconoBotonHeader"></i>
+          <span>{{catalogo.tituloBotonHeader}}</span>
+      </button> -->
+    <div id="wrap-filtros">
+      <div class="filter">
+        Desde
+        <input
+          type="date"
+          [value]="fechaActual"
+          class="form-control"
+          #fechaInicial
+        />
+        <!-- Desde <i class="fas fa-calendar-alt"></i> -->
+      </div>
+      <div class="filter">
+        Hasta
+        <input
+          type="date"
+          [value]="fechaActual"
+          class="form-control"
+          #fechaFinal
+        />
+        <!-- Hasta <i class="fas fa-calendar-alt"></i> -->
+      </div>
+      <div class="filter">
+        <i
+          class="fas fa-search"
+          style="margin-left: -7px"
+          role="button"
+          (click)="cargarPorFecha(fechaInicial.value, fechaFinal.value)"
+        ></i>
+      </div>
+      <div class="filter">
+        Exportar
+        <i
+          class="fas fa-file-export"
+          role="button"
+          (click)="exportarExcel()"
+        ></i>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="wrap-tables-catalogos">
+  <div id="wrap-table">
+    <table class="table mt-4" id="tabla-reportes">
+      <thead>
+        <tr>
+          <!-- <th scope="col" *ngFor="let item of catalogo.tituloTabla">{{item}}</th> -->
+          <th scope="col">ID Pedido</th>
+          <th scope="col">Fecha</th>
+          <th scope="col">Vendedor</th>
+          <th scope="col">Cliente</th>
+          <th scope="col">Sucursal</th>
+          <th scope="col">Producto</th>
+          <th scope="col">Etapa</th>
+          <th scope="col">Categoría</th>
+          <th scope="col">Cantidad</th>
+          <th scope="col">Monto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let productoPedido of objProdPedidos">
+          <td>{{ productoPedido?.pedido?.idReferencia }}</td>
+          <td>
+            {{
+              productoPedido?.pedido?.fecha_alta
+                | totalReportes: productoPedido?.pedido?.fecha_alta
+            }}
+          </td>
+          <td>{{ productoPedido?.pedido?.idCreador?.nombre }}</td>
+          <td>{{ productoPedido?.pedido?.cliente?.nombre }}</td>
+          <td>{{ productoPedido?.pedido?.sucursal?.nombre }}</td>
+          <td>{{ productoPedido?.producto?.nombre }}</td>
+          <td>
+            <span *ngFor="let etapa of arrayEtapas">
+              <span *ngIf="etapa.id === productoPedido?.pedido.etapa">
+                {{ etapa.nombre }}</span
+              >
+            </span>
+          </td>
+          <td>{{ productoPedido?.producto?.categoria?.nombre }}</td>
+          <td>{{ productoPedido?.cantidad }}</td>
+          <td>
+            {{ productoPedido?.total | currency: "USD":"symbol" }}
+          </td>
+        </tr>
+        <tr style="font-size: 1.2rem">
+          <td colspan="8" style="text-align: right">Total:</td>
+          <td style="color: rgb(78, 78, 78); font-weight: bold">
+            {{ totalReporte | currency: "USD":"symbol" }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
