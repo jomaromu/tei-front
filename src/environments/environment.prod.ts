@@ -13,4 +13,12 @@ export const environment = {
   urlArchivos: 'http://137.184.29.242:3011',
   urlMetodoPago: 'http://137.184.29.242:3012',
   urlRoleWorker: 'http://137.184.29.242:3013',
+  urlColor: 'http://137.184.29.242:3014',
+  urlPrioridad: 'http://137.184.29.242:3015',
+  urlEtapa: 'http://137.184.29.242:3016',
+  urlModalidad: 'http://137.184.29.242:3017',
+  urlTipoArchivo: 'http://137.184.29.242:3018',
+
+  colPrioridad: 'colPrioridad',
+  colEtapas: 'colEtapas',
 };

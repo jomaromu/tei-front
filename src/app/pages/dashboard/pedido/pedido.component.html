@@ -1,0 +1,29 @@
+<app-menu></app-menu>
+<section id="wrap-pedido">
+  <p-tabView>
+    <!-- INFORMACION TAB -->
+    <p-tabPanel header="Información" leftIcon="pi pi-info-circle">
+      <app-informacion [pedido]="pedido"></app-informacion>
+    </p-tabPanel>
+
+    <!-- PRODUCTOS TAB -->
+    <p-tabPanel header="Productos" leftIcon="pi pi-box">
+      <app-productos [pedido]="pedido"></app-productos>
+    </p-tabPanel>
+
+    <!-- ARCHIVOS TAB -->
+    <p-tabPanel header="Archivos" leftIcon="pi pi-file">
+      <app-archivos [pedido]="pedido"></app-archivos>
+    </p-tabPanel>
+
+    <!-- SEGUIMIENTO TAB -->
+    <p-tabPanel header="Seguimiento" leftIcon="pi pi-compass">
+      <app-seguimiento [pedido]="pedido"></app-seguimiento>
+    </p-tabPanel>
+
+    <!-- PAGOS TAB -->
+    <p-tabPanel header="Pagos" leftIcon="pi pi-money-bill">
+      <app-pagos [pedido]="pedido"></app-pagos>
+    </p-tabPanel>
+  </p-tabView>
+</section>

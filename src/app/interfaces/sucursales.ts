@@ -1,34 +1,34 @@
 export interface Sucursal {
   ok: boolean;
   mensaje: string;
-  err?: Error;
-  sucursalDB?: SucursalesDB;
-  sucursalesDB?: SucursalesDB[];
+  err?: any;
+  sucursalDB?: SucursalDB;
+  sucursalesDB?: Array<SucursalDB>;
 }
 
-export interface SucursalesDB {
-  telefono?: string;
-  estado?: boolean;
+// export interface SucursalesDB {
+//   telefono?: string;
+//   estado?: boolean;
+//   _id?: string;
+//   idCreador?: string;
+//   idReferencia?: string;
+//   nombre?: string;
+//   ubicacion?: string;
+//   fecha_creacion?: string;
+// }
+
+export interface SucursalDB {
   _id?: string;
-  idCreador?: string;
-  idReferencia?: string;
+  idCreador?: any;
   nombre?: string;
-  ubicacion?: Ubicacion;
+  provincia?: Provincia;
+  telefono?: string;
+  direccion?: string;
+  estado?: boolean;
   fecha_creacion?: string;
 }
 
-interface Ubicacion {
-  pais: string;
-  ciudad: string;
-  _id: string;
-  direccion: string;
-}
-
-interface Error {
-  message: string;
-  errors: {
-    nombre: {
-      message: string;
-    }
-  };
+interface Provincia {
+  id: string;
+  name: string;
 }

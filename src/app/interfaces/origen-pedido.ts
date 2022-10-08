@@ -1,14 +1,14 @@
 export interface OrigenPedido {
-    ok: boolean;
-    mensaje: string;
-    err: any;
-    origenDB: OrigenDB;
-    origenesDB: Array<OrigenDB>;
+  ok: boolean;
+  mensaje: string;
+  err: any;
+  origenesDB: Array<OrigenDB>;
+  origenDB: OrigenDB;
 }
 
-interface OrigenDB {
-    estado: boolean;
-    _id: string;
-    idCreador: string;
-    nombre: string;
+export interface OrigenDB {
+  estado: boolean;
+  _id: string;
+  idCreador: string;
+  nombre: string;
 }

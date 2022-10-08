@@ -1,0 +1,95 @@
+@import "../../../../../styles";
+* {
+  font-family: $font-family;
+}
+
+@media screen and(max-width: 576px) {
+  button#btnNuevo {
+    margin-left: -25px !important;
+    margin-top: -25px !important;
+  }
+
+  section#wrap-sucursales {
+    margin-top: 40px;
+  }
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.badge-activo {
+  background-color: rgba(83, 179, 86, 0.5);
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-weight: bold;
+  color: rgb(5, 92, 8);
+}
+
+.badge-inactivo {
+  background-color: tomato;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-weight: bold;
+  color: darken($color: $white, $amount: 2);
+}
+
+.btnHeader {
+  background-color: $primary;
+  border: none !important;
+}
+
+.btnHeader:hover {
+  background-color: $secondary !important;
+}
+
+#wrap-pagos {
+  // border: 1px solid red;
+  // margin: 100px auto;
+  // width: 90%;
+}
+
+#wrap-tabla {
+  background-color: white;
+  padding: 25px;
+}
+
+#wrap-form-pagos {
+  // border: 1px solid red;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 50px);
+  padding: 25px 0;
+  column-gap: 15px;
+  row-gap: 35px;
+  position: relative;
+}
+
+.p-inputtext,
+.p-dropdown {
+  width: 100%;
+}
+
+#wrap-tipos-pagos {
+  display: flex;
+  flex-direction: column;
+  max-height: 150px;
+  overflow: auto;
+  border: 1px solid rgb(201, 201, 201);
+  padding: 15px;
+  border-radius: 8px;
+
+  p-radioButton {
+    margin-bottom: 10px;
+  }
+}
+
+#enlaces {
+  text-decoration: none;
+  color: $primary;
+
+  i {
+    font-size: 1.4rem;
+  }
+}

@@ -1,0 +1,98 @@
+@import "../../../../styles";
+* {
+  font-family: $font-family;
+}
+
+@media screen and(max-width: 576px) {
+  button#btnNuevo {
+    margin-left: -25px !important;
+    margin-top: -25px !important;
+  }
+
+  section#wrap-role {
+    margin-top: 40px;
+  }
+
+  section#acordeon-catalogo {
+    div {
+      // border: 1px solid red;
+      flex-direction: column;
+      justify-content: center;
+    }
+  }
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.badge-activo {
+  background-color: rgba(83, 179, 86, 0.5);
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-weight: bold;
+  color: rgb(5, 92, 8);
+}
+
+.badge-inactivo {
+  background-color: tomato;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-weight: bold;
+  color: darken($color: $white, $amount: 2);
+}
+
+.btnHeader {
+  background-color: $primary;
+  border: none !important;
+}
+
+.btnHeader:hover {
+  background-color: $secondary !important;
+}
+
+#wrap-role {
+  // border: 1px solid red;
+  margin: 100px auto;
+  width: 90%;
+}
+
+#wrap-tabla {
+  background-color: white;
+  padding: 25px;
+}
+
+#wrap-form-role {
+  // background-color: skyblue;
+  // border: 1px solid red;
+  display: grid;
+  grid-template-columns: repeat(2, 50%);
+  padding: 25px 0;
+  column-gap: 15px;
+  row-gap: 35px;
+  position: relative;
+}
+
+#acordeon-catalogo {
+  display: grid;
+  grid-template-columns: repeat(2, 50%);
+
+  div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    // border: 1px solid red;
+    padding: 7px;
+    box-shadow: $box-shadow;
+
+    label {
+      margin-right: 7px;
+    }
+  }
+}
+
+.p-inputtext,
+.p-dropdown {
+  width: 100%;
+}

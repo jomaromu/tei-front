@@ -1,0 +1,153 @@
+<!-- FORM PRODUCTO -->
+<form [formGroup]="forma">
+  <!-- INFORMACION DEL PRODUCTO -->
+  <p-fieldset
+    legend="Información del producto"
+    [style]="{ marginBottom: '50px' }"
+  >
+    <div id="wrap-info-producto">
+      <!-- Nombre producto -->
+      <div class="wrap-inputs">
+        <span class="p-float-label">
+          <p-dropdown
+            id="p-dropdown"
+            [style]="{ width: '100%', height: '100%' }"
+            [options]="productos"
+            optionLabel="nombre"
+            formControlName="producto"
+            [showClear]="true"
+            [filter]="true"
+            filterBy="nombre"
+            placeholder=" "
+            (keyup)="buscarProductos($event)"
+            (onClick)="setProducto()"
+          >
+          </p-dropdown>
+          <label for="inputtext">Nombre producto</label>
+        </span>
+      </div>
+
+      <!-- cantidad -->
+      <div class="wrap-inputs">
+        <span class="p-float-label">
+          <p-inputNumber
+            [style]="{ width: '100%' }"
+            [useGrouping]="false"
+            formControlName="cantidad"
+            placeholder=" "
+            [showButtons]="true"
+            [min]="1"
+            [class]="{
+              'ng-invalid':
+                !validarCantidad.valido && forma.controls.cantidad.touched
+            }"
+          ></p-inputNumber>
+          <label for="inputtext">Cantidad</label>
+        </span>
+      </div>
+
+      <!-- Precio -->
+      <div class="wrap-inputs">
+        <span class="p-float-label">
+          <p-inputNumber
+            [style]="{ width: '100%' }"
+            mode="currency"
+            currency="USD"
+            locale="en-US"
+            formControlName="precio"
+            placeholder=" "
+            [class]="{
+              'ng-invalid':
+                !validarPrecio.valido && forma.controls.precio.touched
+            }"
+          ></p-inputNumber>
+          <label for="inputtext">Precio</label>
+        </span>
+      </div>
+
+      <!-- itbms -->
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          justify-content: flex-start;
+          align-items: center;
+        "
+      >
+        <p-inputSwitch formControlName="itbms"></p-inputSwitch>
+        <label style="margin-left: 15px" for="">ITBMS</label>
+      </div>
+
+      <div id="btn-agregar">
+        <button
+          label="Agregar producto"
+          pButton
+          type="submit"
+          iconPos="left"
+          (click)="btnAgregarProducto()"
+        ></button>
+      </div>
+    </div>
+  </p-fieldset>
+</form>
+
+<!-- TABLA PRODUCTOS PEDIDOS -->
+<p-fieldset legend="Productos pedidos">
+  <!-- tabla -->
+  <p-table
+    [value]="productosPedidos"
+    [rows]="10"
+    [paginator]="true"
+    selectionMode="single"
+    responsiveLayout="scroll"
+    [showCurrentPageReport]="true"
+    [autoLayout]="true"
+    styleClass="p-datatable-striped"
+    currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} Productos"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [resizableColumns]="true"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>#</th>
+        <th>Producto</th>
+        <th>Cantidad</th>
+        <th>Precio</th>
+        <th>ITBMS</th>
+        <th>Total</th>
+        <th></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-productoPedido let-i="rowIndex">
+      <tr>
+        <td>{{ i + 1 }}</td>
+        <td>{{ productoPedido?.producto?.nombre || "Producto no existe" }}</td>
+        <td>{{ productoPedido?.cantidad }}</td>
+        <td>{{ productoPedido?.precio | currency }}</td>
+        <td>{{ productoPedido?.itbms | currency }}</td>
+        <td>
+          {{ productoPedido?.total | currency }}
+        </td>
+        <td>
+          <button
+            pButton
+            pRipple
+            icon="pi pi-trash"
+            class="p-button-rounded p-button-danger"
+            (click)="eliminarProductoPedido(productoPedido._id)"
+          ></button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="footer">
+      <tr>
+        <td colspan="4"></td>
+        <!-- <td style="font-size: 1.3rem">{{ totales?.subtotal | currency }}</td> -->
+
+        <td style="font-size: 1.3rem">{{ totales?.itmbs | currency }}</td>
+        <td style="font-size: 1.3rem">{{ totales?.total | currency }}</td>
+        <td></td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-fieldset>

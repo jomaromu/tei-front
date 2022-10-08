@@ -53,18 +53,18 @@ export class CategoriaService {
     return this.http.get(url, { headers: header }).pipe(map((resp) => resp));
   }
 
-  editarCategoriaID(id: string, token: string, data: any): Observable<any> {
+  editarCategoriaID(data: any): Observable<any> {
     const url = `${environment.urlCategoria}/categoria/editarCategoriaID`;
-    const header = new HttpHeaders({ id, estado: data.estado, token });
+    const header = new HttpHeaders({ token: data.token });
 
     return this.http
       .put(url, data, { headers: header })
       .pipe(map((resp) => resp));
   }
 
-  eliminarCategoriaID(id: string, token: string): Observable<any> {
+  eliminarCategoriaID(data: any): Observable<any> {
     const url = `${environment.urlCategoria}/categoria/eliminarCategoriaID`;
-    const header = new HttpHeaders({ id, token });
+    const header = new HttpHeaders({ token: data.token, id: data.id });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }

@@ -40,41 +40,30 @@ export class ProductoService {
     return this.http.get(url, { headers: header }).pipe(map((resp) => resp));
   }
 
-  obtenerProductoCriterioNombre(data: any): Observable<any> {
-    const url = `${environment.urlProducto}/product/obtenerProductoCriterioNombre`;
-
-    const header = new HttpHeaders({
-      token: data.token,
-      criterio: data.criterio,
-    });
-
-    return this.http.get(url, { headers: header }).pipe(map((resp) => resp));
-  }
-
-  obtenerProductoCriterioNombrePedido(data: any): Observable<any> {
-    const url = `${environment.urlProducto}/product/obtenerProductoCriterioNombrePedido`;
-
-    const header = new HttpHeaders({
-      token: data.token,
-      criterio: data.criterio,
-    });
-
-    return this.http.get(url, { headers: header }).pipe(map((resp) => resp));
-  }
-
-  eliminarProductoID(id: string, token: string): Observable<any> {
+  eliminarProductoID(data: any): Observable<any> {
     const url = `${environment.urlProducto}/product/eliminarProducto`;
-    const header = new HttpHeaders({ id, token });
+    const header = new HttpHeaders({ id: data.id, token: data.token });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }
 
-  editarProductoID(id: string, token: string, data: any): Observable<any> {
+  editarProductoID(data: any): Observable<any> {
     const url = `${environment.urlProducto}/product/editarProducto`;
-    const header = new HttpHeaders({ id, token });
+    const header = new HttpHeaders({ id: data.id, token: data.token });
 
     return this.http
       .put(url, data, { headers: header })
       .pipe(map((resp) => resp));
+  }
+
+  obtenerProductoCriterio(data: any): Observable<any> {
+    const url = `${environment.urlProducto}/product/obtenerProductoCriterio`;
+
+    const header = new HttpHeaders({
+      token: data.token,
+      criterio: data.criterio,
+    });
+
+    return this.http.get(url, { headers: header }).pipe(map((resp) => resp));
   }
 }

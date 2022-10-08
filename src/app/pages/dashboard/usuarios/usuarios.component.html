@@ -1,0 +1,438 @@
+<app-menu></app-menu>
+<app-loading></app-loading>
+
+<!-- TABLA COLABORADORES -->
+<section id="wrap-worker">
+  <section id="wrap-header">
+    <h3 style="font-weight: bold; margin-bottom: 50px">Colaboradores</h3>
+  </section>
+
+  <section id="wrap-tabla" class="card shaddow rounded">
+    <!-- toolbar -->
+    <p-toolbar
+      [style]="{
+        'background-color': 'white',
+        border: 'none',
+        'margin-bottom': '25px'
+      }"
+    >
+      <ng-template pTemplate="left">
+        <button
+          pButton
+          pRipple
+          label="Nuevo"
+          icon="pi pi-plus"
+          class="p-button-success btnHeader"
+          (click)="showDialog('crear')"
+          style="height: 45px"
+          id="btnNuevo"
+        ></button>
+      </ng-template>
+    </p-toolbar>
+
+    <!-- tabla -->
+    <p-table
+      [value]="colaboradores"
+      [rows]="10"
+      [paginator]="true"
+      selectionMode="single"
+      responsiveLayout="scroll"
+      [showCurrentPageReport]="true"
+      [autoLayout]="true"
+      styleClass="p-datatable-striped"
+      currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} Colaboradores"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [resizableColumns]="true"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>#</th>
+          <th>Nombre</th>
+          <th>Teléfono</th>
+          <th>Role</th>
+          <th>Estado</th>
+          <th>Controles</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-colaborador let-i="rowIndex">
+        <tr>
+          <td>{{ i + 1 }}</td>
+          <td>{{ colaborador.nombre }} {{ colaborador.apellido }}</td>
+          <td>{{ colaborador.telefono }}</td>
+          <td>{{ colaborador.role?.nombre }}</td>
+          <td>
+            <span
+              [ngClass]="{ 'badge-activo': colaborador.estado }"
+              *ngIf="colaborador.estado"
+              >Activo</span
+            >
+            <span
+              [ngClass]="{ 'badge-inactivo': !colaborador.estado }"
+              *ngIf="!colaborador.estado"
+              >Inactivo</span
+            >
+          </td>
+          <td>
+            <button
+              pButton
+              pRipple
+              icon="pi pi-pencil"
+              class="p-button-rounded p-button-primary"
+              style="margin-right: 7px"
+              (click)="showDialog('editar', colaborador)"
+            ></button>
+            <button
+              pButton
+              pRipple
+              icon="pi pi-trash"
+              class="p-button-rounded p-button-danger"
+              (click)="eliminarColaborador(colaborador)"
+            ></button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+</section>
+
+<!-- DIALOG CREAR -->
+<form [formGroup]="forma">
+  <p-dialog
+    header="Nuevo colaborador"
+    [(visible)]="displayDialogCrear"
+    [modal]="true"
+    [draggable]="true"
+    [resizable]="false"
+    [style]="{ width: '500px' }"
+    [breakpoints]="{ '530px': '95%' }"
+  >
+    <section id="wrap-form-worker">
+      <!-- Sucursales -->
+      <div class="field flex-column">
+        <p-dropdown
+          [style]="{ width: '100%' }"
+          [options]="sucursales"
+          optionLabel="nombre"
+          formControlName="sucursales"
+          [showClear]="true"
+          placeholder="Sucursal"
+        >
+        </p-dropdown>
+        <small
+          *ngIf="!validarSucursal.valido && forma.controls.sucursales.touched"
+          class="p-error"
+          >Seleccione una sucursal
+        </small>
+      </div>
+
+      <!-- Roles -->
+      <div class="field flex-column">
+        <p-dropdown
+          [style]="{ width: '100%' }"
+          [options]="roles"
+          optionLabel="nombre"
+          formControlName="roles"
+          [showClear]="true"
+          placeholder="Role"
+        >
+        </p-dropdown>
+        <small
+          *ngIf="!validarRole.valido && forma.controls.roles.touched"
+          class="p-error"
+          >Seleccione un role
+        </small>
+      </div>
+
+      <!-- Nombre -->
+      <div class="field flex-column" [style]="{ width: '100%' }">
+        <span class="p-float-label">
+          <input
+            id="float-input"
+            formControlName="nombre"
+            type="text"
+            pInputText
+          />
+          <label for="float-input">Nombre</label>
+        </span>
+        <small
+          *ngIf="!validarNombre.valido && forma.controls.nombre.touched"
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarNombre.mensaje }}</small
+        >
+      </div>
+
+      <!-- Apellido -->
+      <div class="field flex-column" [style]="{ width: '100%' }">
+        <span class="p-float-label">
+          <input
+            id="float-input"
+            formControlName="apellido"
+            type="text"
+            pInputText
+          />
+          <label for="float-input">Apellido</label>
+        </span>
+        <small
+          *ngIf="!validarApellido.valido && forma.controls.apellido.touched"
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarApellido.mensaje }}</small
+        >
+      </div>
+
+      <!-- Identificacion -->
+      <div class="field flex-column" [style]="{ width: '100%' }">
+        <span class="p-float-label">
+          <input
+            id="float-input"
+            formControlName="identificacion"
+            type="text"
+            pInputText
+          />
+          <label for="float-input">Identificación</label>
+        </span>
+        <small
+          *ngIf="
+            !validarIdentificacion.valido &&
+            forma.controls.identificacion.touched
+          "
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarIdentificacion.mensaje }}</small
+        >
+      </div>
+
+      <!-- Correo -->
+      <div class="field flex-column" [style]="{ width: '100%' }">
+        <span class="p-float-label">
+          <input
+            id="float-input"
+            formControlName="correo"
+            type="text"
+            pInputText
+          />
+          <label for="float-input">Correo</label>
+        </span>
+        <small
+          *ngIf="!validarCorreo.valido && forma.controls.correo.touched"
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarCorreo.mensaje }}</small
+        >
+      </div>
+
+      <!-- Telefono -->
+      <div class="field flex-column" [style]="{ width: '100%' }">
+        <span class="p-float-label">
+          <input
+            id="float-input"
+            formControlName="telefono"
+            type="text"
+            pInputText
+          />
+          <label for="float-input">Teléfono(507)</label>
+        </span>
+        <small
+          *ngIf="!validarTelefono && forma.controls.telefono.touched"
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarTelefonoensaje }}</small
+        >
+      </div>
+
+      <!-- Estado -->
+      <p-inputSwitch formControlName="estado" name="estado"></p-inputSwitch>
+    </section>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        pRipple
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="closeDialog()"
+      ></button>
+      <button
+        pButton
+        pRipple
+        label="Guardar"
+        icon="pi pi-check"
+        class="p-button-text"
+        (click)="btnGuardar('crear')"
+      ></button>
+    </ng-template>
+  </p-dialog>
+</form>
+
+<!-- DIALOG EDITAR -->
+<form [formGroup]="forma">
+  <p-dialog
+    header="Editar colaborador"
+    [(visible)]="displayDialogEditar"
+    [modal]="true"
+    [draggable]="true"
+    [resizable]="false"
+    [style]="{ width: '500px' }"
+    [breakpoints]="{ '530px': '95%' }"
+  >
+    <section id="wrap-form-worker">
+      <!-- Sucursales -->
+      <div class="field flex-column">
+        <p-dropdown
+          [style]="{ width: '100%' }"
+          [options]="sucursales"
+          optionLabel="nombre"
+          formControlName="sucursales"
+          [showClear]="true"
+          placeholder="Sucursal"
+        >
+        </p-dropdown>
+        <small
+          *ngIf="!validarSucursal.valido && forma.controls.sucursales.touched"
+          class="p-error"
+          >Seleccione una sucursal
+        </small>
+      </div>
+
+      <!-- Roles -->
+      <div class="field flex-column">
+        <p-dropdown
+          [style]="{ width: '100%' }"
+          [options]="roles"
+          optionLabel="nombre"
+          formControlName="roles"
+          [showClear]="true"
+          placeholder="Role"
+        >
+        </p-dropdown>
+        <small
+          *ngIf="!validarRole.valido && forma.controls.roles.touched"
+          class="p-error"
+          >Seleccione un role
+        </small>
+      </div>
+
+      <!-- Nombre -->
+      <div class="field flex-column" [style]="{ width: '100%' }">
+        <span class="p-float-label">
+          <input
+            id="float-input"
+            formControlName="nombre"
+            type="text"
+            pInputText
+          />
+          <label for="float-input">Nombre</label>
+        </span>
+        <small
+          *ngIf="!validarNombre.valido && forma.controls.nombre.touched"
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarNombre.mensaje }}</small
+        >
+      </div>
+
+      <!-- Apellido -->
+      <div class="field flex-column" [style]="{ width: '100%' }">
+        <span class="p-float-label">
+          <input
+            id="float-input"
+            formControlName="apellido"
+            type="text"
+            pInputText
+          />
+          <label for="float-input">Apellido</label>
+        </span>
+        <small
+          *ngIf="!validarApellido.valido && forma.controls.apellido.touched"
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarApellido.mensaje }}</small
+        >
+      </div>
+
+      <!-- Identificacion -->
+      <div class="field flex-column" [style]="{ width: '100%' }">
+        <span class="p-float-label">
+          <input
+            id="float-input"
+            formControlName="identificacion"
+            type="text"
+            pInputText
+          />
+          <label for="float-input">Identificación</label>
+        </span>
+        <small
+          *ngIf="
+            !validarIdentificacion.valido &&
+            forma.controls.identificacion.touched
+          "
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarIdentificacion.mensaje }}</small
+        >
+      </div>
+
+      <!-- Correo -->
+      <div class="field flex-column" [style]="{ width: '100%' }">
+        <span class="p-float-label">
+          <input
+            id="float-input"
+            formControlName="correo"
+            type="text"
+            pInputText
+          />
+          <label for="float-input">Correo</label>
+        </span>
+        <small
+          *ngIf="!validarCorreo.valido && forma.controls.correo.touched"
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarCorreo.mensaje }}</small
+        >
+      </div>
+
+      <!-- Telefono -->
+      <div class="field flex-column" [style]="{ width: '100%' }">
+        <span class="p-float-label">
+          <input
+            id="float-input"
+            formControlName="telefono"
+            type="text"
+            pInputText
+          />
+          <label for="float-input">Teléfono(507)</label>
+        </span>
+        <small
+          *ngIf="!validarTelefono && forma.controls.telefono.touched"
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarTelefonoensaje }}</small
+        >
+      </div>
+
+      <!-- Estado -->
+      <p-inputSwitch formControlName="estado" name="estado"></p-inputSwitch>
+    </section>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        pRipple
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="closeDialog()"
+      ></button>
+      <button
+        pButton
+        pRipple
+        label="Guardar"
+        icon="pi pi-check"
+        class="p-button-text"
+        (click)="btnGuardar('editar')"
+      ></button>
+    </ng-template>
+  </p-dialog>
+</form>

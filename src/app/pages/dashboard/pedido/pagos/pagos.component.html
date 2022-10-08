@@ -1,0 +1,248 @@
+<app-loading></app-loading>
+
+<!-- INFORMACION DE PAGOS -->
+<p-fieldset legend="Información de pagos" [style]="{ marginBottom: '50px' }">
+  <!-- TABLA PAGOS -->
+  <section id="wrap-pagos">
+    <section id="wrap-tabla" class="card shaddow rounded">
+      <!-- toolbar -->
+      <p-toolbar
+        [style]="{
+          'background-color': 'white',
+          border: 'none',
+          'margin-bottom': '25px'
+        }"
+      >
+        <ng-template pTemplate="left">
+          <button
+            pButton
+            pRipple
+            label="Añadir pago"
+            icon="pi pi-plus"
+            class="p-button-success btnHeader"
+            (click)="showDialog('crear')"
+            style="height: 45px"
+            id="btnNuevo"
+          ></button>
+        </ng-template>
+      </p-toolbar>
+
+      <!-- tabla -->
+      <p-table
+        [value]="pagos"
+        [rows]="5"
+        [paginator]="true"
+        selectionMode="single"
+        responsiveLayout="scroll"
+        [showCurrentPageReport]="true"
+        [autoLayout]="true"
+        styleClass="p-datatable-striped"
+        currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} pagos"
+        [rowsPerPageOptions]="[5, 25, 50]"
+        [resizableColumns]="true"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>#</th>
+            <th>Creador</th>
+            <th>Fecha</th>
+            <th>Modalidad</th>
+            <th>Método</th>
+            <th>Monto</th>
+            <th></th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-pago let-i="rowIndex">
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ pago?.creador?.nombre }}</td>
+            <td>{{ pago?.fecha }}</td>
+            <td>{{ pago?.modalidad?.nombre }}</td>
+            <td>{{ pago?.metodo?.nombre }}</td>
+            <td>{{ pago?.monto | currency }}</td>
+            <td>
+              <button
+                *ngIf="!pago.estado"
+                pButton
+                type="button"
+                class="p-button-raised p-button-rounded p-button-warning p-button-sm"
+                icon="pi pi-question"
+                pTooltip="Pago desactivado"
+                (click)="verMotivo(pago)"
+              ></button>
+              <p-inputSwitch
+                (onChange)="showEstadoPago($event, pago)"
+                *ngIf="pago.estado"
+                [ngModel]="pago.estado"
+              ></p-inputSwitch>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </section>
+  </section>
+</p-fieldset>
+
+<!-- DIALOG CREAR -->
+<form class="formulario" [formGroup]="forma">
+  <p-dialog
+    header="Nuevo pago"
+    [(visible)]="displayDialogCrear"
+    [modal]="true"
+    [draggable]="true"
+    [resizable]="false"
+    [style]="{ width: '500px' }"
+    [breakpoints]="{ '530px': '95%' }"
+  >
+    <section id="wrap-form-pagos">
+      <!-- Modalidad de pago -->
+      <span class="p-float-label">
+        <p-dropdown
+          [style]="{ width: '100%', height: '100%' }"
+          [options]="modalidades"
+          optionLabel="nombre"
+          formControlName="modalidad"
+          [showClear]="true"
+          placeholder=" "
+          [class]="{
+            'ng-invalid':
+              !validarModalidad.valido && forma.controls.modalidad.touched
+          }"
+        >
+        </p-dropdown>
+        <label for="inputtext">Modalidad de pago</label>
+      </span>
+
+      <!-- Métodos de pago -->
+      <span class="p-float-label">
+        <p-dropdown
+          [style]="{ width: '100%', height: '100%' }"
+          [options]="metoddos"
+          optionLabel="nombre"
+          formControlName="metodo"
+          [showClear]="true"
+          placeholder=" "
+          [class]="{
+            'ng-invalid': !validarMetodo.valido && forma.controls.metodo.touched
+          }"
+        >
+        </p-dropdown>
+        <label for="inputtext">Método de pago</label>
+      </span>
+
+      <!-- Moonto de pago -->
+      <span class="p-float-label">
+        <p-inputNumber
+          mode="currency"
+          currency="USD"
+          locale="en-US"
+          formControlName="monto"
+          placeholder=" "
+          class="ng-dirty"
+          [class]="{
+            'ng-invalid': !validarMonto.valido && forma.controls.monto.touched
+          }"
+        ></p-inputNumber>
+        <label for="inputtext">Monto: (Ej: 2.50)</label>
+      </span>
+
+      <!-- estado -->
+      <!-- <div
+        style="
+          display: flex;
+          flex-direction: row;
+          justify-content: flex-start;
+          align-items: center;
+        "
+      >
+        <p-inputSwitch formControlName="estado"></p-inputSwitch>
+        <label style="margin-left: 15px" for="">Estado</label>
+      </div> -->
+    </section>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        pRipple
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="closeDialog()"
+      ></button>
+      <button
+        pButton
+        pRipple
+        label="Guardar"
+        icon="pi pi-check"
+        class="p-button-text"
+        (click)="btnGuardar()"
+      ></button>
+    </ng-template>
+  </p-dialog>
+</form>
+
+<!-- DIALOG ESTADO PAGO -->
+<p-dialog
+  header="¿Porqué deshabilitar este pago?"
+  [(visible)]="modalEstado"
+  [modal]="true"
+  [draggable]="true"
+  [resizable]="false"
+  [style]="{ width: '500px' }"
+  [breakpoints]="{ '530px': '95%' }"
+>
+  <section id="wrap-text-area">
+    <textarea
+      [style]="{ resize: 'none' }"
+      [rows]="5"
+      [cols]="30"
+      id="motivo-deshabilitar"
+      pInputTextarea
+    ></textarea>
+  </section>
+
+  <ng-template pTemplate="footer">
+    <button
+      pButton
+      pRipple
+      label="Cancelar"
+      icon="pi pi-times"
+      class="p-button-text"
+      (click)="closeDialog()"
+    ></button>
+    <button
+      pButton
+      pRipple
+      label="Guardar"
+      icon="pi pi-check"
+      class="p-button-text"
+      (click)="btnGuardarEstado()"
+    ></button>
+  </ng-template>
+</p-dialog>
+
+<!-- DIALOG MOSTRAR MOTIVO-->
+<p-dialog
+  header="¿Motivo de la inhabilitación?"
+  [(visible)]="mostrarMotivo"
+  [modal]="true"
+  [draggable]="true"
+  [resizable]="false"
+  [style]="{ width: '500px' }"
+  [breakpoints]="{ '530px': '95%' }"
+>
+  <section id="wrap-text-motivo">
+    <div>{{ motivo || "No hay un motivo" }}</div>
+  </section>
+
+  <ng-template pTemplate="footer">
+    <button
+      pButton
+      pRipple
+      label="Ok"
+      icon="pi pi-check"
+      class="p-button-text"
+      (click)="closeDialog()"
+    ></button>
+  </ng-template>
+</p-dialog>

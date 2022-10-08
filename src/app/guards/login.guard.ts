@@ -25,6 +25,7 @@ export class LoginGuard implements CanActivate {
 
         if (!usuario.token) {
           this.auth = true;
+          console.log(usuario);
         } else {
           this.router.navigateByUrl('/dashboard');
           this.auth = false;

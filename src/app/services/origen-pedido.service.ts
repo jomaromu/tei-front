@@ -53,18 +53,18 @@ export class OrigenPedidoService {
     return this.http.get(url, { headers: header }).pipe(map((resp) => resp));
   }
 
-  editarOrigenID(id: string, data: any): Observable<any> {
+  editarOrigenID(data: any): Observable<any> {
     const url = `${environment.urlOrigen}/origenPedido/editarOrigen`;
-    const header = new HttpHeaders({ id, token: data.token });
+    const header = new HttpHeaders({ id: data.id, token: data.token });
 
     return this.http
       .put(url, data, { headers: header })
       .pipe(map((resp) => resp));
   }
 
-  eliminarOrigenID(id: string, token: string): Observable<any> {
+  eliminarOrigenID(data: any): Observable<any> {
     const url = `${environment.urlOrigen}/origenPedido/eliminarOrigen`;
-    const header = new HttpHeaders({ id, token });
+    const header = new HttpHeaders({ id: data.id, token: data.token });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }

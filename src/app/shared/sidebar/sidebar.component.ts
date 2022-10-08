@@ -2,75 +2,39 @@ import {
   AfterViewChecked,
   Component,
   ElementRef,
-  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { first, take } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { AppState } from '../../reducers/globarReducers';
 import * as loginActions from '../../reducers/login/login.actions';
 import anime from 'animejs/lib/anime.es.js';
-import { Router, ActivatedRoute } from '@angular/router';
-import { Usuario } from '../../interfaces/resp-worker';
+import { UsuarioWorker } from '../../interfaces/resp-worker';
 import { Subscription } from 'rxjs';
+import * as menuActions from '../../reducers/abrir-cerrar-sidebar/abrir-cerrar-sidebar-actions';
 
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'],
 })
-export class SidebarComponent implements OnInit, AfterViewChecked, OnDestroy {
+export class SidebarComponent implements OnInit, AfterViewChecked {
   @ViewChild('catalogo', { static: true }) catalogo: ElementRef<HTMLElement>;
-  usuario: Usuario;
-  role: string;
-  rolePermitido = true;
-  roles = [
-    {
-      id: 'SuperRole',
-      nombre: 'Super Usuario',
-    },
-    {
-      id: 'AdminRole',
-      nombre: 'Administrador',
-    },
-    {
-      id: 'ProduccionNormalRole',
-      nombre: 'Producción',
-    },
-    {
-      id: 'ProduccionVIPRole',
-      nombre: 'Producción VIP',
-    },
-    {
-      id: 'VendedorNormalRole',
-      nombre: 'Vendedor',
-    },
-    {
-      id: 'VendedorVIPRole',
-      nombre: 'Vendedor VIP',
-    },
-    {
-      id: 'DiseniadorRole',
-      nombre: 'Diseñador',
-    },
-    {
-      id: 'DiseniadorVIPRole',
-      nombre: 'Diseñador VIP',
-    },
-  ];
-
+  @ViewChild('wrapSidebar', { static: true })
+  wrapSidebar: ElementRef<HTMLElement>;
+  usuario: UsuarioWorker;
   sub1: Subscription;
 
-  constructor(
-    private store: Store<AppState>,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
+  constructor(private store: Store<AppState>) {}
 
   ngOnInit(): void {
     this.cargarWorker();
     this.animacionRow();
+  }
+
+  cerrarSidebar(): void {
+    this.store.dispatch(menuActions.abrirCerrarSidebar());
   }
 
   ngAfterViewChecked(): void {
@@ -78,15 +42,7 @@ export class SidebarComponent implements OnInit, AfterViewChecked, OnDestroy {
       .select('login')
       // .pipe(take(2))
       .subscribe((worker) => {
-        this.usuario = worker;
-        this.role = worker?.usuario?.colaborador_role;
-
-        if (
-          this.role === 'DiseniadorRole' ||
-          this.role === 'DiseniadorVIPRole'
-        ) {
-          this.rolePermitido = false;
-        }
+        this.usuario = worker.usuarioDB;
       });
   }
 
@@ -120,47 +76,47 @@ export class SidebarComponent implements OnInit, AfterViewChecked, OnDestroy {
           }
         });
 
-        pedidos.addEventListener('click', (e) => {
-          const isShow = pedidos.getAttribute('aria-expanded');
-          const rowPedidos = document.getElementById('row-pedidos');
+        // pedidos.addEventListener('click', (e) => {
+        //   const isShow = pedidos.getAttribute('aria-expanded');
+        //   const rowPedidos = document.getElementById('row-pedidos');
 
-          if (isShow === 'true') {
-            anime({
-              targets: rowPedidos,
-              rotateZ: 90,
-              easing: 'linear',
-              duration: 200,
-            });
-          } else {
-            anime({
-              targets: rowPedidos,
-              rotateZ: 0,
-              easing: 'linear',
-              duration: 200,
-            });
-          }
-        });
+        //   if (isShow === 'true') {
+        //     anime({
+        //       targets: rowPedidos,
+        //       rotateZ: 90,
+        //       easing: 'linear',
+        //       duration: 200,
+        //     });
+        //   } else {
+        //     anime({
+        //       targets: rowPedidos,
+        //       rotateZ: 0,
+        //       easing: 'linear',
+        //       duration: 200,
+        //     });
+        //   }
+        // });
 
-        reporte.addEventListener('click', (e) => {
-          const isShow = reporte.getAttribute('aria-expanded');
-          const rowReportes = document.getElementById('row-reportes');
+        // reporte.addEventListener('click', (e) => {
+        //   const isShow = reporte.getAttribute('aria-expanded');
+        //   const rowReportes = document.getElementById('row-reportes');
 
-          if (isShow === 'true') {
-            anime({
-              targets: rowReportes,
-              rotateZ: 90,
-              easing: 'linear',
-              duration: 200,
-            });
-          } else {
-            anime({
-              targets: rowReportes,
-              rotateZ: 0,
-              easing: 'linear',
-              duration: 200,
-            });
-          }
-        });
+        //   if (isShow === 'true') {
+        //     anime({
+        //       targets: rowReportes,
+        //       rotateZ: 90,
+        //       easing: 'linear',
+        //       duration: 200,
+        //     });
+        //   } else {
+        //     anime({
+        //       targets: rowReportes,
+        //       rotateZ: 0,
+        //       easing: 'linear',
+        //       duration: 200,
+        //     });
+        //   }
+        // });
       }
     }, 800);
   }
@@ -185,9 +141,5 @@ export class SidebarComponent implements OnInit, AfterViewChecked, OnDestroy {
   salir(): void {
     localStorage.clear();
     window.location.reload();
-  }
-
-  ngOnDestroy(): void {
-    this.sub1.unsubscribe();
   }
 }

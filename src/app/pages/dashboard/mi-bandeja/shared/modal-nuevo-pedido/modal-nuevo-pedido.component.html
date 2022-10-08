@@ -1,0 +1,161 @@
+<!-- DIALOG CREAR -->
+<form class="formulario" [formGroup]="forma">
+  <p-dialog
+    header="Nuevo pedido"
+    [(visible)]="displayDialogCrear"
+    [modal]="true"
+    [draggable]="true"
+    [resizable]="false"
+    [style]="{ width: '500px' }"
+    [breakpoints]="{ '530px': '95%' }"
+    (onHide)="closeDialog()"
+    (onShow)="showDialog()"
+  >
+    <section id="wrap-form-pedido">
+      <!-- Nombre cliente -->
+      <div class="field flex-column">
+        <p-dropdown
+          [style]="{ width: '100%' }"
+          [options]="clientes"
+          optionLabel="nombre"
+          formControlName="nombre"
+          [showClear]="true"
+          placeholder="Nombre cliente"
+          [filter]="true"
+          filterBy="nombre"
+          (keyup)="buscarClientes($event)"
+          (onChange)="setTelefono()"
+        >
+        </p-dropdown>
+        <small
+          *ngIf="!validarNombre.valido && forma.controls.nombre.touched"
+          class="p-error"
+          >Seleccione un nombre
+        </small>
+      </div>
+
+      <!-- Telefono cliente -->
+      <div class="field flex-column">
+        <p-dropdown
+          [style]="{ width: '100%' }"
+          [options]="clientes"
+          optionLabel="telefono"
+          formControlName="telefono"
+          [showClear]="true"
+          placeholder="Teléfono cliente"
+          [filter]="true"
+          filterBy="telefono"
+          (keyup)="buscarClientes($event)"
+          (onChange)="setNombre()"
+        >
+        </p-dropdown>
+        <small
+          *ngIf="!validarTelefono.valido && forma.controls.telefono.touched"
+          class="p-error"
+          >Seleccione un teléfono
+        </small>
+      </div>
+
+      <!-- Fecha Entrega -->
+      <div class="field flex-column">
+        <p-calendar
+          formControlName="fechaEntrega"
+          showButtonBar="true"
+          (click)="abrirCalendar()"
+          dateFormat="d/mm/yy"
+          placeholder="Fecha entrega"
+          id="nuevoPedidoPicker"
+        ></p-calendar>
+        <small
+          *ngIf="!validarFecha.valido && forma.controls.fechaEntrega.touched"
+          class="p-error"
+          >{{ validarFecha.mensaje }}
+        </small>
+      </div>
+
+      <!-- Sucursales -->
+      <div class="field flex-column">
+        <p-dropdown
+          [style]="{ width: '100%' }"
+          [options]="sucursales"
+          optionLabel="nombre"
+          formControlName="sucursales"
+          [showClear]="true"
+          placeholder="Sucursal"
+        >
+        </p-dropdown>
+        <small
+          *ngIf="!validarSucursal.valido && forma.controls.sucursales.touched"
+          class="p-error"
+          >{{ validarSucursal.mensaje }}
+        </small>
+      </div>
+
+      <!-- Prioridades -->
+      <div class="field flex-column">
+        <p-dropdown
+          [style]="{ width: '100%' }"
+          [options]="prioridades"
+          optionLabel="nombre"
+          formControlName="prioridad"
+          [showClear]="true"
+          placeholder="Prioridad"
+        >
+        </p-dropdown>
+        <small
+          *ngIf="!validarPrioridad.valido && forma.controls.prioridad.touched"
+          class="p-error"
+          >{{ validarPrioridad.mensaje }}
+        </small>
+      </div>
+
+      <!-- Etapas -->
+      <div class="field flex-column">
+        <p-dropdown
+          [style]="{ width: '100%' }"
+          [options]="etapas"
+          optionLabel="nombre"
+          formControlName="etapa"
+          [showClear]="true"
+          placeholder="Etapa"
+        >
+        </p-dropdown>
+        <small
+          *ngIf="!validarEtapas.valido && forma.controls.etapa.touched"
+          class="p-error"
+          >{{ validarEtapas.mensaje }}
+        </small>
+      </div>
+
+      <div class="field flex-column" [style]="{ width: '100%' }">
+        <app-crear-editar-cliente
+          [existeClient]="existeClient"
+          [inputCliente]="cliente"
+          (emitCerrarModalNuevoPedido)="eventCerrarModal($event)"
+        ></app-crear-editar-cliente>
+      </div>
+    </section>
+
+    <!-- Estado -->
+    <!-- <p-inputSwitch formControlName="estado" name="estado"></p-inputSwitch> -->
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        pRipple
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="closeDialog()"
+      ></button>
+      <button
+        pButton
+        pRipple
+        label="Guardar"
+        icon="pi pi-check"
+        class="p-button-text"
+        (click)="btnGuardar()"
+      ></button>
+    </ng-template>
+  </p-dialog>
+</form>

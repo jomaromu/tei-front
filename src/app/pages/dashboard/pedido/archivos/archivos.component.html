@@ -1,0 +1,178 @@
+<app-loading></app-loading>
+
+<!-- INFORMACION DE ARCHIVOS -->
+<p-fieldset legend="Información de archivos" [style]="{ marginBottom: '50px' }">
+  <!-- TABLA ARCHIVOS -->
+  <section id="wrap-archivos">
+    <section id="wrap-tabla" class="card shaddow rounded">
+      <!-- toolbar -->
+      <p-toolbar
+        [style]="{
+          'background-color': 'white',
+          border: 'none',
+          'margin-bottom': '25px'
+        }"
+      >
+        <ng-template pTemplate="left">
+          <button
+            pButton
+            pRipple
+            label="Añadir archivo"
+            icon="pi pi-plus"
+            class="p-button-success btnHeader"
+            (click)="showDialog('crear')"
+            style="height: 45px"
+            id="btnNuevo"
+          ></button>
+        </ng-template>
+      </p-toolbar>
+
+      <!-- tabla -->
+      <p-table
+        [value]="archivosPedido"
+        [rows]="5"
+        [paginator]="true"
+        selectionMode="single"
+        responsiveLayout="scroll"
+        [showCurrentPageReport]="true"
+        [autoLayout]="true"
+        styleClass="p-datatable-striped"
+        currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} Archivos"
+        [rowsPerPageOptions]="[5, 25, 50]"
+        [resizableColumns]="true"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Creador</th>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Enlace</th>
+            <th></th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-archivoPedido let-i="rowIndex">
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ archivoPedido?.nombre }}</td>
+            <td>{{ archivoPedido?.idCreador?.nombre || "Sin creador" }}</td>
+            <td>{{ archivoPedido?.fecha }}</td>
+            <td>{{ archivoPedido?.tipo?.nombre || "Sin Tipo" }}</td>
+            <td>
+              <a
+                id="enlaces"
+                [href]="archivoPedido | enlaces: archivo"
+                target="_blank"
+                ><i class="pi pi-folder-open"></i
+              ></a>
+            </td>
+            <td>
+              <button
+                pButton
+                pRipple
+                icon="pi pi-trash"
+                class="p-button-rounded p-button-danger"
+                (click)="eliminarArchivoPedido(archivoPedido)"
+              ></button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </section>
+  </section>
+</p-fieldset>
+
+<!-- DIALOG CREAR -->
+<form class="formulario" [formGroup]="forma">
+  <p-dialog
+    header="Nuevo archivo"
+    [(visible)]="displayDialogCrear"
+    [modal]="true"
+    [draggable]="true"
+    [resizable]="false"
+    [style]="{ width: '500px' }"
+    [breakpoints]="{ '530px': '95%' }"
+    (onHide)="closeDialog()"
+  >
+    <section id="wrap-form-archivos">
+      <div style="grid-column: 1 / 3">
+        <p-fileUpload
+          name="myFile"
+          accept="image/*, application/pdf"
+          maxFileSize="2000000"
+          invalidFileSizeMessageSummary="Arhivo muy pesado"
+          invalidFileSizeMessageDetail="Máximo 2 MegaBytes"
+          invalidFileTypeMessageSummary="Archivo inválido"
+          invalidFileTypeMessageDetail="Sólo: (Imágenes, PDF)"
+          chooseLabel="Escoger"
+          uploadLabel="Subir"
+          [showCancelButton]="false"
+          [showUploadButton]="false"
+          [customUpload]="true"
+          [auto]="true"
+          (uploadHandler)="miArchivo($event)"
+          (onRemove)="limpiarArchivo($event)"
+        ></p-fileUpload>
+        <small
+          *ngIf="!validarArchivo.valido"
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarArchivo.mensaje }}</small
+        >
+      </div>
+
+      <!-- Nombre -->
+      <div
+        class="field flex-column"
+        [style]="{ width: '100%', gridColumn: '1 / 3' }"
+      >
+        <span class="p-float-label">
+          <input
+            id="float-input"
+            formControlName="nombre"
+            type="text"
+            pInputText
+          />
+          <label for="float-input">Nombre archivo (Opcional)</label>
+        </span>
+        <small
+          *ngIf="!validarNombre.valido && forma.controls.nombre.touched"
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarNombre.mensaje }}</small
+        >
+      </div>
+
+      <!-- Tipo de archivo -->
+      <div id="wrap-tipos-archivos" *ngIf="tiposArchivos.length !== 0">
+        <p-radioButton
+          *ngFor="let tipoArchivo of tiposArchivos"
+          name="tipo"
+          formControlName="tipo"
+          [value]="tipoArchivo?._id"
+          [label]="tipoArchivo?.nombre"
+        ></p-radioButton>
+      </div>
+    </section>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        pRipple
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="closeDialog()"
+      ></button>
+      <button
+        pButton
+        pRipple
+        label="Guardar"
+        icon="pi pi-check"
+        class="p-button-text"
+        (click)="btnGuardar()"
+      ></button>
+    </ng-template>
+  </p-dialog>
+</form>

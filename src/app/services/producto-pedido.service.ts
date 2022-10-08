@@ -10,24 +10,20 @@ import { map } from 'rxjs/operators';
 export class ProductoPedidoService {
   constructor(private http: HttpClient) {}
 
-  obtenerProductosPedido(data: any): Observable<any> {
-    const url = `${environment.urlProductosPedido}/productoPedido/obtenerPorPedido`;
-    const header = new HttpHeaders({ token: data.token, pedido: data.pedido });
-
-    return this.http.get(url, { headers: header }).pipe(map((resp) => resp));
-  }
-
   crearProductoPedido(data: any): Observable<any> {
     const url = `${environment.urlProductosPedido}/productoPedido/crearProductoPedido`;
 
-    const header = new HttpHeaders({
-      token: data.token,
-      pedido: data.pedido,
-      producto: data.producto,
-    });
+    const header = new HttpHeaders({ token: data.token });
     return this.http
       .post(url, data, { headers: header })
       .pipe(map((resp) => resp));
+  }
+
+  obtenerProductosPedidos(data: any): Observable<any> {
+    const url = `${environment.urlProductosPedido}/productoPedido/obtenerProductosPedidos`;
+    const header = new HttpHeaders({ token: data.token, pedido: data.pedido });
+
+    return this.http.get(url, { headers: header }).pipe(map((resp) => resp));
   }
 
   eliminarProductoPedido(data: any): Observable<any> {
@@ -35,16 +31,19 @@ export class ProductoPedidoService {
 
     const header = new HttpHeaders({
       token: data.token,
-      id: data.IdProductoPedido,
-      pedido: data.pedido,
+      id: data.id,
     });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }
 
-  editarProductoPedido(data: any): Observable<any> {
-    const url = `${environment.urlProductosPedido}/productoPedido/editarProductoPedido`;
-    const header = new HttpHeaders({ token: data.token, id: data.id });
+  editarSeguimientos(data: any): Observable<any> {
+    const url = `${environment.urlProductosPedido}/productoPedido/editarSeguimientos`;
+
+    const header = new HttpHeaders({
+      idProdPed: data.idProdPed,
+      token: data.token,
+    });
 
     return this.http
       .put(url, data, { headers: header })

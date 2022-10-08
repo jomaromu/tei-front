@@ -1,22 +1,22 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import { environment } from '../environments/environment';
 import { CurrencyPipe } from '@angular/common';
 
 // Modulos externo
-import { PagesModule } from './pages/pages.module';
+import { LoginModule } from './pages/login/login.module';
+import { DashboardModule } from './pages/dashboard/dashboard.module';
 
 // NGRX
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { globalReducerApp } from './reducers/globarReducers';
 
-// Componentes
-import { LoginComponent } from './pages/login/login.component';
 import { EffectsModule } from '@ngrx/effects';
 import { effectsArray } from './services/index';
 
@@ -35,13 +35,12 @@ import { ProductosPedidoService } from './services/sockets/productos-pedido.serv
 // const config: SocketIoConfig = { url: environment.url, options: {} };
 
 @NgModule({
-  declarations: [AppComponent, LoginComponent],
+  declarations: [AppComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
     FormsModule,
-    PagesModule,
     HttpClientModule,
     EffectsModule.forRoot(effectsArray),
     StoreModule.forRoot(globalReducerApp, {}),
@@ -51,6 +50,9 @@ import { ProductosPedidoService } from './services/sockets/productos-pedido.serv
     }),
     // SocketIoModule.forRoot(config)
     SocketIoModule,
+    LoginModule,
+    DashboardModule,
+    BrowserAnimationsModule,
   ],
   providers: [
     CurrencyPipe,

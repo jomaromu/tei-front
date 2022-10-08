@@ -22,8 +22,8 @@ export class SucursalService {
     );
   }
 
-  obtenerSucursales(token: string): Observable<any> {
-    const url = `${environment.urlSucursal}/sucursales/obtenerTodasSucursales`;
+  obtenerSucs(token: string): Observable<any> {
+    const url = `${environment.urlSucursal}/sucursales/obtenerSucs`;
     const header = new HttpHeaders({ token });
 
     return this.http.get(url, { headers: header }).pipe(
@@ -33,35 +33,18 @@ export class SucursalService {
     );
   }
 
-  obtenerSucursalID(id: string, token: string): Observable<any> {
-    const url = `${environment.urlSucursal}/sucursales/obtenerSucursalID`;
-    const header = new HttpHeaders({ id, token });
-
-    return this.http.get(url, { headers: header }).pipe(map((resp) => resp));
-  }
-
-  editarSucursalID(id: string, token: string, data: any): Observable<any> {
+  editarSucursalID(data: any): Observable<any> {
     const url = `${environment.urlSucursal}/sucursales/editarSucursal`;
-    const header = new HttpHeaders({ id, estado: data.estado, token });
+    const header = new HttpHeaders({ token: data.token });
 
     return this.http
       .put(url, data, { headers: header })
       .pipe(map((resp) => resp));
   }
 
-  obtenerSucursalCriterio(data: any): Observable<any> {
-    const url = `${environment.urlSucursal}/sucursales/obtenerSucursalCriterio`;
-    const header = new HttpHeaders({
-      token: data.token,
-      criterio: data.criterio,
-    });
-
-    return this.http.get(url, { headers: header }).pipe(map((resp) => resp));
-  }
-
-  eliminarSucursalID(id: string, token: string): Observable<any> {
+  eliminarSucursalID(data: any): Observable<any> {
     const url = `${environment.urlSucursal}/sucursales/eliminarSucursal`;
-    const header = new HttpHeaders({ id, token });
+    const header = new HttpHeaders({ token: data.token, id: data.id });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }

@@ -5,39 +5,33 @@ import { environment } from '../../environments/environment';
 import { map } from 'rxjs/operators';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PagosService {
-
-  constructor(
-    private http: HttpClient
-  ) { }
+  constructor(private http: HttpClient) {}
 
   crearPago(data: any): Observable<any> {
-
     const url = `${environment.urlPagos}/pago/crearPago`;
-    const header = new HttpHeaders({ token: data.token, pedido: data.pedido, metodo: data.metodo });
+    const header = new HttpHeaders({ token: data.token });
 
-    return this.http.post(url, data, { headers: header })
-      .pipe(map(resp => resp));
+    return this.http
+      .post(url, data, { headers: header })
+      .pipe(map((resp) => resp));
   }
 
-  obtenerPagosPorPedido(token: string, idPedido: string): Observable<any> {
-
+  obtenerPagosPorPedido(data: any): Observable<any> {
     const url = `${environment.urlPagos}/pago/obtenerPagosPorPedido`;
-    const header = new HttpHeaders({ token, pedido: idPedido });
+    const header = new HttpHeaders({ token: data.token, pedido: data.pedido });
 
-    return this.http.get(url, { headers: header })
-      .pipe(map(resp => resp));
+    return this.http.get(url, { headers: header }).pipe(map((resp) => resp));
   }
 
-  desactivarPago(data: any): Observable<any> {
+  editarMotivo(data: any): Observable<any> {
+    const url = `${environment.urlPagos}/pago/editarMotivo`;
+    const header = new HttpHeaders({ token: data.token });
 
-    const url = `${environment.urlPagos}/pago/desactivarPago`;
-    const header = new HttpHeaders({ token: data.token, pedido: data.idPedido, idPago: data.idPago, motivo: data.motivo });
-
-    return this.http.put(url, data, { headers: header })
-      .pipe(map(resp => resp));
+    return this.http
+      .put(url, data, { headers: header })
+      .pipe(map((resp) => resp));
   }
-
 }

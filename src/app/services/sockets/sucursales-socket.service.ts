@@ -42,4 +42,8 @@ export class SucursalesSocketService {
       });
     });
   }
+
+  destruirSocket(evento: string): any {
+    this.socketSucursal.off(evento);
+  }
 }

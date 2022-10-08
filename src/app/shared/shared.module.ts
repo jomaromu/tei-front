@@ -6,41 +6,45 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 // COMPONENTESAS
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { NotFoundComponent } from './not-found/not-found.component';
-import { BusquedaComponent } from './busqueda/busqueda.component';
 import { TablesCatalogosComponent } from './tables-catalogos/tables-catalogos.component';
 import { LoadingComponent } from './loading/loading.component';
 import { TablaPedidosComponent } from './tabla-pedidos/tabla-pedidos.component';
-import { ModalDataComponent } from './modal-data/modal-data.component';
 import { TablaReportesComponent } from './tabla-reportes/tabla-reportes.component';
 
-// PIES
-import { TotalReportesPipe } from '../pipes/total-reportes.pipe';
 import { EditarClienteComponent } from './editar-cliente/editar-cliente.component';
+
+// PRIMENG
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { MenuComponent } from './menu/menu/menu.component';
 
 @NgModule({
   declarations: [
     SidebarComponent,
     NotFoundComponent,
-    BusquedaComponent,
     TablesCatalogosComponent,
     LoadingComponent,
     TablaPedidosComponent,
-    ModalDataComponent,
     TablaReportesComponent,
-    TotalReportesPipe,
+
     EditarClienteComponent,
+    MenuComponent,
   ],
-  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    ReactiveFormsModule,
+    ProgressSpinnerModule,
+  ],
   exports: [
     SidebarComponent,
-    BusquedaComponent,
     TablesCatalogosComponent,
     LoadingComponent,
     TablaPedidosComponent,
-    ModalDataComponent,
     TablaReportesComponent,
-    TotalReportesPipe,
+
     EditarClienteComponent,
+    MenuComponent,
   ],
 })
 export class SharedModule {}

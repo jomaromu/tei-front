@@ -1,0 +1,204 @@
+<app-menu></app-menu>
+<app-loading></app-loading>
+
+<!-- TABLA CATEGORIAS -->
+<section id="wrap-categorias">
+  <section id="wrap-header">
+    <h3 style="font-weight: bold; margin-bottom: 50px">Categorías</h3>
+  </section>
+
+  <section id="wrap-tabla" class="card shaddow rounded">
+    <!-- toolbar -->
+    <p-toolbar
+      [style]="{
+        'background-color': 'white',
+        border: 'none',
+        'margin-bottom': '25px'
+      }"
+    >
+      <ng-template pTemplate="left">
+        <button
+          pButton
+          pRipple
+          label="Nueva"
+          icon="pi pi-plus"
+          class="p-button-success btnHeader"
+          (click)="showDialog('crear')"
+          style="height: 45px"
+          id="btnNuevo"
+        ></button>
+      </ng-template>
+    </p-toolbar>
+
+    <!-- tabla -->
+    <p-table
+      [value]="categorias"
+      [rows]="10"
+      [paginator]="true"
+      selectionMode="single"
+      responsiveLayout="scroll"
+      [showCurrentPageReport]="true"
+      [autoLayout]="true"
+      styleClass="p-datatable-striped"
+      currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} Categorías"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [resizableColumns]="true"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>#</th>
+          <th>Nombre</th>
+          <th>Estado</th>
+          <th>Controles</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-categoria let-i="rowIndex">
+        <tr>
+          <td>{{ i + 1 }}</td>
+          <td>{{ categoria.nombre }}</td>
+          <td>
+            <span
+              [ngClass]="{ 'badge-activo': categoria.estado }"
+              *ngIf="categoria.estado"
+              >Activo</span
+            >
+            <span
+              [ngClass]="{ 'badge-inactivo': !categoria.estado }"
+              *ngIf="!categoria.estado"
+              >Inactivo</span
+            >
+          </td>
+          <td>
+            <button
+              pButton
+              pRipple
+              icon="pi pi-pencil"
+              class="p-button-rounded p-button-primary"
+              style="margin-right: 7px"
+              (click)="showDialog('editar', categoria)"
+            ></button>
+            <button
+              pButton
+              pRipple
+              icon="pi pi-trash"
+              class="p-button-rounded p-button-danger"
+              (click)="eliminarCategoria(categoria)"
+            ></button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+</section>
+
+<!-- DIALOG CREAR -->
+<form [formGroup]="forma">
+  <p-dialog
+    header="Nueva categoría"
+    [(visible)]="displayDialogCrear"
+    [modal]="true"
+    [draggable]="true"
+    [resizable]="false"
+    [style]="{ width: '500px' }"
+    [breakpoints]="{ '530px': '95%' }"
+  >
+    <section id="wrap-form-categoria">
+      <!-- Nombre -->
+      <div class="field flex-column" [style]="{ width: '100%' }">
+        <span class="p-float-label">
+          <input
+            id="float-input"
+            formControlName="nombre"
+            type="text"
+            pInputText
+          />
+          <label for="float-input">Nombre categoría</label>
+        </span>
+        <small
+          *ngIf="!validarNombre.valido && forma.controls.nombre.touched"
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarNombre.mensaje }}</small
+        >
+      </div>
+    </section>
+
+    <!-- Estado -->
+    <p-inputSwitch formControlName="estado" name="estado"></p-inputSwitch>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        pRipple
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="closeDialog()"
+      ></button>
+      <button
+        pButton
+        pRipple
+        label="Guardar"
+        icon="pi pi-check"
+        class="p-button-text"
+        (click)="btnGuardar('crear')"
+      ></button>
+    </ng-template>
+  </p-dialog>
+</form>
+
+<!-- DIALOG EDITAR -->
+<form [formGroup]="forma">
+  <p-dialog
+    header="Editar categoría"
+    [(visible)]="displayDialogEditar"
+    [modal]="true"
+    [draggable]="true"
+    [resizable]="false"
+    [style]="{ width: '500px' }"
+    [breakpoints]="{ '530px': '95%' }"
+  >
+    <section id="wrap-form-categoria">
+      <!-- Nombre -->
+      <div class="field flex-column" [style]="{ width: '100%' }">
+        <span class="p-float-label">
+          <input
+            id="float-input"
+            formControlName="nombre"
+            type="text"
+            pInputText
+          />
+          <label for="float-input">Nombre categoría</label>
+        </span>
+        <small
+          *ngIf="!validarNombre.valido && forma.controls.nombre.touched"
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarNombre.mensaje }}</small
+        >
+      </div>
+    </section>
+
+    <!-- Estado -->
+    <p-inputSwitch formControlName="estado" name="estado"></p-inputSwitch>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        pRipple
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="closeDialog()"
+      ></button>
+      <button
+        pButton
+        pRipple
+        label="Guardar"
+        icon="pi pi-check"
+        class="p-button-text"
+        (click)="btnGuardar('editar')"
+      ></button>
+    </ng-template>
+  </p-dialog>
+</form>

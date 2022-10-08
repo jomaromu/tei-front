@@ -41,7 +41,7 @@ export class UserEffects {
       ofType(loginActions.obtenerIdUsuario),
       // tap((datos) => console.log(datos)),
       mergeMap((respToken) =>
-        this.userService.refrescarToken(respToken.usuario.usuario._id).pipe(
+        this.userService.refrescarToken(respToken.usuario.usuarioDB._id).pipe(
           map((usuario: Usuario) => loginActions.refrescarToken({ usuario })),
           // tap(data => console.log(data)),
           catchError((err) => of(loginActions.lognError()))

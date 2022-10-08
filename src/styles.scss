@@ -1,13 +1,31 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap");
+@import '~primeicons/primeicons.css';
 
 html,
 body {
-  height: 100% !important;
+  // height: 100% !important;
   background-color: rgb(239, 242, 245) !important;
   // border: 1px solid red;
-  position: relative;
-  overflow: auto;
+  // position: relative;
+  // overflow: auto;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #ffffff;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 a {
@@ -37,7 +55,7 @@ $box-shadow: 1px 1px 5px
 $botones-shadow: 1px 1px 3px 3px rgb(206, 206, 206);
 $text-shadow: 1px 3px 3px rgb(206, 206, 206);
 
-$width-sidebar: 200px;
+$width-sidebar: 220px;
 
 $map-fonts: (
   "ssm": 8px,

@@ -1,0 +1,9 @@
+#wrap-form-pedido {
+  display: grid;
+  grid-template-columns: repeat(2, 50%);
+  padding: 25px 0;
+  column-gap: 15px;
+  row-gap: 35px;
+  position: relative;
+  min-height: auto;
+}

@@ -1,15 +1,17 @@
 export interface Pagos {
-    ok: boolean;
-    pagoDB: PagoDB;
-    pagosDB: Array<PagoDB>;
+  ok: boolean;
+  pagoDB: PagoDB;
+  pagosDB: Array<PagoDB>;
 }
 
 export interface PagoDB {
-    estado: boolean;
-    fecha: string;
-    idCreador: string;
-    metodo: any;
-    modalidad: number;
-    monto: number;
-    _id: string;
+  _id: string;
+  pedido: string;
+  creador: string;
+  fecha: string;
+  motivo: string;
+  modalidad: string;
+  metodo: string;
+  monto: number;
+  estado: boolean;
 }

@@ -1,0 +1,77 @@
+<app-loading></app-loading>
+
+<!-- INFORMACION DE SEGUIMIENTO -->
+<p-fieldset
+  legend="Información de seguimientos"
+  [style]="{ marginBottom: '50px' }"
+>
+  <!-- PANEL -->
+  <p-splitter
+    *ngFor="let pPedido of pedido?.productosPedidos"
+    [style]="{
+      height: '300px',
+      maxHeight: '300px',
+      marginBottom: '45px'
+    }"
+    layout="horizontal"
+  >
+    <!-- SEGUIMIENTO DISEÑO -->
+    <ng-template pTemplate>
+      <div style="width: 100%">
+        <p-scrollPanel
+          [style]="{
+            width: '100%',
+            height: '100%',
+            padding: '15px'
+          }"
+        >
+          <div class="wrap-areatext">
+            <label for="" style="font-size: 1rem"
+              >Segmiento diseño - {{ pPedido?.producto?.nombre }}</label
+            >
+            <textarea
+              id="{{ pPedido?.producto?._id }}-dise"
+              rows="8"
+              class="wrap-seg"
+              (blur)="guardar(pPedido?.producto?._id, pPedido?._id)"
+              (keyup)="detectUserKeyUp($event, pPedido, pPedido?.producto?._id)"
+              >{{ pPedido?.seg_disenio }}</textarea
+            >
+            <label
+              for=""
+              [id]="pPedido?.producto?._id"
+              style="font-size: 0.8rem"
+            ></label>
+          </div>
+        </p-scrollPanel>
+      </div>
+    </ng-template>
+
+    <!-- SEGUIMIENTO PRODUCCION -->
+    <ng-template pTemplate>
+      <div style="width: 100%">
+        <p-scrollPanel
+          [style]="{
+            width: '100%',
+            height: '100%',
+            padding: '15px'
+          }"
+        >
+          <div class="wrap-areatext">
+            <label for="" style="font-size: 1rem"
+              >Segmiento producción - {{ pPedido?.producto?.nombre }}</label
+            >
+            <textarea
+              id="{{ pPedido?.producto?._id }}-prod"
+              rows="8"
+              class="wrap-seg"
+              (blur)="guardar(pPedido?.producto?._id, pPedido?._id)"
+              (keyup)="detectUserKeyUp($event, pPedido, pPedido?.producto?._id)"
+              >{{ pPedido?.seg_prod }}</textarea
+            >
+          </div>
+        </p-scrollPanel>
+      </div>
+    </ng-template>
+  </p-splitter>
+</p-fieldset>

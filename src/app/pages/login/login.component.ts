@@ -4,10 +4,11 @@ import { UserService } from '../../services/user.service';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { RespUser } from '../../interfaces/resp-worker';
-import { AppState } from 'src/app/reducers/globarReducers';
+// import { RespUser } from '../../interfaces/resp-worker';
+import { AppState } from '../../reducers/globarReducers';
 import Swal from 'sweetalert2';
 import * as userActions from '../../reducers/login/login.actions';
+import { Usuario } from '../../interfaces/resp-worker';
 
 @Component({
   selector: 'app-login',
@@ -93,7 +94,8 @@ export class LoginComponent implements OnInit {
         password: password.toLowerCase().trim(),
       };
 
-      this.userService.login(usuario).subscribe((resp: RespUser) => {
+      this.userService.login(usuario).subscribe((resp: Usuario) => {
+        // console.log(resp);
         if (resp.ok === false) {
           // alert
           sweetEffectAlert.play();

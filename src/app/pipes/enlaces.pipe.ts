@@ -1,29 +1,14 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { environment } from '../../environments/environment';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Store } from '@ngrx/store';
-import { AppState } from '../reducers/globarReducers';
-import { first, map } from 'rxjs/operators';
-import { Observable, Subscription } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { ArchivoDB } from '../interfaces/archivo';
 
 @Pipe({
-  name: 'enlaces'
+  name: 'enlaces',
 })
 export class EnlacesPipe implements PipeTransform {
-
-  subArchivo: Observable<any>;
-
-  constructor(
-  ) { }
-
-  transform(nombreArhivo: string): any {
-
-    if (!nombreArhivo) {
-      return;
-    }
-
-    const url = `${environment.urlArchivos}/archivo/enviarArchivo?nombreArchivo=${nombreArhivo}`;
+  transform(ruta: ArchivoDB): string {
+    const archivo = `${ruta.nombre}.${ruta.ext}`;
+    const url = `${environment.urlArchivos}/archivo/abrirArchivo?archivo=${archivo}`;
     return url;
   }
-
 }

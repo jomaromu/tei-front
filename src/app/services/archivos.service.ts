@@ -5,50 +5,43 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ArchivosService {
+  constructor(private http: HttpClient) {}
 
-  constructor(
-    private http: HttpClient
-  ) { }
-
-  subirArchivo(data: FormData, token: string, pedido: string): Observable<any> {
-
+  subirArchivo(data: FormData, token: string): Observable<any> {
     const url = `${environment.urlArchivos}/archivo/nuevoArchivo`;
-    const header = new HttpHeaders({ token, pedido });
-
-    return this.http.post(url, data, { headers: header, reportProgress: true, observe: 'events' })
-      .pipe(map(resp => resp));
-  }
-
-  obtenerTodosArchivos(token: string): Observable<any> {
-
-    const url = `${environment.urlArchivos}/archivo/obtenerTodosArchivos`;
-
     const header = new HttpHeaders({ token });
 
-    return this.http.get(url, { headers: header })
-      .pipe(map(resp => resp));
+    return this.http
+      .post(url, data, { headers: header })
+      .pipe(map((resp) => resp));
+    return;
+    return this.http
+      .post(url, data, {
+        headers: header,
+        reportProgress: true,
+        observe: 'events',
+      })
+      .pipe(map((resp) => resp));
   }
 
-  obtenerArchivosPorPedido(token: string, idPedido: string): Observable<any> {
+  obtenerArchivos(data: any): Observable<any> {
+    const url = `${environment.urlArchivos}/archivo/obtenerArchivos`;
+    const header = new HttpHeaders({ token: data.token, pedido: data.pedido });
 
-    const url = `${environment.urlArchivos}/archivo/obtenerArchivosPorPedido`;
-
-    const header = new HttpHeaders({ token, idPedido });
-
-    return this.http.get(url, { headers: header })
-      .pipe(map(resp => resp));
+    return this.http.get(url, { headers: header }).pipe(map((resp) => resp));
   }
 
-  eliminarArchivos(data: any): Observable<any> {
+  eliminarArchivo(data: any): Observable<any> {
+    const url = `${environment.urlArchivos}/archivo/eliminarArchivo`;
+    const header = new HttpHeaders({
+      token: data.token,
+      id: data.id,
+      nombreArchivo: data.nombreArchivo,
+    });
 
-    const url = `${environment.urlArchivos}/archivo/eliminarArhivoID`;
-
-    const header = new HttpHeaders({ token: data.token, id: data.id, pedido: data.pedido });
-
-    return this.http.delete(url, { headers: header })
-      .pipe(map(resp => resp));
+    return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }
 }

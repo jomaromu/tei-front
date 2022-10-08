@@ -5,7 +5,7 @@ import { Usuario } from '../../interfaces/resp-worker';
 const estadoInicial: Usuario = {
     ok: null,
     mensaje: null,
-    usuario: null,
+    usuarioDB: null,
     token: localStorage.getItem('token'),
     exp: null,
     iat: null,

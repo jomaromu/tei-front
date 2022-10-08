@@ -1,0 +1,79 @@
+<!-- *ngIf="role === 'SuperRole' || role === 'AdminRole' || role === 'ProduccionVIPRole'" -->
+<div id="wrapper">
+  <div
+    id="wrap-craeciones"
+    class="animate__animated"
+    *ngIf="rolePermitido"
+    #wrapCreaciones
+  >
+    <div id="wrap-head">
+      <div id="head-titulo">
+        <i class="fas fa-cogs" style="margin-right: 30px"></i>
+        <span>Mi bandeja</span>
+      </div>
+    </div>
+
+    <div id="wrap-body">
+      <form [formGroup]="forma" (ngSubmit)="aplicarFiltro()">
+        <div id="body">
+          <!-- Seleccionar bandeja -->
+          <div class="ctrl-creacion">
+            <label class="col-sm-2 col-form-label">Bandeja:</label>
+            <select
+              class="form-select"
+              formControlName="selBandeja"
+              (change)="detectarUsuarios()"
+            >
+              <option [value]="bandeja.id" *ngFor="let bandeja of optBandeja">
+                {{ bandeja.nombre }}
+              </option>
+            </select>
+          </div>
+
+          <!-- (change)="detectarUsuarios()" -->
+
+          <!-- Sucursal -->
+          <div class="ctrl-creacion">
+            <label class="col-sm-2 col-form-label">Sucursal:</label>
+            <select class="form-select" formControlName="sucursal">
+              <option
+                [value]="sucursal._id"
+                *ngFor="let sucursal of sucursales?.sucursalesDB"
+              >
+                {{ sucursal?.nombre }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Usuarios -->
+          <div class="ctrl-creacion">
+            <label class="col-sm-2 col-form-label">Usuarios:</label>
+            <select class="form-select" formControlName="usuarios">
+              <option [value]="userFake.id">{{ userFake.nombre }}</option>
+              <option
+                [value]="usuario._id"
+                [attr.data-userID]="usuario._id"
+                [attr.data-userRole]="usuario.colaborador_role"
+                *ngFor="let usuario of usuarios"
+                #selectUser
+              >
+                {{ usuario?.nombre }} {{ usuario?.apellido }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div id="wrap-buttons-creacion">
+          <button type="submit">Buscar</button>
+          <button type="button" (click)="limpiarForma()">Limpiar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- tabla -->
+  <div id="wrap-table">
+    <app-tabla-pedidos></app-tabla-pedidos>
+  </div>
+</div>
+<!-- </div> -->

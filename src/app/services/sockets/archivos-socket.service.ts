@@ -8,22 +8,22 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class ArchivosSocketService {
-  private socketPedido: Socket;
+  private socketArchivo: Socket;
   public socketStatus = false;
 
   constructor() {
-    this.socketPedido = io(environment.urlArchivos);
+    this.socketArchivo = io(environment.urlArchivos);
     this.checkStatus();
   }
 
   checkStatus(): void {
     // escuchar el servidor
-    this.socketPedido.on('connect', () => {
+    this.socketArchivo.on('connect', () => {
       console.log('Conectado al socket de archivos');
       this.socketStatus = true;
     });
 
-    this.socketPedido.on('disconnect', () => {
+    this.socketArchivo.on('disconnect', () => {
       console.log('Desconectado del socket de archivos');
       this.socketStatus = false;
     });
@@ -31,13 +31,13 @@ export class ArchivosSocketService {
 
   // Emitir eventos
   emitir(evento: string, payload?: any, callback?: any): void {
-    this.socketPedido.emit(evento, payload, callback);
+    this.socketArchivo.emit(evento, payload, callback);
   }
 
   // Escuchar eventos
   escuchar(evento: string): Observable<any> {
     return new Observable((subscriber) => {
-      this.socketPedido.on(evento, (callback: any) => {
+      this.socketArchivo.on(evento, (callback: any) => {
         subscriber.next(callback);
       });
     });

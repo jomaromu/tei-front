@@ -1,0 +1,66 @@
+@import "../../../../styles.scss";
+
+@media screen and(max-width: 576px) {
+  section#wrap-menu {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+
+  div#wrap-search {
+    width: 150px;
+
+    input {
+      width: 100%;
+    }
+  }
+
+  div#wrap-search > i#fa-search {
+    display: none;
+  }
+}
+
+#wrap-menu {
+  // border: 1px solid pink;
+  background-color: white;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 40px;
+  box-shadow: $box-shadow;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+
+i {
+  font-size: 1.1em;
+}
+
+i:hover {
+  cursor: pointer;
+}
+
+#wrap-busqueda {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
+}
+
+#wrap-search {
+  border: 1px solid gray;
+  border-radius: 20px;
+  padding: 5px 15px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  input {
+    outline: none;
+    border: none;
+    margin-right: 5px;
+  }
+}

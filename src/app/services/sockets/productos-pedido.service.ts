@@ -8,22 +8,22 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class ProductosPedidoService {
-  private socketPedido: Socket;
+  private socketProductoPedido: Socket;
   public socketStatus = false;
 
   constructor() {
-    this.socketPedido = io(environment.urlProductosPedido);
+    this.socketProductoPedido = io(environment.urlProductosPedido);
     this.checkStatus();
   }
 
   checkStatus(): void {
     // escuchar el servidor
-    this.socketPedido.on('connect', () => {
+    this.socketProductoPedido.on('connect', () => {
       console.log('Conectado al servidor de productos pedido');
       this.socketStatus = true;
     });
 
-    this.socketPedido.on('disconnect', () => {
+    this.socketProductoPedido.on('disconnect', () => {
       console.log('Desconectado del servidor de productos pedido');
       this.socketStatus = false;
     });
@@ -31,19 +31,19 @@ export class ProductosPedidoService {
 
   // Emitir eventos
   emitir(evento: string, payload?: any, callback?: any): void {
-    this.socketPedido.emit(evento, payload, callback);
+    this.socketProductoPedido.emit(evento, payload, callback);
   }
 
   // Escuchar eventos
   escuchar(evento: string): Observable<any> {
     return new Observable((subscriber) => {
-      this.socketPedido.on(evento, (callback: any) => {
+      this.socketProductoPedido.on(evento, (callback: any) => {
         subscriber.next(callback);
       });
     });
   }
 
   quitarSubscripcion(evento: string): any {
-    this.socketPedido.off(evento);
+    this.socketProductoPedido.off(evento);
   }
 }

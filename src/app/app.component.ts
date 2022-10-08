@@ -1,14 +1,14 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from './reducers/globarReducers';
+import { Subscription, timer } from 'rxjs';
 import * as loginActions from './reducers/login/login.actions';
 import * as moment from 'moment';
-import { Subscription, timer } from 'rxjs';
-import { UserService } from './services/user.service';
-import { Usuario } from './interfaces/resp-worker';
-import { first, take } from 'rxjs/operators';
-import { Router } from '@angular/router';
 moment().locale('es');
+import { Usuario } from './interfaces/resp-worker';
+import anime from 'animejs/lib/anime.es.js';
+import { first } from 'rxjs/operators';
+import * as menuAction from './reducers/abrir-cerrar-sidebar/abrir-cerrar-sidebar-actions';
 
 @Component({
   selector: 'app-root',
@@ -32,6 +32,26 @@ export class AppComponent implements OnInit, OnDestroy {
     this.cargarUsuario();
     this.refrescarToken();
     this.checkToken();
+    this.despliegueInicialSidebar();
+  }
+
+  @HostListener('window:resize', ['$event']) detectarAnchoPag(event) {
+    this.store
+      .select('sidebar')
+      .pipe(first())
+      .subscribe((resp: boolean) => {
+        const anchoWindow = window.innerWidth;
+
+        if (anchoWindow < 768) {
+          if (resp) {
+            this.store.dispatch(menuAction.abrirCerrarSidebar());
+          }
+        } else {
+          if (!resp) {
+            this.store.dispatch(menuAction.abrirCerrarSidebar());
+          }
+        }
+      });
   }
 
   cargarUsuario(): void {
@@ -106,6 +126,25 @@ export class AppComponent implements OnInit, OnDestroy {
     //   { once: this.once }
     // );
     // }
+  }
+
+  despliegueInicialSidebar(): void {
+    this.store
+      .select('sidebar')
+      .pipe(first())
+      .subscribe((resp: boolean) => {
+        const timerSide = timer(0, 500).subscribe((time) => {
+          const anchoWindow = window.innerWidth;
+          const sidebar = document.getElementById('sidebar');
+
+          if (anchoWindow < 768) {
+            if (sidebar) {
+              this.store.dispatch(menuAction.abrirCerrarSidebar());
+              timerSide.unsubscribe();
+            }
+          }
+        });
+      });
   }
 
   ngOnDestroy(): void {

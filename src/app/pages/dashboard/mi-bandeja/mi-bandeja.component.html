@@ -1,0 +1,137 @@
+<app-menu></app-menu>
+
+<section id="wrap-mi-bandeja">
+  <section id="wrap-pedidos">
+    <!-- toolbar -->
+    <p-toolbar
+      [style]="{
+        'background-color': 'white',
+        border: 'none',
+        'margin-bottom': '25px'
+      }"
+    >
+      <div class="p-toolbar-group-left">
+        <!-- Nuevo pedido -->
+        <button
+          *ngIf="usuario?.usuarioDB?.role?.vendedor"
+          pButton
+          pRipple
+          label="Nuevo"
+          icon="pi pi-plus"
+          class="p-button-success btnHeader"
+          (click)="showDialog('crear')"
+          style="height: 45px"
+        ></button>
+
+        <!-- Filtros -->
+        <button
+          pButton
+          pRipple
+          label="Filtros"
+          icon="pi pi-filter"
+          class="p-button-primary"
+          (click)="showDialog('filtros')"
+          style="height: 45px; margin-left: 15px"
+        ></button>
+      </div>
+
+      <div class="p-toolbar-group-right">
+        <!-- Eliminar pedido -->
+        <button
+          pButton
+          pRipple
+          icon="pi pi-trash"
+          class="p-button-danger btnHeader"
+          (click)="showDialog('eliminar')"
+          style="height: 45px"
+        ></button>
+      </div>
+    </p-toolbar>
+
+    <!-- table -->
+    <p-table
+      [value]="pedidos"
+      [rows]="150"
+      [paginator]="true"
+      selectionMode="single"
+      responsiveLayout="scroll"
+      [showCurrentPageReport]="true"
+      [autoLayout]="true"
+      styleClass="p-datatable-striped p-datatable-lg`"
+      currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} Pedidos"
+      [rowsPerPageOptions]="[50, 100, 150]"
+      [resizableColumns]="true"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>ID</th>
+          <th>Fecha</th>
+          <th>Vendedor</th>
+          <th>Cliente</th>
+          <th>Teléfono</th>
+          <th>Sucursal</th>
+          <th>Total</th>
+          <th>Saldo</th>
+          <th>Prioridad</th>
+          <th>Etapa</th>
+          <th>Estado</th>
+          <th>Diseñador</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-pedido>
+        <!-- <tr>
+          <td>
+            <p-tableCheckbox [value]="pedido"></p-tableCheckbox>
+          </td>
+        </tr> -->
+        <tr
+          [ngStyle]="{
+            'background-color': pedido?.pedidoDB?.color?.color
+          }"
+          [ngClass]="{ 'fuente-blanca': pedido?.pedidoDB?.color?.color }"
+          (dblclick)="abrirPedido(pedido?.pedidoDB)"
+          style="cursor: pointer"
+        >
+          <td>
+            {{ pedido?.pedidoDB?.idReferencia }}
+          </td>
+          <td>
+            {{ pedido?.pedidoDB?.fechaRegistro }}
+          </td>
+          <td>
+            {{ pedido?.pedidoDB?.vendedor?.nombre || "sin Vendedor" }}
+          </td>
+          <td>
+            {{ pedido?.pedidoDB?.cliente?.nombre || "Sin cliente" }}
+          </td>
+          <td>
+            {{ pedido?.pedidoDB?.cliente?.telefono || "Sin teléfono" }}
+          </td>
+          <td>
+            {{ pedido?.pedidoDB?.sucursal?.nombre || "Sin sucursal" }}
+          </td>
+          <td>
+            {{ pedido?.totales?.total || 0 | currency }}
+          </td>
+          <td>
+            {{ 0 | currency }}
+          </td>
+          <td>
+            {{ pedido?.pedidoDB?.prioridad?.nombre }}
+          </td>
+          <td>
+            {{ pedido?.pedidoDB?.etapa?.nombre }}
+          </td>
+          <td>{{ pedido?.pedidoDB?.color?.nombre || "Sin estado" }}</td>
+          <td>{{ pedido?.pedidoDB?.diseniador?.nombre || "Sin diseñador" }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+</section>
+
+<app-modal-nuevo-pedido
+  [displayDialogCrear]="displayDialogCrear"
+  (closeDialogCrear)="cerrarDialogoCrear($event)"
+  (emitCrearPedido)="crearPedido($event)"
+></app-modal-nuevo-pedido>

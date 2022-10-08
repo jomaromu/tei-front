@@ -6,7 +6,7 @@ export interface Categoria {
     categoriasDB: Array<CategoriaDB>;
 }
 
-interface CategoriaDB {
+export interface CategoriaDB {
     estado: boolean;
     _id: string;
     idCreador: string;

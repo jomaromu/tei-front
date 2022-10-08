@@ -1,0 +1,440 @@
+<app-menu></app-menu>
+<app-loading></app-loading>
+
+<!-- TABLA ROLES -->
+<section id="wrap-role">
+  <section id="wrap-header">
+    <h3 style="font-weight: bold; margin-bottom: 50px">Roles</h3>
+  </section>
+
+  <section id="wrap-tabla" class="card shaddow rounded">
+    <!-- toolbar -->
+    <p-toolbar
+      [style]="{
+        'background-color': 'white',
+        border: 'none',
+        'margin-bottom': '25px'
+      }"
+    >
+      <div class="p-toolbar-group-left">
+        <button
+          pButton
+          pRipple
+          label="Nuevo"
+          icon="pi pi-plus"
+          class="p-button-success btnHeader"
+          (click)="showDialog('crear')"
+          style="height: 45px"
+          id="btnNuevo"
+        ></button>
+      </div>
+    </p-toolbar>
+
+    <!-- tabla -->
+    <p-table
+      [value]="roles"
+      [rows]="10"
+      [paginator]="true"
+      selectionMode="single"
+      responsiveLayout="scroll"
+      [showCurrentPageReport]="true"
+      [autoLayout]="true"
+      styleClass="p-datatable-striped"
+      currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} Roles"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [resizableColumns]="true"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>#</th>
+          <th>Nombre</th>
+          <th>Estado</th>
+          <th>Controles</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-role let-i="rowIndex">
+        <tr>
+          <td>{{ i + 1 }}</td>
+          <td>{{ role.nombre }}</td>
+          <td>
+            <span
+              [ngClass]="{ 'badge-activo': role.estado }"
+              *ngIf="role.estado"
+              >Activo</span
+            >
+            <span
+              [ngClass]="{ 'badge-inactivo': !role.estado }"
+              *ngIf="!role.estado"
+              >Inactivo</span
+            >
+          </td>
+          <td>
+            <button
+              pButton
+              pRipple
+              icon="pi pi-pencil"
+              class="p-button-rounded p-button-primary"
+              style="margin-right: 7px"
+              (click)="showDialog('editar', role)"
+            ></button>
+            <button
+              pButton
+              pRipple
+              icon="pi pi-th-large"
+              class="p-button-rounded p-button-primary"
+              style="margin-right: 7px"
+              (click)="showDialog('restricciones', role)"
+            ></button>
+            <button
+              pButton
+              pRipple
+              icon="pi pi-trash"
+              class="p-button-rounded p-button-danger"
+              (click)="eliminarRole(role)"
+            ></button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+</section>
+
+<!-- DIALOG CREAR -->
+<form [formGroup]="forma">
+  <p-dialog
+    header="Nuevo role"
+    [(visible)]="displayDialogCrear"
+    [modal]="true"
+    [draggable]="true"
+    [resizable]="false"
+    [style]="{ width: '500px' }"
+    [breakpoints]="{ '530px': '95%' }"
+  >
+    <section id="wrap-form-role">
+      <!-- Nombre -->
+      <div class="field flex-column" [style]="{ width: '100%' }">
+        <span class="p-float-label">
+          <input
+            id="float-input"
+            formControlName="nombre"
+            type="text"
+            pInputText
+          />
+          <label for="float-input">Nombre role</label>
+        </span>
+        <small
+          *ngIf="!validarNombre.valido && forma.controls.nombre.touched"
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarNombre.mensaje }}</small
+        >
+      </div>
+    </section>
+
+    <div
+      style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px"
+    >
+      <!-- Vendedor -->
+      <div
+        style="
+          box-shadow: 1px 1px 3px rgb(185, 185, 185);
+          padding: 5px;
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          justify-content: center;
+          align-items: center;
+        "
+      >
+        <label for="">Vendedor</label>
+        <p-inputSwitch
+          formControlName="vendedor"
+          name="vendedor"
+        ></p-inputSwitch>
+      </div>
+
+      <!-- Diseñador -->
+      <div
+        style="
+          box-shadow: 1px 1px 3px rgb(185, 185, 185);
+          padding: 5px;
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          justify-content: center;
+          align-items: center;
+        "
+      >
+        <label for="">Diseñador</label>
+        <p-inputSwitch
+          formControlName="diseniador"
+          name="diseniador"
+        ></p-inputSwitch>
+      </div>
+
+      <!-- Estado -->
+      <div
+        style="
+          box-shadow: 1px 1px 3px rgb(185, 185, 185);
+          padding: 5px;
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          justify-content: center;
+          align-items: center;
+        "
+      >
+        <label for="">Estado</label>
+        <p-inputSwitch formControlName="estado" name="estado"></p-inputSwitch>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        pRipple
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="closeDialog()"
+      ></button>
+      <button
+        pButton
+        pRipple
+        label="Guardar"
+        icon="pi pi-check"
+        class="p-button-text"
+        (click)="btnGuardar('crear')"
+      ></button>
+    </ng-template>
+  </p-dialog>
+</form>
+
+<!-- DIALOG EDITAR -->
+<form [formGroup]="forma">
+  <p-dialog
+    header="Editar role"
+    [(visible)]="displayDialogEditar"
+    [modal]="true"
+    [draggable]="true"
+    [resizable]="false"
+    [style]="{ width: '500px' }"
+    [breakpoints]="{ '530px': '95%' }"
+  >
+    <section id="wrap-form-role">
+      <!-- Nombre -->
+      <div class="field flex-column" [style]="{ width: '100%' }">
+        <span class="p-float-label">
+          <input
+            id="float-input"
+            formControlName="nombre"
+            type="text"
+            pInputText
+          />
+          <label for="float-input">Nombre role</label>
+        </span>
+        <small
+          *ngIf="!validarNombre.valido && forma.controls.nombre.touched"
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarNombre.mensaje }}</small
+        >
+      </div>
+    </section>
+
+    <div
+      style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px"
+    >
+      <!-- Vendedor -->
+      <div
+        style="
+          box-shadow: 1px 1px 3px rgb(185, 185, 185);
+          padding: 5px;
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          justify-content: center;
+          align-items: center;
+        "
+      >
+        <label for="">Vendedor</label>
+        <p-inputSwitch
+          formControlName="vendedor"
+          name="vendedor"
+        ></p-inputSwitch>
+      </div>
+
+      <!-- Diseñador -->
+      <div
+        style="
+          box-shadow: 1px 1px 3px rgb(185, 185, 185);
+          padding: 5px;
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          justify-content: center;
+          align-items: center;
+        "
+      >
+        <label for="">Diseñador</label>
+        <p-inputSwitch
+          formControlName="diseniador"
+          name="diseniador"
+        ></p-inputSwitch>
+      </div>
+
+      <!-- Estado -->
+      <div
+        style="
+          box-shadow: 1px 1px 3px rgb(185, 185, 185);
+          padding: 5px;
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          justify-content: center;
+          align-items: center;
+        "
+      >
+        <label for="">Estado</label>
+        <p-inputSwitch formControlName="estado" name="estado"></p-inputSwitch>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        pRipple
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="closeDialog()"
+      ></button>
+      <button
+        pButton
+        pRipple
+        label="Guardar"
+        icon="pi pi-check"
+        class="p-button-text"
+        (click)="btnGuardar('editar')"
+      ></button>
+    </ng-template>
+  </p-dialog>
+</form>
+
+<!-- DIALOG RESTRICCIONES -->
+<form [formGroup]="formaRestricciones">
+  <p-dialog
+    header="Restricciones del role: {{ role?.nombre }}"
+    [(visible)]="displayDialogRestriccion"
+    [modal]="true"
+    [draggable]="true"
+    [resizable]="false"
+    [style]="{ width: '500px' }"
+    [breakpoints]="{ '530px': '95%' }"
+  >
+    <section>
+      <p-accordion
+        [multiple]="true"
+        [style]="{ width: '100%', padding: '10px' }"
+      >
+        <p-accordionTab header="Sidebar">
+          <section id="acordeon-catalogo">
+            <div>
+              <label for="">Catálogo</label>
+              <p-inputSwitch formControlName="catalogo"></p-inputSwitch>
+            </div>
+
+            <div>
+              <label for="">Sucursales</label>
+              <p-inputSwitch formControlName="sucursales"></p-inputSwitch>
+            </div>
+
+            <div>
+              <label for="">Colaboradores</label>
+              <p-inputSwitch formControlName="colaboradores"></p-inputSwitch>
+            </div>
+
+            <div>
+              <label for="">Clientes</label>
+              <p-inputSwitch formControlName="clientes"></p-inputSwitch>
+            </div>
+
+            <div>
+              <label for="">Categorias</label>
+              <p-inputSwitch formControlName="categorias"></p-inputSwitch>
+            </div>
+
+            <div>
+              <label for="">Productos</label>
+              <p-inputSwitch formControlName="productos"></p-inputSwitch>
+            </div>
+
+            <div>
+              <label for="">Roles</label>
+              <p-inputSwitch formControlName="roles"></p-inputSwitch>
+            </div>
+
+            <div>
+              <label for="">Origen</label>
+              <p-inputSwitch formControlName="origen"></p-inputSwitch>
+            </div>
+
+            <div>
+              <label for="">Prioridad</label>
+              <p-inputSwitch formControlName="prioridad"></p-inputSwitch>
+            </div>
+
+            <div>
+              <label for="">Etapas</label>
+              <p-inputSwitch formControlName="etapas"></p-inputSwitch>
+            </div>
+
+            <div>
+              <label for="">Colores</label>
+              <p-inputSwitch formControlName="colores"></p-inputSwitch>
+            </div>
+
+            <div>
+              <label for="">Metodos</label>
+              <p-inputSwitch formControlName="metodos"></p-inputSwitch>
+            </div>
+          </section>
+        </p-accordionTab>
+        <p-accordionTab header="Bandeja"> Content 2 </p-accordionTab>
+        <p-accordionTab header="Pedido">
+          <section>
+            <p-accordion
+              [multiple]="true"
+              [style]="{ width: '100%', padding: '10px' }"
+            >
+              <p-accordionTab header="Información"> Content 1 </p-accordionTab>
+              <p-accordionTab header="Producto"> Content 2 </p-accordionTab>
+              <p-accordionTab header="Archivos"> Content 3 </p-accordionTab>
+              <p-accordionTab header="Seguimiento"> Content 3 </p-accordionTab>
+              <p-accordionTab header="Pagos"> Content 3 </p-accordionTab>
+            </p-accordion>
+          </section>
+        </p-accordionTab>
+      </p-accordion>
+    </section>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        pRipple
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="closeDialog()"
+      ></button>
+      <button
+        pButton
+        pRipple
+        label="Guardar"
+        icon="pi pi-check"
+        class="p-button-text"
+        (click)="btnEditarRestricciones()"
+      ></button>
+    </ng-template>
+  </p-dialog>
+</form>

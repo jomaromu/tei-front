@@ -1,0 +1,39 @@
+#wrap-info-producto {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  position: relative;
+  width: 70%;
+  margin-top: 20px;
+  column-gap: 20px;
+  row-gap: 40px;
+
+  .wrap-inputs {
+    // border: 1px solid green;
+    height: 100%;
+  }
+}
+#btn-agregar {
+  // border: 1px solid blue;
+  grid-column: 1 / 3;
+  display: flex;
+  justify-content: center;
+
+  button {
+    width: 100%;
+  }
+}
+
+p-inputnumber,
+.p-inputnumber {
+  width: 100%;
+  height: 100%;
+}
+
+#p-dropdown div {
+  border: 1px solid red;
+  color: red;
+}
+
+.p-float-label {
+  height: 100%;
+}

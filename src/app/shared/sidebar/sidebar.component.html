@@ -1,13 +1,15 @@
-<div class="wrap-sidebar">
+<section class="wrap-sidebar" id="wrapSidebar" #wrapSidebar>
+  <i class="fas fa-times" id="close" (click)="cerrarSidebar()"></i>
   <div id="logo">
     <img src="../../../assets/tei-scaled.png" alt="TEI" title="TEI" />
   </div>
 
   <div id="perfil">
-    <p>{{ usuario?.usuario?.nombre }} {{ usuario?.usuario?.apellido }}</p>
-    <span *ngFor="let item of roles">
+    <p>{{ usuario?.nombre }} {{ usuario?.apellido }}</p>
+    <!-- <span *ngFor="let item of roles">
       <a *ngIf="item.id === role">{{ item.nombre }}</a>
-    </span>
+    </span> -->
+    <span>{{ usuario?.role?.nombre }}</span>
     <a role="button">Ver perfil</a>
   </div>
 
@@ -26,14 +28,14 @@
     </a>
   </div>
 
-  <div class="group-items" *ngIf="rolePermitido">
+  <!-- <div class="group-items" *ngIf="rolePermitido">
     <a class="item-sidebar" routerLink="/dashboard/nuevo-pedido">
       <i class="fas fa-shopping-cart"></i>
       <span>Crear Pedido</span>
     </a>
-  </div>
+  </div> -->
 
-  <div class="group-items" *ngIf="role === 'SuperRole' || role === 'AdminRole'">
+  <div class="group-items">
     <a
       class="item-sidebar"
       data-bs-toggle="collapse"
@@ -81,6 +83,12 @@
     </div>
 
     <div class="group-items subs">
+      <a class="item-sidebar subs-items" routerLink="/dashboard/roles">
+        <span>Roles</span>
+      </a>
+    </div>
+
+    <!-- <div class="group-items subs">
       <a
         class="item-sidebar"
         data-bs-toggle="collapse"
@@ -93,51 +101,80 @@
         <span>Pedidos</span>
         <i class="fas fa-angle-right" id="row-pedidos"></i>
       </a>
-    </div>
+    </div> -->
 
     <!-- tercer nivel -->
-    <div class="collapse" id="collapseExample2">
-      <!-- <div class="group-items subs">
+    <!-- <div class="collapse" id="collapseExample2"> -->
+    <!-- <div class="group-items subs">
                 <a class="item-sidebar subs-items" routerLink="prioridad-pedido">
                     <span>Prioridad</span>
                 </a>
             </div> -->
 
-      <div class="group-items subs">
-        <a
-          class="item-sidebar subs-items"
-          routerLink="/dashboard/origen-pedido"
-        >
-          <span>Origen</span>
-        </a>
-      </div>
+    <div class="group-items subs">
+      <a class="item-sidebar subs-items" routerLink="/dashboard/origen-pedido">
+        <span>Origen</span>
+      </a>
+    </div>
 
-      <div class="group-items subs">
+    <div class="group-items subs">
+      <a class="item-sidebar subs-items" routerLink="/dashboard/prioridad">
+        <span>Proridad</span>
+      </a>
+    </div>
+
+    <div class="group-items subs">
+      <a class="item-sidebar subs-items" routerLink="/dashboard/etapas">
+        <span>Etapas</span>
+      </a>
+    </div>
+
+    <div class="group-items subs">
+      <a class="item-sidebar subs-items" routerLink="/dashboard/colores">
+        <span>Colores</span>
+      </a>
+    </div>
+
+    <!-- <div class="group-items subs">
         <a
           class="item-sidebar subs-items"
           routerLink="/dashboard/archivos-pedido"
         >
           <span>Archivos</span>
         </a>
-      </div>
+      </div> -->
+    <div class="group-items subs">
+      <a class="item-sidebar subs-items" routerLink="/dashboard/metodos-pagos">
+        <span>Mét. Pagos</span>
+      </a>
     </div>
 
     <div class="group-items subs">
-      <a class="item-sidebar subs-items" routerLink="/dashboard/metodos-pagos">
-        <span>M. Pagos</span>
+      <a
+        class="item-sidebar subs-items"
+        routerLink="/dashboard/modalidad-pagos"
+      >
+        <span>Mod. pagos</span>
       </a>
     </div>
+
+    <div class="group-items subs">
+      <a class="item-sidebar subs-items" routerLink="/dashboard/tipo-archivo">
+        <span>Tipo archivo</span>
+      </a>
+    </div>
+    <!-- </div> -->
   </div>
 
-  <div class="group-items" *ngIf="role === 'SuperRole' || role === 'AdminRole'">
+  <!-- <div class="group-items" *ngIf="role === 'SuperRole' || role === 'AdminRole'">
     <a class="item-sidebar" routerLink="facturacion">
       <i class="fas fa-file-invoice-dollar"></i>
       <span>Facturación</span>
     </a>
-  </div>
+  </div> -->
 
   <!-- primer nivel reportes -->
-  <div class="group-items" *ngIf="role === 'SuperRole' || role === 'AdminRole'">
+  <!-- <div class="group-items" *ngIf="role === 'SuperRole' || role === 'AdminRole'">
     <a
       class="item-sidebar"
       data-bs-toggle="collapse"
@@ -150,23 +187,23 @@
       <span>Reportes</span>
       <i class="fas fa-angle-right" id="row-reportes"></i>
     </a>
-  </div>
+  </div> -->
 
   <!-- segundo nivel -->
-  <div class="collapse" id="reportes">
+  <!-- <div class="collapse" id="reportes">
     <div class="group-items subs">
       <a class="item-sidebar subs-items" routerLink="/dashboard/reportes">
         <span>P. Pedidos</span>
       </a>
     </div>
-  </div>
+  </div> -->
 
-  <div class="group-items">
+  <!-- <div class="group-items">
     <a class="item-sidebar" routerLink="/dashboard/ayuda">
       <i class="fas fa-question-circle"></i>
       <span>Ayuda</span>
     </a>
-  </div>
+  </div> -->
 
   <!-- <div class="group-items">
         <a class="item-sidebar" routerLink="/dashboard/bitacora">
@@ -181,4 +218,4 @@
       <span (click)="salir()">Salir</span>
     </a>
   </div>
-</div>
+</section>

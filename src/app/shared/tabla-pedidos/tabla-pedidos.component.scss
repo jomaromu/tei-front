@@ -39,11 +39,17 @@ td {
   cursor: pointer;
 }
 
+#wrap-table {
+  // margin-bottom: 150px;
+  // border: 1px solid pink;
+}
+
 #tabla {
   // width: 100%;
   overflow-x: auto;
   table-layout: fixed;
   word-wrap: break-word;
+  // margin-bottom: 150px
 }
 
 .diseniado {
