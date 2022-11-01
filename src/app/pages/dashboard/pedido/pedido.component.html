@@ -2,28 +2,52 @@
 <section id="wrap-pedido">
   <p-tabView>
     <!-- INFORMACION TAB -->
-    <p-tabPanel header="Información" leftIcon="pi pi-info-circle">
+    <!-- *ngIf="usuario?.role?.restricciones?.pedido?.verInfo" -->
+    <!-- *ngIf="usuario?.role?.restricciones?.pedido?.informacion?.verInfo" -->
+    <p-tabPanel *ngIf="verInfo">
+      <ng-template pTemplate="header"
+        ><i style="margin-right: 7px" class="pi pi-info-circle"></i>
+        Información</ng-template
+      >
       <app-informacion [pedido]="pedido"></app-informacion>
     </p-tabPanel>
 
     <!-- PRODUCTOS TAB -->
-    <p-tabPanel header="Productos" leftIcon="pi pi-box">
+    <p-tabPanel *ngIf="verProductos">
+      <ng-template pTemplate="header"
+        ><i style="margin-right: 7px" class="pi pi-box"></i
+        >Productos</ng-template
+      >
       <app-productos [pedido]="pedido"></app-productos>
     </p-tabPanel>
 
     <!-- ARCHIVOS TAB -->
-    <p-tabPanel header="Archivos" leftIcon="pi pi-file">
+    <p-tabPanel *ngIf="verArchivos">
+      <ng-template pTemplate="header"
+        ><i style="margin-right: 7px" class="pi pi-file"></i
+        >Archivos</ng-template
+      >
       <app-archivos [pedido]="pedido"></app-archivos>
     </p-tabPanel>
 
     <!-- SEGUIMIENTO TAB -->
-    <p-tabPanel header="Seguimiento" leftIcon="pi pi-compass">
+    <p-tabPanel *ngIf="verSeguimiento">
+      <ng-template pTemplate="header"
+        ><i style="margin-right: 7px" class="pi pi-compass"></i
+        >Seguimiento</ng-template
+      >
       <app-seguimiento [pedido]="pedido"></app-seguimiento>
     </p-tabPanel>
 
     <!-- PAGOS TAB -->
-    <p-tabPanel header="Pagos" leftIcon="pi pi-money-bill">
+    <p-tabPanel *ngIf="verPagos" leftIcon="pi pi-money-bill">
+      <ng-template pTemplate="header"
+        ><i style="margin-right: 7px" class="pi pi-money-bill"></i
+        >Pagos</ng-template
+      >
       <app-pagos [pedido]="pedido"></app-pagos>
     </p-tabPanel>
   </p-tabView>
 </section>
+
+<footer><br /><br /><br /><br /></footer>

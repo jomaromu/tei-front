@@ -12,6 +12,7 @@ import { RoleWorkerService } from '../../../services/role-worker.service';
 import * as loadingActions from '../../../reducers/loading/loading.actions';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Validaciones, ValidarTexto } from '../../../classes/validaciones';
+import { FiltrarEstados } from '../../../classes/filtrar-estados';
 
 @Component({
   selector: 'app-usuarios',
@@ -33,7 +34,8 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private sService: SucursalService,
     private rolesService: RoleWorkerService,
-    private validadores: Validaciones
+    private validadores: Validaciones,
+    private filtrarEstados: FiltrarEstados
   ) {}
 
   ngOnInit(): void {
@@ -57,29 +59,46 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   }
 
   cargarUsuarios(): void {
+    this.store.dispatch(loadingActions.cargarLoading());
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.userService
-          .obtenerUsuarios(usuario.token)
-          .subscribe((colaboradores: Usuario) => {
-            // console.log(colaboradores);
-            this.store.dispatch(loadingActions.cargarLoading());
+        if (usuario.usuarioDB) {
+          const data = {
+            foranea: '',
+            token: usuario.token,
+          };
 
-            if (colaboradores.ok) {
-              this.colaboradores = colaboradores.usuariosDB;
-              this.store.dispatch(loadingActions.quitarLoading());
-            } else {
-              Swal.fire('Mensaje', 'Error al cargar los colaboradors', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
 
-            if (!colaboradores) {
-              Swal.fire('Mensaje', 'Error al cargar los colaboradors', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+          this.userService
+            .obtenerUsuarios(data)
+            .subscribe((colaboradores: Usuario) => {
+              // console.log(colaboradores);
+
+              if (colaboradores.ok) {
+                this.colaboradores = colaboradores.usuariosDB;
+                this.store.dispatch(loadingActions.quitarLoading());
+              } else {
+                Swal.fire('Mensaje', `${colaboradores?.err?.mensaje}`, 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
+
+              if (!colaboradores) {
+                Swal.fire(
+                  'Mensaje',
+                  'Error al cargar los colaboradors',
+                  'error'
+                );
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
+            });
+        }
       });
   }
 
@@ -88,12 +107,12 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     let mapRole = null;
     if (this.colaborador.sucursal !== null) {
       mapSucursal = this.sucursales.find(
-        (sucursal) => sucursal._id === this.colaborador.sucursal._id
+        (sucursal) => sucursal._id === this.colaborador?.sucursal?._id
       );
     }
     if (this.colaborador.role !== null) {
       mapRole = this.roles.find(
-        (role) => role._id === this.colaborador.role._id
+        (role) => role._id === this.colaborador?.role?._id
       );
     }
 
@@ -123,15 +142,28 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   cargarRoles(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.rolesService
-          .obtenerRoles(usuario.token)
-          .subscribe((roles: Roles) => {
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
+
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+
+          this.rolesService.obtenerRoles(data).subscribe((roles: Roles) => {
             // this.store.dispatch(loadingActions.cargarLoading());
+            const rolesActivos = this.filtrarEstados.filtrarActivos(
+              roles.rolesDB
+            );
 
             if (roles.ok) {
-              this.roles = roles.rolesDB;
+              this.roles = rolesActivos;
               // this.store.dispatch(loadingActions.quitarLoading());
             } else {
               Swal.fire('Mensaje', 'Error al cargar los roles', 'error');
@@ -143,21 +175,34 @@ export class UsuariosComponent implements OnInit, OnDestroy {
               // this.store.dispatch(loadingActions.quitarLoading());
             }
           });
+        }
       });
   }
 
   cargarSucursales(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.sService
-          .obtenerSucs(usuario.token)
-          .subscribe((sucursales: Sucursal) => {
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
+
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+          this.sService.obtenerSucs(data).subscribe((sucursales: Sucursal) => {
+            const sucActivas = this.filtrarEstados.filtrarActivos(
+              sucursales.sucursalesDB
+            );
             // this.store.dispatch(loadingActions.cargarLoading());
 
             if (sucursales.ok) {
-              this.sucursales = sucursales.sucursalesDB;
+              this.sucursales = sucActivas;
               // this.store.dispatch(loadingActions.quitarLoading());
             } else {
               Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
@@ -169,6 +214,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
               // this.store.dispatch(loadingActions.quitarLoading());
             }
           });
+        }
       });
   }
 
@@ -176,6 +222,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     this.cargarSucursales();
     this.cargarRoles();
     this.colaborador = colaborador;
+
     if (!tipo) {
       tipo = 'crear';
     }
@@ -288,45 +335,49 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   crearColaborador(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearColaborador = {
-          sucursal: this.forma.controls.sucursales.value._id,
-          role: this.forma.controls.roles.value._id,
-          nombre: this.forma.controls.nombre.value,
-          apellido: this.forma.controls.apellido.value,
-          identificacion: this.forma.controls.identificacion.value,
-          telefono: this.forma.controls.telefono.value,
-          correo: this.forma.controls.correo.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearColaborador = {
+            sucursal: this.forma.controls.sucursales.value._id,
+            role: this.forma.controls.roles.value._id,
+            nombre: this.forma.controls.nombre.value,
+            apellido: this.forma.controls.apellido.value,
+            identificacion: this.forma.controls.identificacion.value,
+            telefono: this.forma.controls.telefono.value,
+            correo: this.forma.controls.correo.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        this.userService
-          .crearUsuario(data)
-          .subscribe((colaborador: Usuario) => {
-            this.store.dispatch(loadingActions.cargarLoading());
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
 
-            if (colaborador.ok) {
-              this.store.dispatch(loadingActions.quitarLoading());
-              this.displayDialogCrear = false;
-              Swal.fire(
-                'Mensaje',
-                'Colaborador creado, el password es: 12345678',
-                'success'
-              );
-              this.cargarUsuarios();
-              this.limpiarFormulario();
-            } else {
-              Swal.fire('Mensaje', `Error al crear un colaborador`, 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          this.userService
+            .crearUsuario(data)
+            .subscribe((colaborador: Usuario) => {
+              if (colaborador.ok) {
+                this.displayDialogCrear = false;
+                Swal.fire(
+                  'Mensaje',
+                  'Colaborador creado, el password es: 12345678',
+                  'success'
+                );
+                this.cargarUsuarios();
+                this.limpiarFormulario();
+              } else {
+                Swal.fire('Mensaje', `${colaborador?.err?.mensaje}`, 'error');
+              }
 
-            if (!colaborador) {
-              Swal.fire('Mensaje', 'Error al crear un colaborador', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+              if (!colaborador) {
+                Swal.fire('Mensaje', 'Error al crear un colaborador', 'error');
+              }
+            });
+        }
       });
   }
 
@@ -346,9 +397,15 @@ export class UsuariosComponent implements OnInit, OnDestroy {
           estado: this.forma.controls.estado.value,
           token: usuario.token,
           id: this.colaborador._id,
+          foranea: '',
         };
 
-        this.store.dispatch(loadingActions.cargarLoading());
+        if (usuario.usuarioDB.empresa) {
+          data.foranea = usuario.usuarioDB._id;
+        } else {
+          data.foranea = usuario.usuarioDB.foranea;
+        }
+
         this.userService
           .editarUsuario(data)
           .subscribe((colaborador: Usuario) => {
@@ -358,13 +415,11 @@ export class UsuariosComponent implements OnInit, OnDestroy {
               this.cargarUsuarios();
               this.limpiarFormulario();
             } else {
-              Swal.fire('Mensaje', 'Error al editar colaborador', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
+              Swal.fire('Mensaje', `${colaborador?.err?.mensaje}`, 'error');
             }
 
             if (!colaborador) {
               Swal.fire('Mensaje', 'Error al editar colaborador', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
             }
           });
       });
@@ -382,8 +437,6 @@ export class UsuariosComponent implements OnInit, OnDestroy {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.store.dispatch(loadingActions.cargarLoading());
-
         this.store
           .select('login')
           .pipe(first())
@@ -391,24 +444,30 @@ export class UsuariosComponent implements OnInit, OnDestroy {
             const data = {
               id: colaborador._id,
               token: usuario.token,
+              foranea: '',
             };
 
-            this.userService.eliminarUsuario(data).subscribe((colaborador) => {
-              if (colaborador.ok) {
-                this.store.dispatch(loadingActions.quitarLoading());
-                Swal.fire('Mensaje', 'Colaborador borrado', 'success');
-                this.cargarUsuarios();
-                this.limpiarFormulario();
-              } else {
-                this.store.dispatch(loadingActions.quitarLoading());
-                Swal.fire('Mensaje', 'Error al borrar colaborador', 'error');
-              }
+            if (usuario.usuarioDB.empresa) {
+              data.foranea = usuario.usuarioDB._id;
+            } else {
+              data.foranea = usuario.usuarioDB.foranea;
+            }
 
-              if (!colaborador) {
-                this.store.dispatch(loadingActions.quitarLoading());
-                Swal.fire('Mensaje', 'Error al borrar colaborador', 'error');
-              }
-            });
+            this.userService
+              .eliminarUsuario(data)
+              .subscribe((colaborador: Usuario) => {
+                if (colaborador.ok) {
+                  Swal.fire('Mensaje', 'Colaborador borrado', 'success');
+                  this.cargarUsuarios();
+                  this.limpiarFormulario();
+                } else {
+                  Swal.fire('Mensaje', `${colaborador.err.mensaje}`, 'error');
+                }
+
+                if (!colaborador) {
+                  Swal.fire('Mensaje', 'Error al borrar colaborador', 'error');
+                }
+              });
           });
       }
     });
@@ -428,4 +487,5 @@ interface CrearColaborador {
   estado: boolean;
   token: string;
   id?: string;
+  foranea?: string;
 }

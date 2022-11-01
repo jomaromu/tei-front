@@ -1,6 +1,6 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from 'src/app/reducers/globarReducers';
+import { AppState } from '../../reducers/globarReducers';
 import { ReportesService } from '../../services/reportes.service';
 
 @Component({

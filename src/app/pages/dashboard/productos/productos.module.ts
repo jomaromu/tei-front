@@ -2,8 +2,10 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+// modulo
 import { ProductosRoutingModule } from './productos-routing.module';
 import { SharedModule } from '../../../shared/shared.module';
+import { LoadingModule } from 'src/app/shared/loading/loading.module';
 
 import { ProductosComponent } from './productos.component';
 
@@ -15,7 +17,7 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputSwitchModule } from 'primeng/inputswitch';
-import {InputNumberModule} from 'primeng/inputnumber';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 // providers
 import { Validaciones } from '../../../classes/validaciones';
@@ -35,7 +37,8 @@ import { Validaciones } from '../../../classes/validaciones';
     InputTextModule,
     DropdownModule,
     InputSwitchModule,
-    InputNumberModule
+    InputNumberModule,
+    LoadingModule,
   ],
   providers: [Validaciones],
 })

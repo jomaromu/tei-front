@@ -13,6 +13,7 @@ import * as loadingActions from '../../../reducers/loading/loading.actions';
 import { CategoriaService } from '../../../services/categoria.service';
 import { Categoria, CategoriaDB } from '../../../interfaces/categorias';
 import { ValidarTexto, Validaciones } from '../../../classes/validaciones';
+import { FiltrarEstados } from '../../../classes/filtrar-estados';
 
 @Component({
   selector: 'app-productos',
@@ -33,15 +34,16 @@ export class ProductosComponent implements OnInit, AfterViewInit, OnDestroy {
     private categoriaService: CategoriaService,
     private fb: FormBuilder,
     private validadores: Validaciones,
-    private productosSocketService: ProductoSocketService,
-    private categoriaSocketService: CategoriaSocketService
+    // private productosSocketService: ProductoSocketService,
+    // private categoriaSocketService: CategoriaSocketService,
+    private filtrarEstados: FiltrarEstados
   ) {}
 
   ngOnInit(): void {
     this.crearFormulario();
     this.cargarProductos();
-    this.crearProductoSocket();
-    this.crearCategoriaSocket();
+
+
   }
 
   ngAfterViewInit(): void {
@@ -76,31 +78,41 @@ export class ProductosComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   cargarProductos(): void {
+    this.store.dispatch(loadingActions.cargarLoading());
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.productosService
-          .obtenerProductos(usuario.token)
-          .subscribe((productos: Producto) => {
-            // console.log(productos);
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
 
-            this.store.dispatch(loadingActions.cargarLoading());
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+          this.productosService
+            .obtenerProductos(data)
+            .subscribe((productos: Producto) => {
+              // console.log(productos);
 
-            if (productos.ok) {
-              this.productos = productos.productosDB;
+              if (productos.ok) {
+                this.productos = productos.productosDB;
+                this.store.dispatch(loadingActions.quitarLoading());
+              } else {
+                Swal.fire('Mensaje', 'Error al cargar los productos', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
 
-              this.store.dispatch(loadingActions.quitarLoading());
-            } else {
-              Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-
-            if (!productos) {
-              Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+              if (!productos) {
+                Swal.fire('Mensaje', 'Error al cargar los productos', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
+            });
+        }
       });
   }
 
@@ -136,14 +148,28 @@ export class ProductosComponent implements OnInit, AfterViewInit, OnDestroy {
   cargarCategorias(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const token = usuario.token;
-        this.categoriaService
-          .obtenerCategorias(token)
-          .subscribe((categorias: Categoria) => {
-            this.categorias = categorias.categoriasDB;
-          });
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
+
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+          this.categoriaService
+            .obtenerCategorias(data)
+            .subscribe((categorias: Categoria) => {
+              const catActivas = this.filtrarEstados.filtrarActivos(
+                categorias.categoriasDB
+              );
+              this.categorias = catActivas;
+            });
+        }
       });
   }
 
@@ -196,7 +222,7 @@ export class ProductosComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         if (tipo === 'crear') {
           this.crearProducto();
-          this.crearProductoSocket();
+
         }
 
         if (tipo === 'editar') {
@@ -207,44 +233,52 @@ export class ProductosComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   crearProducto(): void {
+    // this.store.dispatch(loadingActions.cargarLoading());;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearProdcuto = {
-          categoria: this.forma.controls.categoria.value._id,
-          nombre: this.forma.controls.nombre.value,
-          // observacion: this.forma.controls.observacion.value,
-          precio: this.forma.controls.precio.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearProdcuto = {
+            categoria: this.forma.controls.categoria.value._id,
+            nombre: this.forma.controls.nombre.value,
+            // observacion: this.forma.controls.observacion.value,
+            precio: this.forma.controls.precio.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        this.productosService.crearProducto(data).subscribe((producto: any) => {
-          // console.log(producto);
-          // return;
-          this.store.dispatch(loadingActions.cargarLoading());
-
-          if (producto.ok) {
-            this.store.dispatch(loadingActions.quitarLoading());
-            this.displayDialogCrear = false;
-            Swal.fire('Mensaje', 'Producto creado', 'success');
-            // this.cargarProductos();
-            this.limpiarFormulario();
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
           } else {
-            Swal.fire(
-              'Mensaje',
-              `Error al crear un producto: ${producto.mensaje}`,
-              'error'
-            );
-            this.store.dispatch(loadingActions.quitarLoading());
+            data.foranea = usuario.usuarioDB.foranea;
           }
 
-          if (!producto) {
-            Swal.fire('Mensaje', 'Error al crear un producto', 'error');
-            this.store.dispatch(loadingActions.quitarLoading());
-          }
-        });
+          this.productosService
+            .crearProducto(data)
+            .subscribe((producto: Producto) => {
+              // console.log(producto);
+              // return;
+
+              if (producto.ok) {
+                this.displayDialogCrear = false;
+                Swal.fire('Mensaje', 'Producto creado', 'success');
+                this.cargarProductos();
+                this.limpiarFormulario();
+              } else {
+                Swal.fire(
+                  'Mensaje',
+                  `Error al crear un producto: ${producto?.err?.message}`,
+                  'error'
+                );
+              }
+
+              if (!producto) {
+                Swal.fire('Mensaje', 'Error al crear un producto', 'error');
+              }
+            });
+        }
       });
   }
 
@@ -260,97 +294,94 @@ export class ProductosComponent implements OnInit, AfterViewInit, OnDestroy {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.store.dispatch(loadingActions.cargarLoading());
+        // this.store.dispatch(loadingActions.cargarLoading());;
 
         this.store
           .select('login')
-          .pipe(first())
+          // .pipe(first())
           .subscribe((usuario) => {
-            const data = {
-              id: producto._id,
-              token: usuario.token,
-            };
+            if (usuario.usuarioDB) {
+              const data = {
+                id: producto._id,
+                token: usuario.token,
+                foranea: '',
+              };
 
-            this.productosService
-              .eliminarProductoID(data)
-              .subscribe((producto) => {
-                if (producto.ok) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Producto borrado', 'success');
-                  this.cargarProductos();
-                  this.limpiarFormulario();
-                } else {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar producto', 'error');
-                }
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
 
-                if (!producto) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar producto', 'error');
-                }
-              });
+              this.productosService
+                .eliminarProductoID(data)
+                .subscribe((producto) => {
+                  if (producto.ok) {
+                    Swal.fire('Mensaje', 'Producto borrado', 'success');
+                    this.cargarProductos();
+                    this.limpiarFormulario();
+                  } else {
+                    Swal.fire('Mensaje', `${producto?.err?.message}`, 'error');
+                  }
+
+                  if (!producto) {
+                    Swal.fire('Mensaje', 'Error al borrar producto', 'error');
+                  }
+                });
+            }
           });
       }
     });
   }
 
   editarProducto(): void {
+    // this.store.dispatch(loadingActions.cargarLoading());;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearProdcuto = {
-          categoria: this.forma.controls.categoria.value._id,
-          nombre: this.forma.controls.nombre.value,
-          // observacion: this.forma.controls.observacion.value,
-          precio: this.forma.controls.precio.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-          id: this.producto._id,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearProdcuto = {
+            categoria: this.forma.controls.categoria.value._id,
+            nombre: this.forma.controls.nombre.value,
+            // observacion: this.forma.controls.observacion.value,
+            precio: this.forma.controls.precio.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            id: this.producto._id,
+            foranea: '',
+          };
 
-        this.store.dispatch(loadingActions.cargarLoading());
-        this.productosService
-          .editarProductoID(data)
-          .subscribe((producto: Producto) => {
-            if (producto.ok) {
-              this.displayDialogEditar = false;
-              Swal.fire('Mensaje', 'Producto editado', 'success');
-              this.cargarProductos();
-              this.limpiarFormulario();
-            } else {
-              Swal.fire('Mensaje', 'Error al editar producto', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+          this.productosService
+            .editarProductoID(data)
+            .subscribe((producto: Producto) => {
+              if (producto.ok) {
+                this.displayDialogEditar = false;
+                Swal.fire('Mensaje', 'Producto editado', 'success');
+                this.cargarProductos();
+                this.limpiarFormulario();
+              } else {
+                Swal.fire('Mensaje', `${producto?.err?.message}`, 'error');
+              }
 
-            if (!producto) {
-              Swal.fire('Mensaje', 'Error al editar producto', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+              if (!producto) {
+                Swal.fire('Mensaje', 'Error al editar producto', 'error');
+              }
+            });
+        }
       });
   }
 
-  // sockets
-  crearProductoSocket(): void {
-    this.productosSocketService
-      .escuchar('cargar-productos')
-      .subscribe((clientes) => {
-        this.cargarProductos();
-      });
-  }
 
-  crearCategoriaSocket(): void {
-    this.categoriaSocketService
-      .escuchar('cargar-categorias')
-      .subscribe((categorias) => {
-        this.cargarProductos();
-      });
-  }
 
   ngOnDestroy(): void {
-    this.productosSocketService.destruirSocket('cargar-productos');
-    this.categoriaSocketService.destruirSocket('cargar-categorias');
+    // this.productosSocketService.destruirSocket('cargar-productos');
+    // this.categoriaSocketService.destruirSocket('cargar-categorias');
   }
 }
 
@@ -362,6 +393,7 @@ interface CrearProdcuto {
   precio: number;
   token: string;
   id?: any;
+  foranea: string;
 }
 
 /*

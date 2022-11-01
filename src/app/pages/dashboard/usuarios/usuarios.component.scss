@@ -59,9 +59,9 @@
   // background-color: skyblue;
   // border: 1px solid red;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, 49%);
+  column-gap: 2%;
   padding: 25px 0;
-  column-gap: 15px;
   row-gap: 35px;
   position: relative;
 }
@@ -69,4 +69,12 @@
 .p-inputtext,
 .p-dropdown {
   width: 100%;
+}
+
+.btn-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 25px;
 }

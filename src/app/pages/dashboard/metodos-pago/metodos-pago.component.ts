@@ -26,13 +26,13 @@ export class MetodosPagoComponent implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private metodoPagoService: MetodoPagoService,
     private validadores: Validaciones,
-    private metodoSocketService: MetodoSocketService
+    // private metodoSocketService: MetodoSocketService
   ) {}
 
   ngOnInit(): void {
     this.crearFormulario();
     this.cargarMetodos();
-    this.crearMetodoSocket();
+
   }
 
   crearFormulario(): void {
@@ -48,29 +48,40 @@ export class MetodosPagoComponent implements OnInit, OnDestroy {
   }
 
   cargarMetodos(): void {
+    this.store.dispatch(loadingActions.cargarLoading());
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.metodoPagoService
-          .obtenerMetodos(usuario.token)
-          .subscribe((metodos: MetodoPago) => {
-            this.store.dispatch(loadingActions.cargarLoading());
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
 
-            if (metodos.ok) {
-              this.metodos = metodos.metodosDB;
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+          this.metodoPagoService
+            .obtenerMetodos(data)
+            .subscribe((metodos: MetodoPago) => {
+              if (metodos.ok) {
+                this.metodos = metodos.metodosDB;
 
-              this.store.dispatch(loadingActions.quitarLoading());
-            } else {
-              Swal.fire('Mensaje', 'Error al cargar los métodos', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+                this.store.dispatch(loadingActions.quitarLoading());
+              } else {
+                Swal.fire('Mensaje', 'Error al cargar los métodos', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
 
-            if (!metodos) {
-              Swal.fire('Mensaje', 'Error al cargar los métodos', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+              if (!metodos) {
+                Swal.fire('Mensaje', 'Error al cargar los métodos', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
+            });
+        }
       });
   }
 
@@ -118,7 +129,7 @@ export class MetodosPagoComponent implements OnInit, OnDestroy {
       } else {
         if (tipo === 'crear') {
           this.crearMetodo();
-          this.crearMetodoSocket();
+
         }
 
         if (tipo === 'editar') {
@@ -129,75 +140,87 @@ export class MetodosPagoComponent implements OnInit, OnDestroy {
   }
 
   crearMetodo(): void {
+    // this.store.dispatch(loadingActions.cargarLoading());;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearMetodo = {
-          nombre: this.forma.controls.nombre.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearMetodo = {
+            nombre: this.forma.controls.nombre.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        this.metodoPagoService
-          .crearMetodo(data)
-          .subscribe((metodo: MetodoPago) => {
-            this.store.dispatch(loadingActions.cargarLoading());
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
 
-            if (metodo.ok) {
-              this.store.dispatch(loadingActions.quitarLoading());
-              this.displayDialogCrear = false;
-              Swal.fire('Mensaje', 'Método creado', 'success');
-              this.cargarMetodos();
-              this.limpiarFormulario();
-            } else {
-              Swal.fire(
-                'Mensaje',
-                `Error al crear método: ${metodo.err.message}`,
-                'error'
-              );
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          this.metodoPagoService
+            .crearMetodo(data)
+            .subscribe((metodo: MetodoPago) => {
+              if (metodo.ok) {
+                this.displayDialogCrear = false;
+                Swal.fire('Mensaje', 'Método creado', 'success');
+                this.cargarMetodos();
+                this.limpiarFormulario();
+              } else {
+                Swal.fire(
+                  'Mensaje',
+                  `Error al crear método: ${metodo.err.message}`,
+                  'error'
+                );
+              }
 
-            if (!metodo) {
-              Swal.fire('Mensaje', 'Error al crear métod', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+              if (!metodo) {
+                Swal.fire('Mensaje', 'Error al crear métod', 'error');
+              }
+            });
+        }
       });
   }
 
   editarMetodo(): void {
+    // this.store.dispatch(loadingActions.cargarLoading());;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearMetodo = {
-          nombre: this.forma.controls.nombre.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-          id: this.metodo._id,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearMetodo = {
+            nombre: this.forma.controls.nombre.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            id: this.metodo._id,
+            foranea: '',
+          };
 
-        this.store.dispatch(loadingActions.cargarLoading());
-        this.metodoPagoService
-          .editarMetodoID(data)
-          .subscribe((metodo: MetodoPago) => {
-            if (metodo.ok) {
-              this.displayDialogEditar = false;
-              Swal.fire('Mensaje', 'Método editado', 'success');
-              this.cargarMetodos();
-              this.limpiarFormulario();
-            } else {
-              Swal.fire('Mensaje', 'Error al editar método', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
 
-            if (!metodo) {
-              Swal.fire('Mensaje', 'Error al editar método', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+          this.metodoPagoService
+            .editarMetodoID(data)
+            .subscribe((metodo: MetodoPago) => {
+              if (metodo.ok) {
+                this.displayDialogEditar = false;
+                Swal.fire('Mensaje', 'Método editado', 'success');
+                this.cargarMetodos();
+                this.limpiarFormulario();
+              } else {
+                Swal.fire('Mensaje', `${metodo.err.message}`, 'error');
+              }
+
+              if (!metodo) {
+                Swal.fire('Mensaje', 'Error al editar método', 'error');
+              }
+            });
+        }
       });
   }
 
@@ -213,52 +236,50 @@ export class MetodosPagoComponent implements OnInit, OnDestroy {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.store.dispatch(loadingActions.cargarLoading());
+        // this.store.dispatch(loadingActions.cargarLoading());;
 
         this.store
           .select('login')
-          .pipe(first())
+          // .pipe(first())
           .subscribe((usuario) => {
-            const data = {
-              id: metodo._id,
-              token: usuario.token,
-            };
+            if (usuario.usuarioDB) {
+              const data = {
+                id: metodo._id,
+                token: usuario.token,
+                foranea: '',
+              };
 
-            this.metodoPagoService
-              .eliminarMetodoID(data)
-              .subscribe((metodo: MetodoPago) => {
-                if (metodo.ok) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Método borrado', 'success');
-                  this.cargarMetodos();
-                  this.limpiarFormulario();
-                } else {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar método', 'error');
-                }
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
 
-                if (!metodo) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar método', 'error');
-                }
-              });
+              this.metodoPagoService
+                .eliminarMetodoID(data)
+                .subscribe((metodo: MetodoPago) => {
+                  if (metodo.ok) {
+                    Swal.fire('Mensaje', 'Método borrado', 'success');
+                    this.cargarMetodos();
+                    this.limpiarFormulario();
+                  } else {
+                    Swal.fire('Mensaje', `${metodo.err.message}`, 'error');
+                  }
+
+                  if (!metodo) {
+                    Swal.fire('Mensaje', 'Error al borrar método', 'error');
+                  }
+                });
+            }
           });
       }
     });
   }
 
-  // sockets
-  crearMetodoSocket(): void {
-    this.metodoSocketService
-      .escuchar('cargar-metodos')
-      .subscribe((categorias) => {
-        // console.log('ok');
-        this.cargarMetodos();
-      });
-  }
+
 
   ngOnDestroy(): void {
-    this.metodoSocketService.destruirSocket('cargar-metodos');
+    // this.metodoSocketService.destruirSocket('cargar-metodos');
   }
 }
 
@@ -267,6 +288,7 @@ interface CrearMetodo {
   estado: boolean;
   token: string;
   id?: string;
+  foranea: string;
 }
 
 /*

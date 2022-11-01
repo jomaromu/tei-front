@@ -12,6 +12,11 @@
   section#wrap-sucursales {
     margin-top: 40px;
   }
+
+  #wrap-form-pagos {
+    grid-template-columns: repeat(2, 49%) !important;
+    column-gap: 5px !important;
+  }
 }
 
 .flex-column {
@@ -50,9 +55,10 @@
   // width: 90%;
 }
 
-#wrap-tabla {
+#wrap-tabla-pagos {
   background-color: white;
   padding: 25px;
+  position: relative;
 }
 
 #wrap-form-pagos {
@@ -92,4 +98,32 @@
   i {
     font-size: 1.4rem;
   }
+}
+
+#footer-table {
+  // border: 1px solid red;
+  margin-top: 25px;
+  width: 250px;
+  tr {
+    border: 1px solid rgb(199, 198, 198);
+    height: 55px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-radius: 8px;
+    td {
+      color: gray;
+      font-size: 1rem;
+    }
+  }
+}
+
+#footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 25px;
 }

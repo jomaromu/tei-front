@@ -1,6 +1,90 @@
 @import "../../../../../styles";
 
+@media screen and(max-width: 992px) {
+  section.wrap-info {
+    // border: 1px solid red;
+    width: 100%;
+  }
+
+  div.p-inputgroup {
+    // border: 1px solid blue;
+    width: 250px;
+  }
+
+  #wrap-info-pedido {
+    width: 100%;
+  }
+}
+
+@media screen and(max-width: 850px) {
+  div.p-inputgroup {
+    // border: 1px solid blue;
+    width: 240px;
+  }
+}
+
+@media screen and(max-width: 822px) {
+  div.p-inputgroup {
+    // border: 1px solid blue;
+    width: 210px;
+  }
+}
+
+@media screen and(max-width: 768px) {
+  #wrap-info-pedido {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media screen and(max-width: 639px) {
+  #wrap-info-cliente {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
+
+  div.p-inputgroup {
+    // border: 1px solid blue;
+    width: 400px;
+  }
+
+  #wrap-info-pedido {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
+}
+
+@media screen and(max-width: 506px) {
+  div.p-inputgroup {
+    // border: 1px solid blue;
+    width: 380px;
+  }
+}
+
+@media screen and(max-width: 488px) {
+  div.p-inputgroup {
+    // border: 1px solid blue;
+    width: 350px;
+  }
+}
+
+@media screen and(max-width: 444px) {
+  div.p-inputgroup {
+    // border: 1px solid blue;
+    width: 300px;
+  }
+}
+
+@media screen and(max-width: 400px) {
+  div.p-inputgroup {
+    // border: 1px solid blue;
+    width: 250px;
+  }
+}
+
+#formulario {
+  // border: 1px solid red;
+}
+
 #wrap-form-cliente {
+  // border: 1px solid red !important;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   padding: 25px 0;
@@ -22,7 +106,8 @@
 }
 
 #wrap-info-pedido {
-  grid-template-columns: repeat(3, 1fr);
+  // border: 1px solid green;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-template-rows: repeat(3, 50px);
   column-gap: 20px;
   row-gap: 30px;

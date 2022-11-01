@@ -21,7 +21,11 @@ export class ProductoPedidoService {
 
   obtenerProductosPedidos(data: any): Observable<any> {
     const url = `${environment.urlProductosPedido}/productoPedido/obtenerProductosPedidos`;
-    const header = new HttpHeaders({ token: data.token, pedido: data.pedido });
+    const header = new HttpHeaders({
+      token: data.token,
+      pedido: data.pedido,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(map((resp) => resp));
   }
@@ -32,6 +36,7 @@ export class ProductoPedidoService {
     const header = new HttpHeaders({
       token: data.token,
       id: data.id,
+      foranea: data.foranea,
     });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
@@ -41,7 +46,6 @@ export class ProductoPedidoService {
     const url = `${environment.urlProductosPedido}/productoPedido/editarSeguimientos`;
 
     const header = new HttpHeaders({
-      idProdPed: data.idProdPed,
       token: data.token,
     });
 

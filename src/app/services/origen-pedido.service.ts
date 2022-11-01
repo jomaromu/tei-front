@@ -10,9 +10,12 @@ import { map } from 'rxjs/operators';
 export class OrigenPedidoService {
   constructor(private http: HttpClient) {}
 
-  obtenerOrigenes(token: string): Observable<any> {
+  obtenerOrigenes(data: any): Observable<any> {
     const url = `${environment.urlOrigen}/origenPedido/obtenerOrigenes`;
-    const header = new HttpHeaders({ token });
+    const header = new HttpHeaders({
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(
       map((resp: any) => {
@@ -55,7 +58,7 @@ export class OrigenPedidoService {
 
   editarOrigenID(data: any): Observable<any> {
     const url = `${environment.urlOrigen}/origenPedido/editarOrigen`;
-    const header = new HttpHeaders({ id: data.id, token: data.token });
+    const header = new HttpHeaders({ token: data.token });
 
     return this.http
       .put(url, data, { headers: header })
@@ -64,7 +67,11 @@ export class OrigenPedidoService {
 
   eliminarOrigenID(data: any): Observable<any> {
     const url = `${environment.urlOrigen}/origenPedido/eliminarOrigen`;
-    const header = new HttpHeaders({ id: data.id, token: data.token });
+    const header = new HttpHeaders({
+      id: data.id,
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }

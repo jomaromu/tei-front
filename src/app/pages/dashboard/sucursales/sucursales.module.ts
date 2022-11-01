@@ -2,8 +2,10 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+// modulos
 import { SucursalesRoutingModule } from './sucursales-routing.module';
 import { SharedModule } from '../../../shared/shared.module';
+import { LoadingModule } from 'src/app/shared/loading/loading.module';
 
 import { SucursalesComponent } from './sucursales.component';
 
@@ -34,6 +36,7 @@ import { Validaciones } from '../../../classes/validaciones';
     InputTextModule,
     DropdownModule,
     InputSwitchModule,
+    LoadingModule,
   ],
   providers: [Validaciones],
 })

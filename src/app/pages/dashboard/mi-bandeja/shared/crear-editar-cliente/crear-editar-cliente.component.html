@@ -23,17 +23,18 @@
 </div>
 
 <!-- DIALOG CREAR -->
-<form [formGroup]="forma">
-  <p-dialog
-    header="Nuevo cliente"
-    [(visible)]="displayDialogCrear"
-    [draggable]="false"
-    [modal]="true"
-    [resizable]="false"
-    [style]="{ width: '500px' }"
-    [breakpoints]="{ '530px': '95%' }"
-  >
-    <section id="wrap-form-cliente">
+<p-dialog
+  header="Nuevo cliente"
+  [(visible)]="displayDialogCrear"
+  [draggable]="false"
+  [modal]="true"
+  [resizable]="false"
+  [style]="{ width: '500px' }"
+  [breakpoints]="{ '530px': '95%' }"
+  (onHide)="closeDialog()"
+>
+  <form id="formulario" [formGroup]="forma">
+    <section class="wrap-form-cliente">
       <!-- Sucursales -->
       <div class="field flex-column">
         <p-dropdown
@@ -174,12 +175,12 @@
           >{{ validarObservacion.mensaje }}</small
         >
       </div>
+
+      <!-- Estado -->
+      <p-inputSwitch formControlName="estado" name="estado"></p-inputSwitch>
     </section>
 
-    <!-- Estado -->
-    <p-inputSwitch formControlName="estado" name="estado"></p-inputSwitch>
-
-    <ng-template pTemplate="footer">
+    <div class="footer">
       <button
         pButton
         pRipple
@@ -196,22 +197,22 @@
         class="p-button-text"
         (click)="btnGuardar('crear')"
       ></button>
-    </ng-template>
-  </p-dialog>
-</form>
+    </div>
+  </form>
+</p-dialog>
 
 <!-- DIALOG EDITAR -->
-<form [formGroup]="forma">
-  <p-dialog
-    header="Editar cliente"
-    [(visible)]="displayDialogEditar"
-    [modal]="true"
-    [draggable]="false"
-    [resizable]="false"
-    [style]="{ width: '500px' }"
-    [breakpoints]="{ '530px': '95%' }"
-  >
-    <section id="wrap-form-cliente">
+<p-dialog
+  header="Editar cliente"
+  [(visible)]="displayDialogEditar"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '500px' }"
+  [breakpoints]="{ '530px': '95%' }"
+>
+  <form [formGroup]="forma">
+    <section class="wrap-form-cliente">
       <!-- Sucursales -->
       <div class="field flex-column">
         <p-dropdown
@@ -351,12 +352,12 @@
           >{{ validarObservacion.mensaje }}</small
         >
       </div>
+
+      <!-- Estado -->
+      <p-inputSwitch formControlName="estado" name="estado"></p-inputSwitch>
     </section>
 
-    <!-- Estado -->
-    <p-inputSwitch formControlName="estado" name="estado"></p-inputSwitch>
-
-    <ng-template pTemplate="footer">
+    <div class="footer">
       <button
         pButton
         pRipple
@@ -373,6 +374,6 @@
         class="p-button-text"
         (click)="btnGuardar('editar')"
       ></button>
-    </ng-template>
-  </p-dialog>
-</form>
+    </div>
+  </form>
+</p-dialog>

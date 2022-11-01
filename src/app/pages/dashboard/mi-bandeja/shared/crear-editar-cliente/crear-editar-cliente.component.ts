@@ -13,6 +13,7 @@ import {
 import { ClientesService } from '../../../../../services/clientes.service';
 import { Cliente, UsuariosDB } from '../../../../../interfaces/clientes';
 import * as loadingActions from '../../../../../reducers/loading/loading.actions';
+import { FiltrarEstados } from '../../../../../classes/filtrar-estados';
 
 @Component({
   selector: 'app-crear-editar-cliente',
@@ -36,7 +37,8 @@ export class CrearEditarClienteComponent implements OnInit {
     private store: Store<AppState>,
     private sService: SucursalService,
     private validadores: Validaciones,
-    private clienteService: ClientesService
+    private clienteService: ClientesService,
+    private filtrarEstados: FiltrarEstados
   ) {}
 
   ngOnInit(): void {
@@ -92,27 +94,39 @@ export class CrearEditarClienteComponent implements OnInit {
   cargarSucursales(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.sService
-          .obtenerSucs(usuario.token)
-          .subscribe((sucursales: Sucursal) => {
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
+
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+          this.sService.obtenerSucs(data).subscribe((sucursales: Sucursal) => {
+            const sucActivas = this.filtrarEstados.filtrarActivos(
+              sucursales.sucursalesDB
+            );
             // console.log(sucursales.sucursalesDB);
-            // this.store.dispatch(loadingActions.cargarLoading());
 
             if (sucursales.ok) {
-              this.sucursales = sucursales.sucursalesDB;
-              // this.store.dispatch(loadingActions.quitarLoading());
+              this.sucursales = sucActivas;
+              //
             } else {
               Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
-              // this.store.dispatch(loadingActions.quitarLoading());
+              //
             }
 
             if (!sucursales) {
               Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
-              // this.store.dispatch(loadingActions.quitarLoading());
+              //
             }
           });
+        }
       });
   }
 
@@ -218,88 +232,105 @@ export class CrearEditarClienteComponent implements OnInit {
           this.editarCliente();
         }
       }
+
+
     }
   }
 
-  crearCliente(): void {
-    this.store
+  crearCliente(): void {    this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearCliente = {
-          nombre: this.forma.controls.nombre.value,
-          cedula: this.forma.controls.cedula.value,
-          ruc: this.forma.controls.ruc.value,
-          telefono: this.forma.controls.telefono.value,
-          correo: this.forma.controls.correo.value,
-          observacion: this.forma.controls.observacion.value,
-          sucursal: this.forma.controls.sucursales.value._id,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearCliente = {
+            nombre: this.forma.controls.nombre.value,
+            cedula: this.forma.controls.cedula.value,
+            ruc: this.forma.controls.ruc.value,
+            telefono: this.forma.controls.telefono.value,
+            correo: this.forma.controls.correo.value,
+            observacion: this.forma.controls.observacion.value,
+            sucursal: this.forma.controls.sucursales.value._id,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        this.clienteService.crearCliente(data).subscribe((cliente: Cliente) => {
-          this.store.dispatch(loadingActions.cargarLoading());
-
-          if (cliente.ok) {
-            this.store.dispatch(loadingActions.quitarLoading());
-            this.displayDialogCrear = false;
-            Swal.fire('Mensaje', 'Cliente creado', 'success');
-            this.limpiarFormulario();
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
           } else {
-            Swal.fire(
-              'Mensaje',
-              `Error al crear un cliente: ${cliente.err.message}`,
-              'error'
-            );
-            this.store.dispatch(loadingActions.quitarLoading());
+            data.foranea = usuario.usuarioDB.foranea;
           }
 
-          if (!cliente) {
-            Swal.fire('Mensaje', 'Error al crear una cliente', 'error');
-            this.store.dispatch(loadingActions.quitarLoading());
-          }
-        });
+          this.clienteService
+            .crearCliente(data)
+            .subscribe((cliente: Cliente) => {
+              if (cliente.ok) {
+                this.displayDialogCrear = false;
+                Swal.fire('Mensaje', 'Cliente creado', 'success');
+                this.limpiarFormulario();
+
+              } else {
+                Swal.fire(
+                  'Mensaje',
+                  `Error al crear un cliente: ${cliente.err.message}`,
+                  'error'
+                );
+
+              }
+
+              if (!cliente) {
+                Swal.fire('Mensaje', 'Error al crear una cliente', 'error');
+
+              }
+            });
+        }
       });
   }
 
-  editarCliente(): void {
-    this.store
+  editarCliente(): void {    this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearCliente = {
-          nombre: this.forma.controls.nombre.value,
-          cedula: this.forma.controls.cedula.value,
-          ruc: this.forma.controls.ruc.value,
-          telefono: this.forma.controls.telefono.value,
-          correo: this.forma.controls.correo.value,
-          observacion: this.forma.controls.observacion.value,
-          sucursal: this.forma.controls.sucursales.value._id,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-          id: this.inputCliente._id,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearCliente = {
+            nombre: this.forma.controls.nombre.value,
+            cedula: this.forma.controls.cedula.value,
+            ruc: this.forma.controls.ruc.value,
+            telefono: this.forma.controls.telefono.value,
+            correo: this.forma.controls.correo.value,
+            observacion: this.forma.controls.observacion.value,
+            sucursal: this.forma.controls.sucursales.value._id,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            id: this.inputCliente._id,
+            foranea: '',
+          };
 
-        this.store.dispatch(loadingActions.cargarLoading());
-        this.clienteService
-          .editarCliente(data)
-          .subscribe((cliente: Cliente) => {
-            if (cliente.ok) {
-              this.displayDialogEditar = false;
-              Swal.fire('Mensaje', 'Cliente editado', 'success');
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
 
-              this.limpiarFormulario();
-            } else {
-              Swal.fire('Mensaje', 'Error al editar cliente', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          this.clienteService
+            .editarCliente(data)
+            .subscribe((cliente: Cliente) => {
+              if (cliente.ok) {
+                this.displayDialogEditar = false;
+                Swal.fire('Mensaje', 'Cliente editado', 'success');
 
-            if (!cliente) {
-              Swal.fire('Mensaje', 'Error al editar cliente', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+                this.limpiarFormulario();
+              } else {
+                Swal.fire('Mensaje', 'Error al editar cliente', 'error');
+
+              }
+
+              if (!cliente) {
+                Swal.fire('Mensaje', 'Error al editar cliente', 'error');
+
+              }
+            });
+        }
       });
   }
 
@@ -321,4 +352,5 @@ interface CrearCliente {
   estado: boolean;
   token: string;
   id?: string;
+  foranea: string;
 }

@@ -2,8 +2,10 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+// modulos
 import { ColoresRoutingModule } from './colores-routing.module';
 import { SharedModule } from '../../../shared/shared.module';
+import { LoadingModule } from 'src/app/shared/loading/loading.module';
 
 import { ColoresComponent } from './colores.component';
 
@@ -38,6 +40,7 @@ import { Validaciones } from '../../../classes/validaciones';
     InputSwitchModule,
     InputNumberModule,
     ColorPickerModule,
+    LoadingModule,
   ],
   providers: [Validaciones],
 })

@@ -1,0 +1,237 @@
+@import "../../../../styles.scss";
+@import url("https://fonts.googleapis.com/css?family=Lato");
+
+* {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Lato", sans-serif;
+}
+
+#body {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(to bottom right, #eee, #aaa);
+}
+
+h1 {
+  margin: 40px 0 20px;
+}
+
+.lock {
+  border-radius: 5px;
+  width: 55px;
+  height: 45px;
+  background-color: #333;
+  animation: dip 3s infinite;
+  animation-delay: 1.5s;
+}
+.lock::before,
+.lock::after {
+  content: "";
+  position: absolute;
+  border-left: 5px solid #333;
+  height: 20px;
+  width: 15px;
+  left: calc(50% - 12.5px);
+}
+.lock::before {
+  top: -30px;
+  border: 5px solid #333;
+  border-bottom-color: transparent;
+  border-radius: 15px 15px 0 0;
+  height: 30px;
+  animation: lock 2s, spin 2s;
+}
+.lock::after {
+  top: -10px;
+  border-right: 5px solid transparent;
+  animation: spin 2s;
+}
+
+@keyframes lock {
+  0% {
+    top: -45px;
+  }
+  65% {
+    top: -45px;
+  }
+  100% {
+    top: -30px;
+  }
+}
+@keyframes spin {
+  0% {
+    transform: scaleX(-1);
+    left: calc(50% - 30px);
+  }
+  65% {
+    transform: scaleX(1);
+    left: calc(50% - 12.5px);
+  }
+}
+@keyframes dip {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+// dialog actualizar pass
+
+* {
+  font-family: $font-family;
+}
+
+@media screen and(max-width: 576px) {
+  button#btnNuevo {
+    margin-left: -25px !important;
+    margin-top: -25px !important;
+  }
+
+  section#wrap-perfil {
+    margin-top: 40px;
+  }
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.badge-activo {
+  background-color: rgba(83, 179, 86, 0.5);
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-weight: bold;
+  color: rgb(5, 92, 8);
+}
+
+.badge-inactivo {
+  background-color: tomato;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-weight: bold;
+  color: darken($color: $white, $amount: 2);
+}
+
+.btnHeader {
+  background-color: $primary;
+  border: none !important;
+}
+
+.btnHeader:hover {
+  background-color: $secondary !important;
+}
+
+#wrap-perfil {
+  // border: 1px solid red;
+  margin: 100px auto;
+  width: 90%;
+}
+
+#wrap-tabla {
+  background-color: white;
+  padding: 25px;
+}
+
+#wrap-form-perfil {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  padding: 25px 0;
+  column-gap: 15px;
+  row-gap: 35px;
+  position: relative;
+}
+
+.p-inputtext,
+.p-dropdown {
+  width: 100%;
+}
+
+// tarjeta
+
+.card {
+  border: none;
+
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.card:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background-color: lighten($color: $primary, $amount: 55);
+  transform: scaleY(1);
+  transition: all 0.5s;
+  transform-origin: bottom;
+}
+
+.card:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background-color: $primary;
+  transform: scaleY(0);
+  transition: all 0.5s;
+  transform-origin: bottom;
+}
+
+.card:hover::after {
+  transform: scaleY(1);
+}
+
+.fonts {
+  font-size: 11px;
+}
+
+.social-list {
+  display: flex;
+  list-style: none;
+  justify-content: center;
+  padding: 0;
+}
+
+.social-list li {
+  padding: 10px;
+  color: $primary;
+  font-size: 19px;
+}
+
+.buttons button:nth-child(1) {
+  border: 1px solid $primary !important;
+  color: $primary;
+  height: 40px;
+}
+
+.buttons button:nth-child(1):hover {
+  border: 1px solid $primary !important;
+  color: #fff;
+  height: 40px;
+  background-color: $primary;
+}
+
+.buttons button:nth-child(2) {
+  border: 1px solid $primary !important;
+  background-color: $primary;
+  color: #fff;
+  height: 40px;
+}

@@ -1,7 +1,7 @@
 <section class="wrap-sidebar" id="wrapSidebar" #wrapSidebar>
   <i class="fas fa-times" id="close" (click)="cerrarSidebar()"></i>
   <div id="logo">
-    <img src="../../../assets/tei-scaled.png" alt="TEI" title="TEI" />
+    <img src="../../../assets/logo.png" alt="TEI" title="Logo" />
   </div>
 
   <div id="perfil">
@@ -10,7 +10,7 @@
       <a *ngIf="item.id === role">{{ item.nombre }}</a>
     </span> -->
     <span>{{ usuario?.role?.nombre }}</span>
-    <a role="button">Ver perfil</a>
+    <a role="button" routerLink="/dashboard/perfil">Ver perfil</a>
   </div>
 
   <!-- primer nivel -->
@@ -21,10 +21,13 @@
         </a>
     </div> -->
 
-  <div class="group-items">
+  <div
+    class="group-items"
+    *ngIf="usuario?.role?.restricciones?.sidebar?.bandeja === true || usuario?.empresa"
+  >
     <a class="item-sidebar" routerLink="/dashboard/mi-bandeja">
       <i class="fas fa-inbox"></i>
-      <span>Mi bandeja</span>
+      <span>Pedidos</span>
     </a>
   </div>
 
@@ -35,7 +38,13 @@
     </a>
   </div> -->
 
-  <div class="group-items">
+  <div
+    *ngIf="
+      usuario?.role?.restricciones?.sidebar?.configuracion === true ||
+      usuario?.empresa
+    "
+    class="group-items"
+  >
     <a
       class="item-sidebar"
       data-bs-toggle="collapse"
@@ -44,45 +53,73 @@
       aria-controls="catalogos"
       id="catalogo"
     >
-      <i class="fas fa-book"></i>
-      <span>Catálogo</span>
+      <i class="fas fa-cog"></i>
+      <span>Configuración</span>
       <i class="fas fa-angle-right" id="row-catalogo"></i>
+      <!-- <i class="far fa-cog"></i> -->
     </a>
   </div>
 
   <!-- segundo nivel -->
   <div class="collapse" id="catalogos">
-    <div class="group-items subs">
+    <div
+      *ngIf="
+        usuario?.role?.restricciones?.sidebar?.sucursales === true ||
+        usuario?.empresa
+      "
+      class="group-items subs"
+    >
       <a class="item-sidebar subs-items" routerLink="/dashboard/sucursales">
         <span>Sucursales</span>
       </a>
     </div>
 
-    <div class="group-items subs">
+    <div
+      *ngIf="
+        usuario?.role?.restricciones?.sidebar?.colaboradores === true ||
+        usuario?.empresa
+      "
+      class="group-items subs"
+    >
       <a class="item-sidebar subs-items" routerLink="/dashboard/usuarios">
         <span>Colaboradores</span>
       </a>
     </div>
 
-    <div class="group-items subs">
+    <div
+      *ngIf="usuario?.role?.restricciones?.sidebar?.clientes === true || usuario?.empresa"
+      class="group-items subs"
+    >
       <a class="item-sidebar subs-items" routerLink="/dashboard/clientes">
         <span>Clientes</span>
       </a>
     </div>
 
-    <div class="group-items subs">
+    <div
+      *ngIf="usuario?.role?.restricciones?.sidebar?.categorias === true || usuario?.empresa"
+      class="group-items subs"
+    >
       <a class="item-sidebar subs-items" routerLink="/dashboard/categorias">
         <span>Categorías</span>
       </a>
     </div>
 
-    <div class="group-items subs">
+    <div
+      *ngIf="usuario?.role?.restricciones?.sidebar?.productos === true || usuario?.empresa"
+      class="group-items subs"
+    >
       <a class="item-sidebar subs-items" routerLink="/dashboard/productos">
         <span>Productos</span>
       </a>
     </div>
 
-    <div class="group-items subs">
+    <div
+      *ngIf="
+        usuario?.role?.restricciones?.sidebar?.roles === true ||
+        usuario?.empresa
+      "
+      class="group-items subs"
+    >
       <a class="item-sidebar subs-items" routerLink="/dashboard/roles">
         <span>Roles</span>
       </a>
@@ -111,27 +148,39 @@
                 </a>
             </div> -->
 
-    <div class="group-items subs">
+    <div
+      *ngIf="usuario?.role?.restricciones?.sidebar?.origen === true || usuario?.empresa"
+      class="group-items subs"
+    >
       <a class="item-sidebar subs-items" routerLink="/dashboard/origen-pedido">
         <span>Origen</span>
       </a>
     </div>
 
-    <div class="group-items subs">
+    <div
+      *ngIf="usuario?.role?.restricciones?.sidebar?.prioridad === true || usuario?.empresa"
+      class="group-items subs"
+    >
       <a class="item-sidebar subs-items" routerLink="/dashboard/prioridad">
         <span>Proridad</span>
       </a>
     </div>
 
-    <div class="group-items subs">
+    <div
+      *ngIf="usuario?.role?.restricciones?.sidebar?.etapas === true || usuario?.empresa"
+      class="group-items subs"
+    >
       <a class="item-sidebar subs-items" routerLink="/dashboard/etapas">
         <span>Etapas</span>
       </a>
     </div>
 
-    <div class="group-items subs">
+    <div
+      *ngIf="usuario?.role?.restricciones?.sidebar?.colores === true || usuario?.empresa"
+      class="group-items subs"
+    >
       <a class="item-sidebar subs-items" routerLink="/dashboard/colores">
-        <span>Colores</span>
+        <span>Estados</span>
       </a>
     </div>
 
@@ -143,13 +192,19 @@
           <span>Archivos</span>
         </a>
       </div> -->
-    <div class="group-items subs">
+    <div
+      *ngIf="usuario?.role?.restricciones?.sidebar?.metodos === true || usuario?.empresa"
+      class="group-items subs"
+    >
       <a class="item-sidebar subs-items" routerLink="/dashboard/metodos-pagos">
         <span>Mét. Pagos</span>
       </a>
     </div>
 
-    <div class="group-items subs">
+    <div
+      *ngIf="usuario?.role?.restricciones?.sidebar?.modalidad === true || usuario?.empresa"
+      class="group-items subs"
+    >
       <a
         class="item-sidebar subs-items"
         routerLink="/dashboard/modalidad-pagos"
@@ -158,7 +213,10 @@
       </a>
     </div>
 
-    <div class="group-items subs">
+    <div
+      *ngIf="usuario?.role?.restricciones?.sidebar?.tipoArchivo === true || usuario?.empresa"
+      class="group-items subs"
+    >
       <a class="item-sidebar subs-items" routerLink="/dashboard/tipo-archivo">
         <span>Tipo archivo</span>
       </a>

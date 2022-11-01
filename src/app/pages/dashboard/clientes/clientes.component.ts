@@ -13,6 +13,7 @@ import { ClientesService } from '../../../services/clientes.service';
 import { SucursalService } from '../../../services/sucursal.service';
 import { Validaciones, ValidarTexto } from '../../../classes/validaciones';
 import { CSocketService } from '../../../services/sockets/c-socket.service';
+import { FiltrarEstados } from '../../../classes/filtrar-estados';
 
 @Component({
   selector: 'app-clientes',
@@ -33,14 +34,14 @@ export class ClientesComponent implements OnInit, OnDestroy {
     private sService: SucursalService,
     private fb: FormBuilder,
     private validadores: Validaciones,
-    private socketCliente: CSocketService
+    // private socketCliente: CSocketService,
+    private filtrarEstados: FiltrarEstados
   ) {}
 
   ngOnInit(): void {
     this.crearFormulario();
     this.cargarClientes();
     this.cargarSucursales();
-    this.crearClienteSocket();
   }
 
   crearFormulario(): void {
@@ -77,47 +78,70 @@ export class ClientesComponent implements OnInit, OnDestroy {
   }
 
   cargarClientes(): void {
+    this.store.dispatch(loadingActions.cargarLoading());
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.clienteService
-          .obtenerClientes(usuario.token)
-          .subscribe((clientes: Cliente) => {
-            // console.log(clientes);
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
 
-            this.store.dispatch(loadingActions.cargarLoading());
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+          this.clienteService
+            .obtenerClientes(data)
+            .subscribe((clientes: Cliente) => {
+              // console.log(clientes);
 
-            if (clientes.ok) {
-              // this.sucursales = sucursales.sucursalesDB;
-              this.clientes = clientes.usuariosDB;
-              this.store.dispatch(loadingActions.quitarLoading());
-            } else {
-              Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+              if (clientes.ok) {
+                // this.sucursales = sucursales.sucursalesDB;
+                this.clientes = clientes.usuariosDB;
+                this.store.dispatch(loadingActions.quitarLoading());
+              } else {
+                Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
 
-            if (!clientes) {
-              Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+              if (!clientes) {
+                Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
+            });
+        }
       });
   }
 
   cargarSucursales(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.sService
-          .obtenerSucs(usuario.token)
-          .subscribe((sucursales: Sucursal) => {
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
+
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+          this.sService.obtenerSucs(data).subscribe((sucursales: Sucursal) => {
+            const sucActivas = this.filtrarEstados.filtrarActivos(
+              sucursales.sucursalesDB
+            );
             // console.log(sucursales.sucursalesDB);
-            // this.store.dispatch(loadingActions.cargarLoading());
+            // // this.store.dispatch(loadingActions.cargarLoading());;
 
             if (sucursales.ok) {
-              this.sucursales = sucursales.sucursalesDB;
+              this.sucursales = sucActivas;
               // this.store.dispatch(loadingActions.quitarLoading());
             } else {
               Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
@@ -129,6 +153,7 @@ export class ClientesComponent implements OnInit, OnDestroy {
               // this.store.dispatch(loadingActions.quitarLoading());
             }
           });
+        }
       });
   }
 
@@ -243,7 +268,6 @@ export class ClientesComponent implements OnInit, OnDestroy {
       } else {
         if (tipo === 'crear') {
           this.crearCliente();
-          this.crearClienteSocket();
         }
 
         if (tipo === 'editar') {
@@ -254,85 +278,99 @@ export class ClientesComponent implements OnInit, OnDestroy {
   }
 
   crearCliente(): void {
+    // this.store.dispatch(loadingActions.cargarLoading());;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearCliente = {
-          nombre: this.forma.controls.nombre.value,
-          cedula: this.forma.controls.cedula.value,
-          ruc: this.forma.controls.ruc.value,
-          telefono: this.forma.controls.telefono.value,
-          correo: this.forma.controls.correo.value,
-          observacion: this.forma.controls.observacion.value,
-          sucursal: this.forma.controls.sucursales.value._id,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearCliente = {
+            nombre: this.forma.controls.nombre.value,
+            cedula: this.forma.controls.cedula.value,
+            ruc: this.forma.controls.ruc.value,
+            telefono: this.forma.controls.telefono.value,
+            correo: this.forma.controls.correo.value,
+            observacion: this.forma.controls.observacion.value,
+            sucursal: this.forma.controls.sucursales.value._id,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        this.clienteService.crearCliente(data).subscribe((cliente: Cliente) => {
-          this.store.dispatch(loadingActions.cargarLoading());
-
-          if (cliente.ok) {
-            this.store.dispatch(loadingActions.quitarLoading());
-            this.displayDialogCrear = false;
-            Swal.fire('Mensaje', 'Cliente creado', 'success');
-            this.cargarClientes();
-            this.limpiarFormulario();
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
           } else {
-            Swal.fire(
-              'Mensaje',
-              `Error al crear un cliente: ${cliente.err.message}`,
-              'error'
-            );
-            this.store.dispatch(loadingActions.quitarLoading());
+            data.foranea = usuario.usuarioDB.foranea;
           }
 
-          if (!cliente) {
-            Swal.fire('Mensaje', 'Error al crear una cliente', 'error');
-            this.store.dispatch(loadingActions.quitarLoading());
-          }
-        });
+          this.clienteService
+            .crearCliente(data)
+            .subscribe((cliente: Cliente) => {
+              if (cliente.ok) {
+                this.displayDialogCrear = false;
+                this.cargarClientes();
+                this.limpiarFormulario();
+                Swal.fire('Mensaje', 'Cliente creado', 'success');
+              } else {
+                Swal.fire(
+                  'Mensaje',
+                  `Error al crear un cliente: ${cliente.err.message}`,
+                  'error'
+                );
+              }
+
+              if (!cliente) {
+                Swal.fire('Mensaje', 'Error al crear una cliente', 'error');
+              }
+            });
+        }
       });
   }
 
   editarCliente(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearCliente = {
-          nombre: this.forma.controls.nombre.value,
-          cedula: this.forma.controls.cedula.value,
-          ruc: this.forma.controls.ruc.value,
-          telefono: this.forma.controls.telefono.value,
-          correo: this.forma.controls.correo.value,
-          observacion: this.forma.controls.observacion.value,
-          sucursal: this.forma.controls.sucursales.value._id,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-          id: this.cliente._id,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearCliente = {
+            nombre: this.forma.controls.nombre.value,
+            cedula: this.forma.controls.cedula.value,
+            ruc: this.forma.controls.ruc.value,
+            telefono: this.forma.controls.telefono.value,
+            correo: this.forma.controls.correo.value,
+            observacion: this.forma.controls.observacion.value,
+            sucursal: this.forma.controls.sucursales.value._id,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            id: this.cliente._id,
+            foranea: '',
+          };
 
-        this.store.dispatch(loadingActions.cargarLoading());
-        this.clienteService
-          .editarCliente(data)
-          .subscribe((cliente: Cliente) => {
-            if (cliente.ok) {
-              this.displayDialogEditar = false;
-              Swal.fire('Mensaje', 'Cliente editado', 'success');
-              this.cargarClientes();
-              this.limpiarFormulario();
-            } else {
-              Swal.fire('Mensaje', 'Error al editar cliente', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
 
-            if (!cliente) {
-              Swal.fire('Mensaje', 'Error al editar cliente', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+          // this.store.dispatch(loadingActions.cargarLoading());;
+          this.clienteService
+            .editarCliente(data)
+            .subscribe((cliente: Cliente) => {
+              if (cliente.ok) {
+                this.displayDialogEditar = false;
+                Swal.fire('Mensaje', 'Cliente editado', 'success');
+                this.cargarClientes();
+                this.limpiarFormulario();
+              } else {
+                Swal.fire('Mensaje', `${cliente?.err?.message}`, 'error');
+              }
+
+              if (!cliente) {
+                Swal.fire('Mensaje', 'Error al editar cliente', 'error');
+              }
+            });
+        }
       });
   }
 
@@ -348,48 +386,48 @@ export class ClientesComponent implements OnInit, OnDestroy {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.store.dispatch(loadingActions.cargarLoading());
+        // this.store.dispatch(loadingActions.cargarLoading());;
 
         this.store
           .select('login')
-          .pipe(first())
+          // .pipe(first())
           .subscribe((usuario) => {
-            const data = {
-              id: cliente._id,
-              token: usuario.token,
-            };
+            if (usuario.usuarioDB) {
+              const data = {
+                id: cliente._id,
+                token: usuario.token,
+                foranea: '',
+              };
 
-            this.clienteService.eliminarCliente(data).subscribe((cliente) => {
-              if (cliente.ok) {
-                this.store.dispatch(loadingActions.quitarLoading());
-                Swal.fire('Mensaje', 'Cliente borrado', 'success');
-                this.cargarClientes();
-                this.limpiarFormulario();
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
               } else {
-                this.store.dispatch(loadingActions.quitarLoading());
-                Swal.fire('Mensaje', 'Error al borrar cliente', 'error');
+                data.foranea = usuario.usuarioDB.foranea;
               }
 
-              if (!cliente) {
-                this.store.dispatch(loadingActions.quitarLoading());
-                Swal.fire('Mensaje', 'Error al borrar cliente', 'error');
-              }
-            });
+              this.clienteService
+                .eliminarCliente(data)
+                .subscribe((cliente: Cliente) => {
+                  if (cliente.ok) {
+                    Swal.fire('Mensaje', 'Cliente borrado', 'success');
+                    this.cargarClientes();
+                    this.limpiarFormulario();
+                  } else {
+                    Swal.fire('Mensaje', `${cliente?.err?.message}`, 'error');
+                  }
+
+                  if (!cliente) {
+                    Swal.fire('Mensaje', 'Error al borrar cliente', 'error');
+                  }
+                });
+            }
           });
       }
     });
   }
 
-  // sockets
-  crearClienteSocket(): void {
-    this.socketCliente.escuchar('cargar-clientes').subscribe((clientes) => {
-      // console.log('ok');
-      this.cargarClientes();
-    });
-  }
-
   ngOnDestroy(): void {
-    this.socketCliente.destruirSocket('cargar-clientes');
+    // this.socketCliente.destruirSocket('cargar-clientes');
   }
 }
 
@@ -404,6 +442,7 @@ interface CrearCliente {
   estado: boolean;
   token: string;
   id?: string;
+  foranea: string;
 }
 
 /*

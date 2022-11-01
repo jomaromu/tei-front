@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { first } from 'rxjs/operators';
-import { AppState } from 'src/app/reducers/globarReducers';
+import { AppState } from '../../../reducers/globarReducers';
 import * as menuActions from '../../../reducers/abrir-cerrar-sidebar/abrir-cerrar-sidebar-actions';
 
 @Component({

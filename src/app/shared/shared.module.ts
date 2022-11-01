@@ -6,12 +6,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 // COMPONENTESAS
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { NotFoundComponent } from './not-found/not-found.component';
-import { TablesCatalogosComponent } from './tables-catalogos/tables-catalogos.component';
-import { LoadingComponent } from './loading/loading.component';
-import { TablaPedidosComponent } from './tabla-pedidos/tabla-pedidos.component';
 import { TablaReportesComponent } from './tabla-reportes/tabla-reportes.component';
-
-import { EditarClienteComponent } from './editar-cliente/editar-cliente.component';
 
 // PRIMENG
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -21,12 +16,7 @@ import { MenuComponent } from './menu/menu/menu.component';
   declarations: [
     SidebarComponent,
     NotFoundComponent,
-    TablesCatalogosComponent,
-    LoadingComponent,
-    TablaPedidosComponent,
     TablaReportesComponent,
-
-    EditarClienteComponent,
     MenuComponent,
   ],
   imports: [
@@ -36,15 +26,6 @@ import { MenuComponent } from './menu/menu/menu.component';
     ReactiveFormsModule,
     ProgressSpinnerModule,
   ],
-  exports: [
-    SidebarComponent,
-    TablesCatalogosComponent,
-    LoadingComponent,
-    TablaPedidosComponent,
-    TablaReportesComponent,
-
-    EditarClienteComponent,
-    MenuComponent,
-  ],
+  exports: [SidebarComponent, TablaReportesComponent, MenuComponent],
 })
 export class SharedModule {}

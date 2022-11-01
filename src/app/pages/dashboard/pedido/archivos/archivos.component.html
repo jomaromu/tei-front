@@ -1,5 +1,4 @@
-<app-loading></app-loading>
-
+<!-- <app-loading></app-loading> -->
 <!-- INFORMACION DE ARCHIVOS -->
 <p-fieldset legend="Información de archivos" [style]="{ marginBottom: '50px' }">
   <!-- TABLA ARCHIVOS -->
@@ -99,12 +98,12 @@
       <div style="grid-column: 1 / 3">
         <p-fileUpload
           name="myFile"
-          accept="image/*, application/pdf"
+          [accept]="archivosPermitidos"
           maxFileSize="2000000"
           invalidFileSizeMessageSummary="Arhivo muy pesado"
           invalidFileSizeMessageDetail="Máximo 2 MegaBytes"
           invalidFileTypeMessageSummary="Archivo inválido"
-          invalidFileTypeMessageDetail="Sólo: (Imágenes, PDF)"
+          invalidFileTypeMessageDetail="Sólo: (Imágenes, PDF, DOC, PPT)"
           chooseLabel="Escoger"
           uploadLabel="Subir"
           [showCancelButton]="false"
@@ -145,7 +144,11 @@
       </div>
 
       <!-- Tipo de archivo -->
-      <div id="wrap-tipos-archivos" *ngIf="tiposArchivos.length !== 0">
+
+      <span *ngIf="tiposArchivos.length === 0" class="wrap-tipos-archivos">
+        <label style="color: tomato">Debe crear un tipo de archivo</label>
+      </span>
+      <span class="wrap-tipos-archivos" *ngIf="tiposArchivos.length !== 0">
         <p-radioButton
           *ngFor="let tipoArchivo of tiposArchivos"
           name="tipo"
@@ -153,7 +156,7 @@
           [value]="tipoArchivo?._id"
           [label]="tipoArchivo?.nombre"
         ></p-radioButton>
-      </div>
+      </span>
     </section>
 
     <ng-template pTemplate="footer">

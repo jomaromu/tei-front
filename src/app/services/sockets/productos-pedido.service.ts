@@ -1,17 +1,19 @@
 import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import { AppState } from '../../reducers/globarReducers';
 // import { Socket } from 'ngx-socket-io';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
-export class ProductosPedidoService {
+export class ProductoPedidoSocket {
   private socketProductoPedido: Socket;
   public socketStatus = false;
 
-  constructor() {
+  constructor(private store: Store<AppState>) {
     this.socketProductoPedido = io(environment.urlProductosPedido);
     this.checkStatus();
   }
@@ -19,12 +21,23 @@ export class ProductosPedidoService {
   checkStatus(): void {
     // escuchar el servidor
     this.socketProductoPedido.on('connect', () => {
-      console.log('Conectado al servidor de productos pedido');
-      this.socketStatus = true;
+      this.store.select('login').subscribe((usuario) => {
+        if (usuario.usuarioDB) {
+          let foranea = '';
+          if (usuario.usuarioDB.empresa) {
+            foranea = usuario.usuarioDB._id;
+          } else {
+            foranea = usuario.usuarioDB.foranea;
+          }
+          console.log('Conectado al servidor de productos pedidos');
+          this.socketProductoPedido.emit('room', foranea);
+          this.socketStatus = true;
+        }
+      });
     });
 
     this.socketProductoPedido.on('disconnect', () => {
-      console.log('Desconectado del servidor de productos pedido');
+      console.log('Desconectado del servidor de productos pedidos');
       this.socketStatus = false;
     });
   }

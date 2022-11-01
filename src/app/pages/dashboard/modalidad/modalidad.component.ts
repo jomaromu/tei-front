@@ -45,29 +45,49 @@ export class ModalidadComponent implements OnInit {
   }
 
   cargarModalidades(): void {
+    this.store.dispatch(loadingActions.cargarLoading());
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.modalidadService
-          .obtenerModalidades(usuario.token)
-          .subscribe((modalidades: ModalidadPago) => {
-            this.store.dispatch(loadingActions.cargarLoading());
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
 
-            if (modalidades.ok) {
-              this.modalidades = modalidades.modalidadesDB;
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
 
-              this.store.dispatch(loadingActions.quitarLoading());
-            } else {
-              Swal.fire('Mensaje', 'Error al cargar las modalidades', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          this.modalidadService
+            .obtenerModalidades(data)
+            .subscribe((modalidades: ModalidadPago) => {
+              if (modalidades.ok) {
+                this.modalidades = modalidades.modalidadesDB;
 
-            if (!modalidades) {
-              Swal.fire('Mensaje', 'Error al cargar las modalidades', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+                this.store.dispatch(loadingActions.quitarLoading());
+              } else {
+                Swal.fire(
+                  'Mensaje',
+                  'Error al cargar las modalidades',
+                  'error'
+                );
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
+
+              if (!modalidades) {
+                Swal.fire(
+                  'Mensaje',
+                  'Error al cargar las modalidades',
+                  'error'
+                );
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
+            });
+        }
       });
   }
 
@@ -126,71 +146,83 @@ export class ModalidadComponent implements OnInit {
   }
 
   crearModalidad(): void {
+    // this.store.dispatch(loadingActions.cargarLoading());;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearModalidad = {
-          nombre: this.forma.controls.nombre.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearModalidad = {
+            nombre: this.forma.controls.nombre.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        this.modalidadService
-          .crearModalidadPago(data)
-          .subscribe((modalidades: ModalidadPago) => {
-            this.store.dispatch(loadingActions.cargarLoading());
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
 
-            if (modalidades.ok) {
-              this.store.dispatch(loadingActions.quitarLoading());
-              this.displayDialogCrear = false;
-              Swal.fire('Mensaje', 'Modalidad creada', 'success');
-              this.cargarModalidades();
-              this.limpiarFormulario();
-            } else {
-              Swal.fire('Mensaje', `Error al crear modalidad`, 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          this.modalidadService
+            .crearModalidadPago(data)
+            .subscribe((modalidades: ModalidadPago) => {
+              if (modalidades.ok) {
+                this.displayDialogCrear = false;
+                Swal.fire('Mensaje', 'Modalidad creada', 'success');
+                this.cargarModalidades();
+                this.limpiarFormulario();
+              } else {
+                Swal.fire('Mensaje', `${modalidades?.err?.message}`, 'error');
+              }
 
-            if (!modalidades) {
-              Swal.fire('Mensaje', 'Error al crear modalidad', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+              if (!modalidades) {
+                Swal.fire('Mensaje', 'Error al crear modalidad', 'error');
+              }
+            });
+        }
       });
   }
 
   editarModalidad(): void {
+    // this.store.dispatch(loadingActions.cargarLoading());;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearModalidad = {
-          nombre: this.forma.controls.nombre.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-          id: this.modalidad._id,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearModalidad = {
+            nombre: this.forma.controls.nombre.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            id: this.modalidad._id,
+            foranea: '',
+          };
 
-        this.store.dispatch(loadingActions.cargarLoading());
-        this.modalidadService
-          .editarModalidad(data)
-          .subscribe((modalidades: ModalidadPago) => {
-            if (modalidades.ok) {
-              this.displayDialogEditar = false;
-              Swal.fire('Mensaje', 'Modalidad editada', 'success');
-              this.cargarModalidades();
-              this.limpiarFormulario();
-            } else {
-              Swal.fire('Mensaje', 'Error al editar modalidad', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
 
-            if (!modalidades) {
-              Swal.fire('Mensaje', 'Error al editar modalidad', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+          this.modalidadService
+            .editarModalidad(data)
+            .subscribe((modalidades: ModalidadPago) => {
+              if (modalidades.ok) {
+                this.displayDialogEditar = false;
+                Swal.fire('Mensaje', 'Modalidad editada', 'success');
+                this.cargarModalidades();
+                this.limpiarFormulario();
+              } else {
+                Swal.fire('Mensaje', `${modalidades?.err?.message}`, 'error');
+              }
+
+              if (!modalidades) {
+                Swal.fire('Mensaje', 'Error al editar modalidad', 'error');
+              }
+            });
+        }
       });
   }
 
@@ -206,35 +238,45 @@ export class ModalidadComponent implements OnInit {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.store.dispatch(loadingActions.cargarLoading());
+        // this.store.dispatch(loadingActions.cargarLoading());;
 
         this.store
           .select('login')
-          .pipe(first())
+          // .pipe(first())
           .subscribe((usuario) => {
-            const data = {
-              id: modalidad._id,
-              token: usuario.token,
-            };
+            if (usuario.usuarioDB) {
+              const data = {
+                id: modalidad._id,
+                token: usuario.token,
+                foranea: '',
+              };
 
-            this.modalidadService
-              .eliminarModalidad(data)
-              .subscribe((modalidades: ModalidadPago) => {
-                if (modalidades.ok) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'modalidad borrada', 'success');
-                  this.cargarModalidades();
-                  this.limpiarFormulario();
-                } else {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar modalidad', 'error');
-                }
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
 
-                if (!modalidades) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar modalidad', 'error');
-                }
-              });
+              this.modalidadService
+                .eliminarModalidad(data)
+                .subscribe((modalidades: ModalidadPago) => {
+                  if (modalidades.ok) {
+                    Swal.fire('Mensaje', 'modalidad borrada', 'success');
+                    this.cargarModalidades();
+                    this.limpiarFormulario();
+                  } else {
+                    Swal.fire(
+                      'Mensaje',
+                      `${modalidades?.err?.message}`,
+                      'error'
+                    );
+                  }
+
+                  if (!modalidades) {
+                    Swal.fire('Mensaje', 'Error al borrar modalidad', 'error');
+                  }
+                });
+            }
           });
       }
     });
@@ -248,6 +290,7 @@ interface CrearModalidad {
   estado: boolean;
   token: string;
   id?: string;
+  foranea: string;
 }
 
 /*

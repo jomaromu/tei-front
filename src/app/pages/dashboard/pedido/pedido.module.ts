@@ -2,8 +2,10 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+// modulos
 import { PedidoRoutingModule } from './pedido-routing.module';
 import { SharedModule } from 'src/app/shared/shared.module';
+import { LoadingModule } from 'src/app/shared/loading/loading.module';
 
 import { PedidoComponent } from './pedido.component';
 
@@ -34,7 +36,10 @@ import { EnlacesPipe } from '../../../pipes/enlaces.pipe';
 import { SplitterModule } from 'primeng/splitter';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { InputTextareaModule } from 'primeng/inputtextarea';
-import {TooltipModule} from 'primeng/tooltip';
+import { TooltipModule } from 'primeng/tooltip';
+import { SplitButtonModule } from 'primeng/splitbutton';
+import { MessagesModule } from 'primeng/messages';
+import { MessageModule } from 'primeng/message';
 
 @NgModule({
   declarations: [
@@ -55,6 +60,7 @@ import {TooltipModule} from 'primeng/tooltip';
     TableModule,
     ToolbarModule,
     ButtonModule,
+    SplitButtonModule,
     DialogModule,
     InputTextModule,
     DropdownModule,
@@ -68,7 +74,10 @@ import {TooltipModule} from 'primeng/tooltip';
     SplitterModule,
     ScrollPanelModule,
     InputTextareaModule,
-    TooltipModule
+    TooltipModule,
+    MessagesModule,
+    MessageModule,
+    LoadingModule,
   ],
   providers: [Validaciones, CalculosProductosPedidos],
 })

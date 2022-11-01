@@ -1,6 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap");
-@import '~primeicons/primeicons.css';
+@import "~primeicons/primeicons.css";
+
+* {
+  box-sizing: border-box;
+}
 
 html,
 body {

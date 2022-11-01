@@ -20,5 +20,6 @@ import { SharedModule } from '../../shared/shared.module';
     FormsModule,
     ReactiveFormsModule,
   ],
+  exports: [],
 })
 export class DashboardModule {}

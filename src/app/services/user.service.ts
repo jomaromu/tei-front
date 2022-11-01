@@ -22,9 +22,12 @@ export class UserService {
     );
   }
 
-  obtenerUsuarios(token: string): Observable<any> {
+  obtenerUsuarios(data: any): Observable<any> {
     const url = `${environment.urlWorker}/worker/obtenerUsuarios`;
-    const header = new HttpHeaders({ token });
+    const header = new HttpHeaders({
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(
       map((resp: Array<any>) => {
@@ -35,16 +38,39 @@ export class UserService {
 
   editarUsuario(data: any): Observable<any> {
     const url = `${environment.urlWorker}/worker/editarUsuario`;
-    const header = new HttpHeaders({ token: data.token, id: data.id });
+    const header = new HttpHeaders({
+      token: data.token,
+      id: data.id,
+      foranea: data.foranea,
+    });
 
     return this.http
       .put(url, data, { headers: header })
       .pipe(map((resp) => resp));
   }
 
+  editarPassword(data: any): Observable<any> {
+    const url = `${environment.urlWorker}/worker/editarPassword`;
+    const header = new HttpHeaders({ token: data.token });
+
+    return this.http
+      .put(url, data, { headers: header })
+      .pipe(map((resp) => resp));
+  }
+
+  recuperarPassword(data: any): Observable<any> {
+    const url = `${environment.urlWorker}/worker/recuperarPassword`;
+
+    return this.http.put(url, data).pipe(map((resp) => resp));
+  }
+
   eliminarUsuario(data: any): Observable<any> {
     const url = `${environment.urlWorker}/worker/eliminarUsuario`;
-    const header = new HttpHeaders({ token: data.token, id: data.id });
+    const header = new HttpHeaders({
+      token: data.token,
+      id: data.id,
+      foranea: data.foranea,
+    });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }
@@ -75,6 +101,20 @@ export class UserService {
 
     return this.http.post(url, { idUsuario }).pipe(
       map((resp) => {
+        return resp;
+      })
+    );
+  }
+
+  obtenerDistribucion(data: any): Observable<any> {
+    const url = `${environment.urlWorker}/worker/obtenerDistribucion`;
+    const header = new HttpHeaders({
+      token: data.token,
+      foranea: data.foranea,
+    });
+
+    return this.http.get(url, { headers: header }).pipe(
+      map((resp: Array<any>) => {
         return resp;
       })
     );

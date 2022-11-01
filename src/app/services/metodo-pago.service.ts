@@ -10,9 +10,12 @@ import { map } from 'rxjs/operators';
 export class MetodoPagoService {
   constructor(private http: HttpClient) {}
 
-  obtenerMetodos(token: string): Observable<any> {
+  obtenerMetodos(data: any): Observable<any> {
     const url = `${environment.urlMetodoPago}/metodoPago/obtenerTododsMetodos`;
-    const header = new HttpHeaders({ token });
+    const header = new HttpHeaders({
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(
       map((resp: any) => {
@@ -41,7 +44,11 @@ export class MetodoPagoService {
 
   editarMetodoID(data: any): Observable<any> {
     const url = `${environment.urlMetodoPago}/metodoPago/editarMetodo`;
-    const header = new HttpHeaders({ id: data.id, token: data.token });
+    const header = new HttpHeaders({
+      id: data.id,
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http
       .put(url, data, { headers: header })
@@ -50,7 +57,11 @@ export class MetodoPagoService {
 
   eliminarMetodoID(data: any): Observable<any> {
     const url = `${environment.urlMetodoPago}/metodoPago/eliminarMetodoID`;
-    const header = new HttpHeaders({ id: data.id, token: data.token });
+    const header = new HttpHeaders({
+      id: data.id,
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }

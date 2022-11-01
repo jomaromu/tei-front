@@ -22,9 +22,12 @@ export class SucursalService {
     );
   }
 
-  obtenerSucs(token: string): Observable<any> {
+  obtenerSucs(data: any): Observable<any> {
     const url = `${environment.urlSucursal}/sucursales/obtenerSucs`;
-    const header = new HttpHeaders({ token });
+    const header = new HttpHeaders({
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(
       map((resp: Array<any>) => {
@@ -44,7 +47,11 @@ export class SucursalService {
 
   eliminarSucursalID(data: any): Observable<any> {
     const url = `${environment.urlSucursal}/sucursales/eliminarSucursal`;
-    const header = new HttpHeaders({ token: data.token, id: data.id });
+    const header = new HttpHeaders({
+      token: data.token,
+      id: data.id,
+      foranea: data.foranea,
+    });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }

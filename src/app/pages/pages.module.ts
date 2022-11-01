@@ -5,20 +5,15 @@ import { RoutingPagesModule } from './routing-pages.module';
 import { RouterModule } from '@angular/router';
 
 // Componentes
-import { BitacoraComponent } from './bitacora/bitacora.component';
-import { FacturacionComponent } from './facturacion/facturacion.component';
-import { ReportesComponent } from './reportes/reportes.component';
-import { SharedModule } from '../shared/shared.module';
 
 // pipes
 
 @NgModule({
-  declarations: [BitacoraComponent, FacturacionComponent, ReportesComponent],
+  declarations: [],
   imports: [
     CommonModule,
     RoutingPagesModule,
     ReactiveFormsModule,
-    SharedModule,
     FormsModule,
     RouterModule,
   ],

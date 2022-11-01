@@ -13,4 +13,5 @@ export interface ArchivoDB {
   idCreador: string;
   fecha: string;
   ext: string;
+  foranea: string;
 }

@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 import { RolesRoutingModule } from './roles-routing.module';
-import { SharedModule } from 'src/app/shared/shared.module';
+import { SharedModule } from '../../../shared/shared.module';
+import { LoadingModule } from 'src/app/shared/loading/loading.module';
 
 import { RolesComponent } from './roles.component';
 
@@ -16,6 +17,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { AccordionModule } from 'primeng/accordion';
+import { CheckboxModule } from 'primeng/checkbox';
 
 // providers
 import { Validaciones } from '../../../classes/validaciones';
@@ -36,6 +38,8 @@ import { Validaciones } from '../../../classes/validaciones';
     DropdownModule,
     InputSwitchModule,
     AccordionModule,
+    CheckboxModule,
+    LoadingModule,
   ],
   providers: [Validaciones],
 })

@@ -21,9 +21,12 @@ export class ColorService {
     );
   }
 
-  obtenerColores(token: string): Observable<any> {
+  obtenerColores(data: any): Observable<any> {
     const url = `${environment.urlColor}/colores/obtenerColores`;
-    const header = new HttpHeaders({ token });
+    const header = new HttpHeaders({
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(
       map((resp: Array<any>) => {
@@ -43,7 +46,11 @@ export class ColorService {
 
   eliminarColor(data: any): Observable<any> {
     const url = `${environment.urlColor}/colores/eliminarColor`;
-    const header = new HttpHeaders({ id: data.id, token: data.token });
+    const header = new HttpHeaders({
+      id: data.id,
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }

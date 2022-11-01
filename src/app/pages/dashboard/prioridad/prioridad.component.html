@@ -1,5 +1,5 @@
-<app-menu></app-menu>
 <app-loading></app-loading>
+<app-menu></app-menu>
 
 <!-- TABLA PRIORIDAD -->
 <section id="wrap-prioridad">
@@ -43,6 +43,7 @@
 
     <!-- tabla -->
     <p-table
+      #dt
       [value]="prioridadesOrdendas"
       [rows]="10"
       [paginator]="true"
@@ -54,7 +55,23 @@
       currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} Prioridades"
       [rowsPerPageOptions]="[10, 25, 50]"
       [resizableColumns]="true"
+      [globalFilterFields]="['nombre']"
     >
+      <ng-template pTemplate="caption">
+        <div
+          style="display: flex; justify-content: flex-end; flex-direction: row"
+        >
+          <span class="p-input-icon-left ml-auto">
+            <i class="pi pi-search"></i>
+            <input
+              pInputText
+              type="text"
+              (input)="dt.filterGlobal($event.target.value, 'contains')"
+              placeholder="Nombre"
+            />
+          </span>
+        </div>
+      </ng-template>
       <ng-template pTemplate="header">
         <tr>
           <th>#</th>
@@ -112,6 +129,7 @@
     [resizable]="false"
     [style]="{ width: '500px' }"
     [breakpoints]="{ '530px': '95%' }"
+    (onHide)="closeDialog()"
   >
     <section id="wrap-form-prioridad">
       <!-- Nombre -->

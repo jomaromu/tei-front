@@ -10,9 +10,12 @@ import { map } from 'rxjs/operators';
 export class ClientesService {
   constructor(private http: HttpClient) {}
 
-  obtenerClientes(token: string): Observable<any> {
+  obtenerClientes(data: any): Observable<any> {
     const url = `${environment.urlClient}/client/obtenerTodosUsuarios`;
-    const header = new HttpHeaders({ token });
+    const header = new HttpHeaders({
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(
       map((resp: any) => {
@@ -37,6 +40,7 @@ export class ClientesService {
     const header = new HttpHeaders({
       token: data.token,
       criterio: data.criterio,
+      foranea: data.foranea,
     });
 
     return this.http.get(url, { headers: header }).pipe(
@@ -59,7 +63,11 @@ export class ClientesService {
 
   editarCliente(data: any): Observable<any> {
     const url = `${environment.urlClient}/client/editarUsuario`;
-    const header = new HttpHeaders({ token: data.token, id: data.id });
+    const header = new HttpHeaders({
+      token: data.token,
+      id: data.id,
+      foranea: data.foranea,
+    });
 
     return this.http
       .put(url, data, { headers: header })
@@ -68,7 +76,11 @@ export class ClientesService {
 
   eliminarCliente(data: any): Observable<any> {
     const url = `${environment.urlClient}/client/eliminarUsuario`;
-    const header = new HttpHeaders({ token: data.token, id: data.id });
+    const header = new HttpHeaders({
+      token: data.token,
+      id: data.id,
+      foranea: data.foranea,
+    });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }

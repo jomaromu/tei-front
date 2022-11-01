@@ -2,8 +2,11 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+// modulos
 import { OrigenPedidoRoutingModule } from './origen-pedido-routing.module';
 import { SharedModule } from '../../../shared/shared.module';
+import { LoadingModule } from 'src/app/shared/loading/loading.module';
+
 
 import { OrigenPedidoComponent } from './origen-pedido.component';
 
@@ -34,6 +37,7 @@ import { Validaciones } from '../../../classes/validaciones';
     InputTextModule,
     DropdownModule,
     InputSwitchModule,
+    LoadingModule
   ],
   providers: [Validaciones],
 })

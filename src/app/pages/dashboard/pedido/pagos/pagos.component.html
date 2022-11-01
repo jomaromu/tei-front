@@ -1,10 +1,10 @@
-<app-loading></app-loading>
+<!-- <app-loading></app-loading> -->
 
 <!-- INFORMACION DE PAGOS -->
 <p-fieldset legend="Información de pagos" [style]="{ marginBottom: '50px' }">
   <!-- TABLA PAGOS -->
   <section id="wrap-pagos">
-    <section id="wrap-tabla" class="card shaddow rounded">
+    <section id="wrap-tabla-pagos" class="card shaddow rounded">
       <!-- toolbar -->
       <p-toolbar
         [style]="{
@@ -37,6 +37,7 @@
         [showCurrentPageReport]="true"
         [autoLayout]="true"
         styleClass="p-datatable-striped"
+        [style]="{ position: 'relative' }"
         currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} pagos"
         [rowsPerPageOptions]="[5, 25, 50]"
         [resizableColumns]="true"
@@ -79,6 +80,28 @@
           </tr>
         </ng-template>
       </p-table>
+      <div id="footer-table">
+        <tr>
+          <td>Subtotal:</td>
+          <td>{{ totales?.subtotal || 0 | currency }}</td>
+        </tr>
+        <tr>
+          <td>ITBMS:</td>
+          <td>{{ totales?.itbms || 0 | currency }}</td>
+        </tr>
+        <tr>
+          <td>Total:</td>
+          <td>{{ totales?.total || 0 | currency }}</td>
+        </tr>
+        <tr>
+          <td>Pagos:</td>
+          <td>{{ totales?.pagos || 0 | currency }}</td>
+        </tr>
+        <tr>
+          <td>Saldo:</td>
+          <td>{{ totales?.saldo || 0 | currency }}</td>
+        </tr>
+      </div>
     </section>
   </section>
 </p-fieldset>
@@ -110,7 +133,7 @@
           }"
         >
         </p-dropdown>
-        <label for="inputtext">Modalidad de pago</label>
+        <label for="inputtext">Mod. de pago</label>
       </span>
 
       <!-- Métodos de pago -->
@@ -127,10 +150,10 @@
           }"
         >
         </p-dropdown>
-        <label for="inputtext">Método de pago</label>
+        <label for="inputtext">Mét. de pago</label>
       </span>
 
-      <!-- Moonto de pago -->
+      <!-- Monto de pago -->
       <span class="p-float-label">
         <p-inputNumber
           mode="currency"
@@ -160,7 +183,7 @@
       </div> -->
     </section>
 
-    <ng-template pTemplate="footer">
+    <div id="footer">
       <button
         pButton
         pRipple
@@ -177,7 +200,7 @@
         class="p-button-text"
         (click)="btnGuardar()"
       ></button>
-    </ng-template>
+    </div>
   </p-dialog>
 </form>
 

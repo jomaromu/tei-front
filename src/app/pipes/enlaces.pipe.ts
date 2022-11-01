@@ -7,7 +7,8 @@ import { ArchivoDB } from '../interfaces/archivo';
 })
 export class EnlacesPipe implements PipeTransform {
   transform(ruta: ArchivoDB): string {
-    const archivo = `${ruta.nombre}.${ruta.ext}`;
+    // console.log(ruta);
+    const archivo = `${ruta.foranea}/${ruta.nombre}.${ruta.ext}`;
     const url = `${environment.urlArchivos}/archivo/abrirArchivo?archivo=${archivo}`;
     return url;
   }

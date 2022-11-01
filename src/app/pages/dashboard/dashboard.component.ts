@@ -10,7 +10,6 @@ import { AppState } from '../../reducers/globarReducers';
 
 import anime from 'animejs/lib/anime.es.js';
 import { timer } from 'rxjs';
-import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
@@ -41,7 +40,7 @@ export class DashboardComponent implements OnInit {
         const close = sidebar.querySelector('#close') as HTMLElement;
 
         if (sidebar) {
-          if (anchoWindow < 576) {
+          if (anchoWindow <= 576) {
             sidebar.style.position = 'absolute';
             sidebar.style.zIndex = '999';
             close.style.display = 'block';

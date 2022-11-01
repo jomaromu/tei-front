@@ -10,9 +10,12 @@ import { map } from 'rxjs/operators';
 export class ModadlidadService {
   constructor(private http: HttpClient) {}
 
-  obtenerModalidades(token: string): Observable<any> {
+  obtenerModalidades(data: any): Observable<any> {
     const url = `${environment.urlModalidad}/modalidadPago/obtenerModalidades`;
-    const header = new HttpHeaders({ token });
+    const header = new HttpHeaders({
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(
       map((resp: any) => {
@@ -50,7 +53,11 @@ export class ModadlidadService {
 
   eliminarModalidad(data: any): Observable<any> {
     const url = `${environment.urlModalidad}/modalidadPago/eliminarModalidad`;
-    const header = new HttpHeaders({ id: data.id, token: data.token });
+    const header = new HttpHeaders({
+      id: data.id,
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }

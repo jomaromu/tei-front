@@ -2,8 +2,10 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+// modulos
 import { EtapasRoutingModule } from './etapas-routing.module';
 import { SharedModule } from '../../../shared/shared.module';
+import { LoadingModule } from 'src/app/shared/loading/loading.module';
 
 import { EtapasComponent } from './etapas.component';
 
@@ -36,6 +38,7 @@ import { Validaciones } from '../../../classes/validaciones';
     DropdownModule,
     InputSwitchModule,
     OrderListModule,
+    LoadingModule,
   ],
   providers: [Validaciones],
 })

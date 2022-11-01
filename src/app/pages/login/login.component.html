@@ -1,3 +1,5 @@
+<app-loading></app-loading>
+
 <!-- style="display: none" -->
 <div
   class="alert alert-danger text-center animate__animated animate__fadeInDown animate__faster"
@@ -19,7 +21,7 @@
   <div id="form-login" class="contenedores-login">
     <form [formGroup]="formulario" (ngSubmit)="entrar()">
       <img
-        src="../../../assets/tei-scaled.png"
+        src="../../../assets/logo.png"
         alt="Todo en Impresiones - Logo"
         title="TEI"
       />
@@ -58,7 +60,9 @@
           />
 
           <div id="txt-olvide-pass">
-            <label class="chk-password">Olvidé mi contraseña</label>
+            <label class="chk-password" role="button" (click)="recuperarPass()"
+              >Olvidé mi contraseña</label
+            >
           </div>
 
           <div id="button-submit">
@@ -69,3 +73,61 @@
     </form>
   </div>
 </div>
+
+<!-- DIALOG RESET PASSWORD -->
+<form [formGroup]="formaResetPass">
+  <p-dialog
+    header="Recuperar contraseña"
+    [(visible)]="displayDialog"
+    [modal]="true"
+    [draggable]="true"
+    [resizable]="false"
+    [style]="{ width: '500px' }"
+    (onHide)="closeDialog()"
+  >
+    <section id="wrap-form-login">
+      <!-- Password  -->
+      <div class="field flex-column" style="width: '100%'; grid-column: 1 / 3">
+        <span class="p-float-label">
+          <input
+            pInputText
+            id="float-input"
+            type="email"
+            promptLabel="Ingrese su correo"
+            formControlName="email"
+            style="height: 40px; padding: 7px; width: 250px"
+          />
+          <label for="float-input">Ingrese su correo</label>
+        </span>
+        <small
+          *ngIf="
+            !validarRecuperarPass.valido &&
+            formaResetPass.controls.email.touched
+          "
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarRecuperarPass.mensaje }}</small
+        >
+      </div>
+    </section>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        pRipple
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="closeDialog()"
+      ></button>
+      <button
+        pButton
+        pRipple
+        label="Recuperar"
+        icon="pi pi-check"
+        class="p-button-text"
+        (click)="btnRecuperarPass()"
+      ></button>
+    </ng-template>
+  </p-dialog>
+</form>

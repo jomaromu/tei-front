@@ -28,13 +28,13 @@ export class CategoriasComponent implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private categoriaService: CategoriaService,
     private validadores: Validaciones,
-    private categoriaSocketService: CategoriaSocketService
+    // private categoriaSocketService: CategoriaSocketService
   ) {}
 
   ngOnInit(): void {
     this.crearFormulario();
     this.cargarCategorias();
-    this.crearCategoriaSocket();
+
   }
 
   crearFormulario(): void {
@@ -50,28 +50,39 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   cargarCategorias(): void {
+    this.store.dispatch(loadingActions.cargarLoading());
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.categoriaService
-          .obtenerCategorias(usuario.token)
-          .subscribe((categorias: Categoria) => {
-            this.store.dispatch(loadingActions.cargarLoading());
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
 
-            if (categorias.ok) {
-              this.categorias = categorias.categoriasDB;
-              this.store.dispatch(loadingActions.quitarLoading());
-            } else {
-              Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+          this.categoriaService
+            .obtenerCategorias(data)
+            .subscribe((categorias: Categoria) => {
+              if (categorias.ok) {
+                this.categorias = categorias.categoriasDB;
+                this.store.dispatch(loadingActions.quitarLoading());
+              } else {
+                Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
 
-            if (!categorias) {
-              Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+              if (!categorias) {
+                Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
+            });
+        }
       });
   }
 
@@ -119,7 +130,7 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       } else {
         if (tipo === 'crear') {
           this.crearCategoria();
-          this.crearCategoriaSocket();
+
         }
 
         if (tipo === 'editar') {
@@ -130,75 +141,87 @@ export class CategoriasComponent implements OnInit, OnDestroy {
   }
 
   crearCategoria(): void {
+    // this.store.dispatch(loadingActions.cargarLoading());;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearCategoria = {
-          nombre: this.forma.controls.nombre.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearCategoria = {
+            nombre: this.forma.controls.nombre.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        this.categoriaService
-          .crearCategoria(data)
-          .subscribe((categoria: any) => {
-            this.store.dispatch(loadingActions.cargarLoading());
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
 
-            if (categoria.ok) {
-              this.store.dispatch(loadingActions.quitarLoading());
-              this.displayDialogCrear = false;
-              Swal.fire('Mensaje', 'Categoría creada', 'success');
-              this.cargarCategorias();
-              this.limpiarFormulario();
-            } else {
-              Swal.fire(
-                'Mensaje',
-                `Error al crear categoría: ${categoria.err.message}`,
-                'error'
-              );
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          this.categoriaService
+            .crearCategoria(data)
+            .subscribe((categoria: any) => {
+              if (categoria.ok) {
+                this.displayDialogCrear = false;
+                Swal.fire('Mensaje', 'Categoría creada', 'success');
+                this.cargarCategorias();
+                this.limpiarFormulario();
+              } else {
+                Swal.fire(
+                  'Mensaje',
+                  `Error al crear categoría: ${categoria.err.message}`,
+                  'error'
+                );
+              }
 
-            if (!categoria) {
-              Swal.fire('Mensaje', 'Error al crear categoría', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+              if (!categoria) {
+                Swal.fire('Mensaje', 'Error al crear categoría', 'error');
+              }
+            });
+        }
       });
   }
 
   editarCategoria(): void {
+    // this.store.dispatch(loadingActions.cargarLoading());;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearCategoria = {
-          nombre: this.forma.controls.nombre.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-          id: this.categoria._id,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearCategoria = {
+            nombre: this.forma.controls.nombre.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            id: this.categoria._id,
+            foranea: '',
+          };
 
-        this.store.dispatch(loadingActions.cargarLoading());
-        this.categoriaService
-          .editarCategoriaID(data)
-          .subscribe((categoria: Categoria) => {
-            if (categoria.ok) {
-              this.displayDialogEditar = false;
-              Swal.fire('Mensaje', 'Categoría editada', 'success');
-              this.cargarCategorias();
-              this.limpiarFormulario();
-            } else {
-              Swal.fire('Mensaje', 'Error al editar categoría', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
 
-            if (!categoria) {
-              Swal.fire('Mensaje', 'Error al editar categoría', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+          this.categoriaService
+            .editarCategoriaID(data)
+            .subscribe((categoria: Categoria) => {
+              if (categoria.ok) {
+                this.displayDialogEditar = false;
+                Swal.fire('Mensaje', 'Categoría editada', 'success');
+                this.cargarCategorias();
+                this.limpiarFormulario();
+              } else {
+                Swal.fire('Mensaje', `${categoria?.err?.message}`, 'error');
+              }
+
+              if (!categoria) {
+                Swal.fire('Mensaje', 'Error al editar categoría', 'error');
+              }
+            });
+        }
       });
   }
 
@@ -214,52 +237,49 @@ export class CategoriasComponent implements OnInit, OnDestroy {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.store.dispatch(loadingActions.cargarLoading());
-
+        // this.store.dispatch(loadingActions.cargarLoading());;
         this.store
           .select('login')
           .pipe(first())
           .subscribe((usuario) => {
-            const data = {
-              id: categoria._id,
-              token: usuario.token,
-            };
+            if (usuario.usuarioDB) {
+              const data = {
+                id: categoria._id,
+                token: usuario.token,
+                foranea: '',
+              };
 
-            this.categoriaService
-              .eliminarCategoriaID(data)
-              .subscribe((categoria: Categoria) => {
-                if (categoria.ok) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Categoría borrada', 'success');
-                  this.cargarCategorias();
-                  this.limpiarFormulario();
-                } else {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar categoría', 'error');
-                }
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
 
-                if (!categoria) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar categoría', 'error');
-                }
-              });
+              this.categoriaService
+                .eliminarCategoriaID(data)
+                .subscribe((categoria: Categoria) => {
+                  if (categoria.ok) {
+                    Swal.fire('Mensaje', 'Categoría borrada', 'success');
+                    this.cargarCategorias();
+                    this.limpiarFormulario();
+                  } else {
+                    Swal.fire('Mensaje', `${categoria?.err?.message}`, 'error');
+                  }
+
+                  if (!categoria) {
+                    Swal.fire('Mensaje', 'Error al borrar categoría', 'error');
+                  }
+                });
+            }
           });
       }
     });
   }
 
-  // sockets
-  crearCategoriaSocket(): void {
-    this.categoriaSocketService
-      .escuchar('cargar-categorias')
-      .subscribe((categorias) => {
-        // console.log('ok');
-        this.cargarCategorias();
-      });
-  }
+
 
   ngOnDestroy(): void {
-    this.categoriaSocketService.destruirSocket('cargar-categorias');
+    // this.categoriaSocketService.destruirSocket('cargar-categorias');
   }
 }
 
@@ -268,6 +288,7 @@ interface CrearCategoria {
   estado: boolean;
   token: string;
   id?: string;
+  foranea: string;
 }
 
 /*

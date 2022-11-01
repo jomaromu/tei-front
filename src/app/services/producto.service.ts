@@ -10,9 +10,12 @@ import { environment } from '../../environments/environment';
 export class ProductoService {
   constructor(private http: HttpClient) {}
 
-  obtenerProductos(token: string): Observable<any> {
+  obtenerProductos(data: any): Observable<any> {
     const url = `${environment.urlProducto}/product/obtenerProductos`;
-    const header = new HttpHeaders({ token });
+    const header = new HttpHeaders({
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(
       map((resp: any) => {
@@ -42,7 +45,11 @@ export class ProductoService {
 
   eliminarProductoID(data: any): Observable<any> {
     const url = `${environment.urlProducto}/product/eliminarProducto`;
-    const header = new HttpHeaders({ id: data.id, token: data.token });
+    const header = new HttpHeaders({
+      id: data.id,
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }
@@ -62,6 +69,7 @@ export class ProductoService {
     const header = new HttpHeaders({
       token: data.token,
       criterio: data.criterio,
+      foranea: data.foranea,
     });
 
     return this.http.get(url, { headers: header }).pipe(map((resp) => resp));

@@ -21,9 +21,12 @@ export class EtapasService {
     );
   }
 
-  obtenerEtapas(token: string): Observable<any> {
+  obtenerEtapas(data: any): Observable<any> {
     const url = `${environment.urlEtapa}/etapas/obtenerEtapas`;
-    const header = new HttpHeaders({ token });
+    const header = new HttpHeaders({
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(
       map((resp: any) => {
@@ -43,7 +46,11 @@ export class EtapasService {
 
   eliminarEtapa(data: any): Observable<any> {
     const url = `${environment.urlEtapa}/etapas/eliminarEtapa`;
-    const header = new HttpHeaders({ token: data.token, id: data.id });
+    const header = new HttpHeaders({
+      token: data.token,
+      id: data.id,
+      foranea: data.foranea,
+    });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }
@@ -53,6 +60,7 @@ export class EtapasService {
     const header = new HttpHeaders({
       token: data.token,
       colEtapas: data.colEtapas,
+      foranea: data.foranea,
     });
 
     return this.http.get(url, { headers: header }).pipe(
@@ -64,7 +72,10 @@ export class EtapasService {
 
   actualizarEtapasOrdenadas(data: any): Observable<any> {
     const url = `${environment.urlEtapa}/etapas/actualizarEtapasOrdenadas`;
-    const header = new HttpHeaders({ token: data.token });
+    const header = new HttpHeaders({
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http
       .put(url, data, { headers: header })

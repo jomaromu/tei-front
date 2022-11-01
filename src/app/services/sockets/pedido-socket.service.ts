@@ -19,12 +19,12 @@ export class PedidoSocketService {
   checkStatus(): void {
     // escuchar el servidor
     this.socketPedido.on('connect', () => {
-      console.log('Conectado al socket de pedido');
+      console.log('Conectado al socket de pedidos');
       this.socketStatus = true;
     });
 
     this.socketPedido.on('disconnect', () => {
-      console.log('Desconectado del socket de pedido');
+      console.log('Desconectado del socket de pedidos');
       this.socketStatus = false;
     });
   }

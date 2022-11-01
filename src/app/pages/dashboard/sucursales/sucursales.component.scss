@@ -68,3 +68,11 @@
 .p-dropdown {
   width: 100%;
 }
+
+.btn-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 25px;
+}

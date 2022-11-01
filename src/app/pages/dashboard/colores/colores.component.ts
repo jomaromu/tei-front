@@ -26,14 +26,12 @@ export class ColoresComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private validadores: Validaciones,
     private store: Store<AppState>,
-    private colorService: ColorService,
-    private colorSocketService: ColorSocketService
+    private colorService: ColorService // private colorSocketService: ColorSocketService
   ) {}
 
   ngOnInit(): void {
     this.crearFormulario();
     this.cargarColores();
-    this.crearColoresSocket();
   }
 
   crearFormulario(): void {
@@ -51,30 +49,41 @@ export class ColoresComponent implements OnInit, OnDestroy {
   }
 
   cargarColores(): void {
+    this.store.dispatch(loadingActions.cargarLoading());
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.colorService
-          .obtenerColores(usuario.token)
-          .subscribe((colores: Colores) => {
-            this.store.dispatch(loadingActions.cargarLoading());
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
 
-            if (colores.ok) {
-              this.colores = colores.coloresDB;
-              // console.log(colores);
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+          this.colorService
+            .obtenerColores(data)
+            .subscribe((colores: Colores) => {
+              if (colores.ok) {
+                this.colores = colores.coloresDB;
+                // console.log(colores);
 
-              this.store.dispatch(loadingActions.quitarLoading());
-            } else {
-              Swal.fire('Mensaje', 'Error al cargar colores', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+                this.store.dispatch(loadingActions.quitarLoading());
+              } else {
+                Swal.fire('Mensaje', 'Error al cargar colores', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
 
-            if (!colores) {
-              Swal.fire('Mensaje', 'Error al cargar colores', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+              if (!colores) {
+                Swal.fire('Mensaje', 'Error al cargar colores', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
+            });
+        }
       });
   }
 
@@ -124,7 +133,6 @@ export class ColoresComponent implements OnInit, OnDestroy {
       } else {
         if (tipo === 'crear') {
           this.crearColor();
-          this.crearColoresSocket();
         }
 
         if (tipo === 'editar') {
@@ -135,74 +143,87 @@ export class ColoresComponent implements OnInit, OnDestroy {
   }
 
   crearColor(): void {
+    // // this.store.dispatch(loadingActions.cargarLoading());;;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearColor = {
-          nombre: this.forma.controls.nombre.value,
-          color: this.forma.controls.color.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearColor = {
+            nombre: this.forma.controls.nombre.value,
+            color: this.forma.controls.color.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        this.colorService.crearColor(data).subscribe((color: Colores) => {
-          // return;
-          this.store.dispatch(loadingActions.cargarLoading());
-
-          if (color.ok) {
-            this.store.dispatch(loadingActions.quitarLoading());
-            this.displayDialogCrear = false;
-            Swal.fire('Mensaje', 'Color creado', 'success');
-            this.cargarColores();
-            this.limpiarFormulario();
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
           } else {
-            Swal.fire(
-              'Mensaje',
-              `Error al crear un color: ${color.mensaje}`,
-              'error'
-            );
-            this.store.dispatch(loadingActions.quitarLoading());
+            data.foranea = usuario.usuarioDB.foranea;
           }
 
-          if (!color) {
-            Swal.fire('Mensaje', 'Error al crear un color', 'error');
-            this.store.dispatch(loadingActions.quitarLoading());
-          }
-        });
+          this.colorService.crearColor(data).subscribe((color: Colores) => {
+            // return;
+
+            if (color.ok) {
+              this.displayDialogCrear = false;
+              Swal.fire('Mensaje', 'Color creado', 'success');
+              this.cargarColores();
+              this.limpiarFormulario();
+            } else {
+              Swal.fire(
+                'Mensaje',
+                `Error al crear un color: ${color.err.message}`,
+                'error'
+              );
+            }
+
+            if (!color) {
+              Swal.fire('Mensaje', 'Error al crear un color', 'error');
+            }
+          });
+        }
       });
   }
 
   editarColor(): void {
+    // // this.store.dispatch(loadingActions.cargarLoading());;;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearColor = {
-          nombre: this.forma.controls.nombre.value,
-          color: this.forma.controls.color.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-          id: this.color._id,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearColor = {
+            nombre: this.forma.controls.nombre.value,
+            color: this.forma.controls.color.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            id: this.color._id,
+            foranea: '',
+          };
 
-        this.store.dispatch(loadingActions.cargarLoading());
-        this.colorService.editarColor(data).subscribe((color: Colores) => {
-          if (color.ok) {
-            this.displayDialogEditar = false;
-            Swal.fire('Mensaje', 'Color editado', 'success');
-            this.cargarColores();
-            this.limpiarFormulario();
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
           } else {
-            Swal.fire('Mensaje', 'Error al editar color', 'error');
-            this.store.dispatch(loadingActions.quitarLoading());
+            data.foranea = usuario.usuarioDB.foranea;
           }
 
-          if (!color) {
-            Swal.fire('Mensaje', 'Error al editar color', 'error');
-            this.store.dispatch(loadingActions.quitarLoading());
-          }
-        });
+          this.colorService.editarColor(data).subscribe((color: Colores) => {
+            if (color.ok) {
+              this.displayDialogEditar = false;
+              Swal.fire('Mensaje', 'Color editado', 'success');
+              this.cargarColores();
+              this.limpiarFormulario();
+            } else {
+              Swal.fire('Mensaje', `${color.err.message}`, 'error');
+            }
+
+            if (!color) {
+              Swal.fire('Mensaje', 'Error al editar color', 'error');
+            }
+          });
+        }
       });
   }
 
@@ -218,49 +239,48 @@ export class ColoresComponent implements OnInit, OnDestroy {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.store.dispatch(loadingActions.cargarLoading());
+        // // this.store.dispatch(loadingActions.cargarLoading());;;
 
         this.store
           .select('login')
-          .pipe(first())
+          // .pipe(first())
           .subscribe((usuario) => {
-            const data = {
-              id: color._id,
-              token: usuario.token,
-            };
+            if (usuario.usuarioDB) {
+              const data = {
+                id: color._id,
+                token: usuario.token,
+                foranea: '',
+              };
 
-            this.colorService
-              .eliminarColor(data)
-              .subscribe((color: Colores) => {
-                if (color.ok) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Color borrado', 'success');
-                  this.cargarColores();
-                  this.limpiarFormulario();
-                } else {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar color', 'error');
-                }
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
 
-                if (!color) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar color', 'error');
-                }
-              });
+              this.colorService
+                .eliminarColor(data)
+                .subscribe((color: Colores) => {
+                  if (color.ok) {
+                    Swal.fire('Mensaje', 'Color borrado', 'success');
+                    this.cargarColores();
+                    this.limpiarFormulario();
+                  } else {
+                    Swal.fire('Mensaje', `${color.err.message}`, 'error');
+                  }
+
+                  if (!color) {
+                    Swal.fire('Mensaje', 'Error al borrar color', 'error');
+                  }
+                });
+            }
           });
       }
     });
   }
 
-  // sockets
-  crearColoresSocket(): void {
-    this.colorSocketService.escuchar('cargar-colores').subscribe((clientes) => {
-      this.cargarColores();
-    });
-  }
-
   ngOnDestroy(): void {
-    this.colorSocketService.destruirSocket('cargar-colores');
+    // this.colorSocketService.destruirSocket('cargar-colores');
   }
 }
 
@@ -270,6 +290,7 @@ interface CrearColor {
   color: string;
   token: string;
   id?: any;
+  foranea: string;
 }
 
 /*

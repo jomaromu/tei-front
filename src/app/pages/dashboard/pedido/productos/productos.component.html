@@ -1,5 +1,7 @@
+<!-- <app-loading></app-loading> -->
+
 <!-- FORM PRODUCTO -->
-<form [formGroup]="forma">
+<form id="formulario" [formGroup]="forma">
   <!-- INFORMACION DEL PRODUCTO -->
   <p-fieldset
     legend="Información del producto"
@@ -11,7 +13,7 @@
         <span class="p-float-label">
           <p-dropdown
             id="p-dropdown"
-            [style]="{ width: '100%', height: '100%' }"
+            [style]="{ width: '100%', height: '50px' }"
             [options]="productos"
             optionLabel="nombre"
             formControlName="producto"
@@ -31,7 +33,7 @@
       <div class="wrap-inputs">
         <span class="p-float-label">
           <p-inputNumber
-            [style]="{ width: '100%' }"
+            [style]="{ width: '100%', height: '50px' }"
             [useGrouping]="false"
             formControlName="cantidad"
             placeholder=" "
@@ -50,7 +52,7 @@
       <div class="wrap-inputs">
         <span class="p-float-label">
           <p-inputNumber
-            [style]="{ width: '100%' }"
+            [style]="{ width: '100%', height: '50px' }"
             mode="currency"
             currency="USD"
             locale="en-US"
@@ -144,7 +146,7 @@
         <td colspan="4"></td>
         <!-- <td style="font-size: 1.3rem">{{ totales?.subtotal | currency }}</td> -->
 
-        <td style="font-size: 1.3rem">{{ totales?.itmbs | currency }}</td>
+        <td style="font-size: 1.3rem">{{ totales?.itbms | currency }}</td>
         <td style="font-size: 1.3rem">{{ totales?.total | currency }}</td>
         <td></td>
       </tr>

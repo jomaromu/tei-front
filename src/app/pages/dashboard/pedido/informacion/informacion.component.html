@@ -1,5 +1,7 @@
+<!-- <app-loading></app-loading> -->
+
 <!-- FORM INFORMACION -->
-<form [formGroup]="formaInfo">
+<form id="formulario" [formGroup]="formaInfo">
   <!-- INFORMACION DEL CLIENTE -->
   <p-fieldset
     legend="Información del cliente"
@@ -7,12 +9,15 @@
   >
     <div id="wrap-info-cliente" class="wrap-info">
       <!-- nombre cliente -->
-      <div class="p-inputgroup">
+      <div
+        class="p-inputgroup"
+        *ngIf="usuario?.role?.restricciones?.pedido?.informacion?.verCliente"
+      >
         <span class="p-inputgroup-addon"><i class="pi pi-user"></i></span>
         <input
           type="text"
-          value="{{ pedido?.cliente?.nombre || 'Cliente no existe' }} - {{
-            pedido?.idReferencia
+          value="{{ pedido?.idReferencia }} - {{
+            pedido?.cliente?.nombre || 'Cliente no existe'
           }}"
           [disabled]="true"
           pInputText
@@ -21,7 +26,10 @@
       </div>
 
       <!-- telefono cliente -->
-      <div class="p-inputgroup">
+      <div
+        class="p-inputgroup"
+        *ngIf="usuario?.role?.restricciones?.pedido?.informacion?.verTelefono"
+      >
         <span class="p-inputgroup-addon"><i class="pi pi-phone"></i></span>
         <input
           type="text"
@@ -33,7 +41,10 @@
       </div>
 
       <!-- correo cliente -->
-      <div class="p-inputgroup">
+      <div
+        class="p-inputgroup"
+        *ngIf="usuario?.role?.restricciones?.pedido?.informacion?.verCorreo"
+      >
         <span class="p-inputgroup-addon"><i class="pi pi-at"></i></span>
         <input
           type="text"
@@ -54,6 +65,7 @@
         [style]="{ height: '45px' }"
         [disabled]="!pedido?.cliente"
         [ngClass]="{ 'cursor-pointer': !pedido?.cliente }"
+        *ngIf="usuario?.role?.restricciones?.pedido?.informacion?.editarCliente"
       ></button>
     </div>
   </p-fieldset>
@@ -73,7 +85,7 @@
       </span>
 
       <!-- fecha entrega -->
-      <span class="p-float-label">
+      <span class="p-float-label" style="width: 100%">
         <p-calendar
           [style]="{ width: '100%' }"
           showButtonBar="true"
@@ -120,6 +132,7 @@
             'ng-invalid':
               !validarEtapas.valido && formaInfo.controls.etapa.touched
           }"
+          (onChange)="filtrarEtapas()"
           formControlName="etapa"
         >
         </p-dropdown>
@@ -127,37 +140,54 @@
       </span>
 
       <!-- diseñador -->
-      <span class="p-float-label">
+      <div class="p-inputgroup" style="width: 100%">
+        <button
+          type="button"
+          (click)="mostrarDistribucion()"
+          pButton
+          pRipple
+          icon="pi pi-eye"
+          [disabled]="
+            !usuario?.role?.restricciones?.pedido?.informacion?.diseniador
+              ?.verDistribucion
+          "
+        ></button>
+
         <p-dropdown
-          [style]="{ width: '100%', height: '100%' }"
+          [style]="{
+            width: '100%',
+            height: '100%',
+            borderTopLeftRadius: '0',
+            borderTopBottomRadius: '0'
+          }"
           [options]="diseniadores"
           optionLabel="nombre"
           [showClear]="true"
-          placeholder=" "
+          placeholder="Diseñador"
           formControlName="diseniador"
         >
         </p-dropdown>
-        <label for="float-input">Diseñador</label>
-      </span>
+      </div>
 
       <!-- colores -->
       <span class="p-float-label">
         <p-dropdown
-          [style]="{ width: '100%', height: '100%' }"
+          [style]="{ width: '100%', height: '50px' }"
           [options]="colores"
           optionLabel="nombre"
           [showClear]="true"
           placeholder=" "
           formControlName="color"
+          (onChange)="filtrarEstados()"
         >
         </p-dropdown>
-        <label for="float-input">Colores</label>
+        <label for="float-input">Estado</label>
       </span>
 
       <!-- origen -->
       <span class="p-float-label">
         <p-dropdown
-          [style]="{ width: '100%', height: '100%' }"
+          [style]="{ width: '100%', height: '50px' }"
           [options]="origenes"
           optionLabel="nombre"
           [showClear]="true"
@@ -171,7 +201,7 @@
       <!-- vendedor -->
       <span class="p-float-label">
         <p-dropdown
-          [style]="{ width: '100%', height: '100%' }"
+          [style]="{ width: '100%', height: '50px' }"
           [options]="vendedores"
           optionLabel="nombre"
           [showClear]="true"
@@ -206,19 +236,25 @@
     <!-- <button
       pButton
       pRipple
-      label="Cancelar"
-      icon="pi pi-times"
-      class="p-button-text"
-      (click)="closeDialog()"
+      label="Historial cambios"
+      icon="pi pi-history"
+      class="p-button-text p-button-help"
+      (click)="obtenerHistorial()"
     ></button> -->
-    <button
+    <p-splitButton
+      label="Acciones"
+      icon="pi pi-check"
+      [model]="items"
+      styleClass="p-button-text mr-2 mb-2"
+    ></p-splitButton>
+    <!-- <button
       pButton
       pRipple
       label="Guardar cambios"
       icon="pi pi-check"
       class="p-button-text"
       (click)="btnGuardarInfo()"
-    ></button>
+    ></button> -->
   </div>
 </form>
 
@@ -401,3 +437,102 @@
     </ng-template>
   </p-dialog>
 </form>
+
+<!-- DIALOG DISTRIBUCION -->
+<p-dialog
+  header="Diseñadores"
+  [(visible)]="displayDialogDist"
+  [modal]="true"
+  [draggable]="true"
+  [resizable]="false"
+  [breakpoints]="{ '530px': '95%' }"
+>
+  <!-- tabla -->
+  <p-table
+    [value]="distribucion"
+    [rows]="10"
+    [paginator]="true"
+    selectionMode="single"
+    responsiveLayout="scroll"
+    [showCurrentPageReport]="true"
+    [autoLayout]="true"
+    styleClass="p-datatable-striped"
+    currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} Diseñadores"
+    [resizableColumns]="true"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nombre</th>
+        <th>Apellido</th>
+        <th>Teléfono</th>
+        <th>Pedidos asignados</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-dist let-i="rowIndex">
+      <tr>
+        <td>{{ dist?.nombre }}</td>
+        <td>{{ dist?.apellido }}</td>
+        <td>{{ dist?.telefono || "Sin teléfono" }}</td>
+        <td>{{ dist?.pedidos?.pedidos || 0 }}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-dialog>
+
+<!-- DIALOG HISTORIAL -->
+<p-dialog
+  header="Historial"
+  [(visible)]="displayDialogHist"
+  [modal]="true"
+  [draggable]="true"
+  [resizable]="false"
+  [breakpoints]="{ '530px': '95%' }"
+  [style]="{ maxWidth: '700px' }"
+>
+  <!-- tabla -->
+  <p-table
+    [value]="historiales"
+    [rows]="10"
+    [paginator]="true"
+    selectionMode="single"
+    responsiveLayout="scroll"
+    [showCurrentPageReport]="true"
+    [autoLayout]="true"
+    styleClass="p-datatable-striped"
+    currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} Historiales"
+    [resizableColumns]="true"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nombre</th>
+        <th>Prioridad Orig.</th>
+        <th>Prioridad Act.</th>
+        <th>Etapa Orig.</th>
+        <th>Etapa Act.</th>
+        <th>Estado Orig.</th>
+        <th>Estado Act.</th>
+        <th>Vendedor Act.</th>
+        <th>Vendedor Orig.</th>
+        <th>Diseñador Act.</th>
+        <th>Diseñador Orig.</th>
+        <th>Fecha</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-historial let-i="rowIndex">
+      <tr>
+        <td>{{ historial?.usuario?.nombre }}</td>
+        <td>{{ historial?.priorOrg?.nombre }}</td>
+        <td>{{ historial?.priorAct?.nombre }}</td>
+        <td>{{ historial?.etapaOrg?.nombre }}</td>
+        <td>{{ historial?.etapaAct?.nombre }}</td>
+        <td>{{ historial?.estadoOrg?.nombre || "Sin estado" }}</td>
+        <td>{{ historial?.estadoAct?.nombre || "Sin estado" }}</td>
+        <td>{{ historial?.vendedorAct?.nombre }}</td>
+        <td>{{ historial?.vendedorOrg?.nombre }}</td>
+        <td>{{ historial?.diseniadorAct?.nombre }}</td>
+        <td>{{ historial?.diseniadorOrg?.nombre }}</td>
+        <td>{{ historial?.fecha }}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-dialog>

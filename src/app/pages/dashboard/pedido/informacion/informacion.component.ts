@@ -1,29 +1,37 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { timer } from 'rxjs';
 import { first, take } from 'rxjs/operators';
-import { Validaciones, ValidarTexto } from 'src/app/classes/validaciones';
-import { Cliente, UsuariosDB } from 'src/app/interfaces/clientes';
-import { ColorDB, Colores } from 'src/app/interfaces/colores';
-import { EtapaDB, EtapaOrdenada } from 'src/app/interfaces/etapas';
-import { OrigenPedido } from 'src/app/interfaces/origen-pedido';
-import { Pedido, PedidoDB } from 'src/app/interfaces/pedido';
-import { PrioridadDB, PrioridadOrdenada } from 'src/app/interfaces/prioridad';
-import { Usuario, UsuarioWorker } from 'src/app/interfaces/resp-worker';
-import { Sucursal, SucursalDB } from 'src/app/interfaces/sucursales';
-import { AppState } from 'src/app/reducers/globarReducers';
-import { ClientesService } from 'src/app/services/clientes.service';
-import { ColorService } from 'src/app/services/color.service';
-import { EtapasService } from 'src/app/services/etapas.service';
-import { OrigenPedidoService } from 'src/app/services/origen-pedido.service';
-import { PedidoService } from 'src/app/services/pedido.service';
-import { PrioridadService } from 'src/app/services/prioridad.service';
-import { SucursalService } from 'src/app/services/sucursal.service';
-import { UserService } from 'src/app/services/user.service';
+import { Validaciones, ValidarTexto } from '../../../../classes/validaciones';
+import { Cliente, UsuariosDB } from '../../../../interfaces/clientes';
+import { ColorDB, Colores } from '../../../../interfaces/colores';
+import { EtapaDB, EtapaOrdenada } from '../../../../interfaces/etapas';
+import { OrigenPedido } from '../../../../interfaces/origen-pedido';
+import { Pedido, PedidoDB } from '../../../../interfaces/pedido';
+import {
+  PrioridadDB,
+  PrioridadOrdenada,
+} from '../../../../interfaces/prioridad';
+import { Usuario, UsuarioWorker } from '../../../../interfaces/resp-worker';
+import { Sucursal, SucursalDB } from '../../../../interfaces/sucursales';
+import { AppState } from '../../../../reducers/globarReducers';
+import { ClientesService } from '../../../../services/clientes.service';
+import { ColorService } from '../../../../services/color.service';
+import { EtapasService } from '../../../../services/etapas.service';
+import { OrigenPedidoService } from '../../../../services/origen-pedido.service';
+import { PedidoService } from '../../../../services/pedido.service';
+import { PrioridadService } from '../../../../services/prioridad.service';
+import { SucursalService } from '../../../../services/sucursal.service';
+import { UserService } from '../../../../services/user.service';
 import { environment } from 'src/environments/environment';
 import Swal from 'sweetalert2';
 import * as loadingActions from '../../../../reducers/loading/loading.actions';
+import * as moment from 'moment';
+import * as _ from 'lodash';
+import { FiltrarEstados } from '../../../../classes/filtrar-estados';
+import { CSocketService } from '../../../../services/sockets/c-socket.service';
 
 @Component({
   selector: 'app-informacion',
@@ -36,16 +44,25 @@ export class InformacionComponent implements OnInit {
   formaEditar: FormGroup;
   formaInfo: FormGroup;
   displayDialogEditar = false;
+  displayDialogDist = false;
+  displayDialogHist = false;
+  usuario: UsuarioWorker;
 
   prioridades: Array<PrioridadDB> = [];
   etapas: Array<EtapaDB> = [];
+  etapasOrds: Array<EtapaDB> = [];
   diseniadores: Array<UsuarioWorker> = [];
   colores: Array<ColorDB> = [];
+  estados: Array<ColorDB> = [];
   origenes: Array<any> = [];
   vendedores: Array<any> = [];
   sucursales: Array<SucursalDB>;
+  distribucion: Array<any> = [];
+  historiales: Array<any> = [];
 
   contatorTime = 0;
+
+  items: Array<any> = [];
 
   constructor(
     private store: Store<AppState>,
@@ -58,181 +75,441 @@ export class InformacionComponent implements OnInit {
     private etapaService: EtapasService,
     private coloresService: ColorService,
     private origenService: OrigenPedidoService,
-    private pedidoService: PedidoService
+    private pedidoService: PedidoService,
+    private filtrarEstadosCat: FiltrarEstados,
+    private clienteSocket: CSocketService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.crearFormularioInfo();
     this.crearFormularioEditarCliente();
     this.cargarCatalogos();
+    this.botonAcciones();
+    this.cargarPedidoSocket();
   }
 
   cargarCatalogos(): void {
     const time = timer(0, 1000).subscribe((resp) => {
       this.store
         .select('login')
-        .pipe(take(10))
+        // .pipe(take(10))
+        // .pipe(first())
         .subscribe((usuario) => {
-          // console.log(this.pedido);
-          this.contatorTime++;
+          if (usuario.usuarioDB) {
+            this.usuario = usuario.usuarioDB;
+            // console.log(this.usuario);
+            // console.log(
+            //   this.usuario?.role?.restricciones?.pedido?.informacion?.verCliente
+            // );
 
-          const fechaRegistro = () => {
-            this.formaInfo.controls.fechaRegistro.disable();
-            this.formaInfo.controls.fechaRegistro.setValue(
-              this.pedido?.fechaRegistro
-            );
-          };
+            if (!this.pedido) {
+              return;
+            }
+            this.contatorTime++;
 
-          const fechaEntrega = () => {
-            this.formaInfo.controls.fechaEntrega.setValue(
-              this.pedido?.fechaEntrega
-            );
-          };
-
-          const prioridad = () => {
-            const data = {
-              token: usuario.token,
-              colPrioridad: environment.colPrioridad,
-            };
-            this.prioridadService
-              .obtenerPrioridadesOrdenadas(data)
-              .subscribe((pOrdenadas: PrioridadOrdenada) => {
-                const pOrds = pOrdenadas.prioridadesOrdenadaDB.prioridades;
-                this.prioridades = pOrds;
-
-                const pOrd = pOrds.find(
-                  (pOrd) => pOrd._id === this.pedido?.prioridad?._id
-                );
-
-                this.formaInfo.controls.prioridad.setValue(pOrd);
-              });
-          };
-
-          const etapa = () => {
-            const data = {
-              token: usuario.token,
-              colEtapas: environment.colEtapas,
+            const fechaRegistro = () => {
+              this.formaInfo.controls.fechaRegistro.disable();
+              this.formaInfo.controls.fechaRegistro.setValue(
+                this.pedido?.fechaRegistro
+              );
             };
 
-            this.etapaService
-              .obtenerEtapasOrdenadas(data)
-              .subscribe((etapasOrds: EtapaOrdenada) => {
-                const etOrds = etapasOrds.etapasOrdenadaDB.etapas;
-                this.etapas = etOrds;
+            const fechaEntrega = () => {
+              if (
+                !this.usuario?.role?.restricciones?.pedido?.informacion
+                  ?.editarFechaEntrega
+              ) {
+                this.formaInfo.controls.fechaEntrega.disable();
+              }
+              this.formaInfo.controls.fechaEntrega.setValue(
+                this.pedido?.fechaEntrega
+              );
+            };
 
-                const eOrd = etOrds.find(
-                  (eOrd) => eOrd._id === this.pedido?.etapa?._id
-                );
+            const prioridad = () => {
+              const data = {
+                token: usuario.token,
+                colPrioridad: environment.colPrioridad,
+                foranea: '',
+              };
 
-                this.formaInfo.controls.etapa.setValue(eOrd);
-              });
-          };
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
+              this.prioridadService
+                .obtenerPrioridadesOrdenadas(data)
+                .subscribe((pOrdenadas: PrioridadOrdenada) => {
+                  const pOrds = this.filtrarEstadosCat.filtrarActivos(
+                    pOrdenadas.prioridadesOrdenadaDB.prioridades
+                  );
+                  // const pOrds = pOrdenadas.prioridadesOrdenadaDB.prioridades;
+                  this.prioridades = pOrds;
 
-          const diseniador = () => {
-            this.userService
-              .obtenerUsuarios(usuario.token)
-              .subscribe((usuarios: Usuario) => {
-                const usersDise = usuarios.usuariosDB.filter(
-                  (user) => user?.role?.diseniador
-                );
-                this.diseniadores = usersDise;
+                  const pOrd = pOrds.find(
+                    (pOrd) => pOrd._id === this.pedido?.prioridad?._id
+                  );
 
-                const userDise = usersDise.find(
-                  (userDise) => userDise._id === this.pedido?.diseniador?._id
-                );
+                  if (
+                    !usuario?.usuarioDB?.role?.restricciones?.pedido
+                      ?.informacion?.prioridad?.editar
+                  ) {
+                    this.formaInfo.controls.prioridad.disable();
+                  }
+                  this.formaInfo.controls.prioridad.setValue(pOrd);
+                });
+            };
 
-                this.formaInfo.controls.diseniador.setValue(userDise);
-              });
-          };
+            const etapa = () => {
+              const data = {
+                token: usuario.token,
+                colEtapas: environment.colEtapas,
+                foranea: '',
+              };
 
-          const color = () => {
-            this.coloresService
-              .obtenerColores(usuario.token)
-              .subscribe((colores: Colores) => {
-                this.colores = colores.coloresDB;
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
 
-                const col = colores.coloresDB.find(
-                  (color) => color._id === this.pedido?.color?._id
-                );
+              this.etapaService
+                .obtenerEtapasOrdenadas(data)
+                .subscribe((etapasOrds: EtapaOrdenada) => {
+                  // this.etapasOrds = this.filtrarEstadosCat.filtrarActivos(
+                  //   etapasOrds.etapasOrdenadaDB.etapas
+                  // );
 
-                this.formaInfo.controls.color.setValue(col);
-              });
-          };
+                  // console.log(this.etapasOrds);
+                  // this.etapasOrds = etapasOrds.etapasOrdenadaDB.etapas;
 
-          const origen = () => {
-            this.origenService
-              .obtenerOrigenes(usuario.token)
-              .subscribe((origenes: OrigenPedido) => {
-                this.origenes = origenes.origenesDB;
+                  const etUser: Array<EtapaDB> =
+                    this.usuario.role.restricciones.pedido.informacion.etapa
+                      .disponibles;
 
-                const org = origenes.origenesDB.find(
-                  (org) => org._id === this.pedido?.origen?._id
-                );
+                  const etapaPedido = this.pedido.etapa;
 
-                this.formaInfo.controls.origen.setValue(org);
-              });
-          };
+                  const mapEtapas: Array<EtapaDB> = _.uniqBy(
+                    [...etUser, etapaPedido],
+                    '_id'
+                  );
 
-          const vendedor = () => {
-            this.userService
-              .obtenerUsuarios(usuario.token)
-              .subscribe((usuarios: Usuario) => {
-                const usersVend = usuarios.usuariosDB.filter(
-                  (user) => user?.role?.vendedor
-                );
-                this.vendedores = usersVend;
+                  const eOrd = mapEtapas.find(
+                    (eOrd) => eOrd._id === this.pedido?.etapa?._id
+                  );
 
-                const userVend = usersVend.find(
-                  (userVend) => userVend._id === this.pedido?.vendedor?._id
-                );
+                  this.etapas =
+                    this.filtrarEstadosCat.filtrarActivos(mapEtapas);
 
-                this.formaInfo.controls.vendedor.setValue(userVend);
-              });
-          };
+                  if (
+                    !this.usuario?.role?.restricciones?.pedido?.informacion
+                      ?.etapa?.editar
+                  ) {
+                    this.formaInfo.controls.etapa.disable();
+                  }
+                  this.formaInfo.controls.etapa.setValue(eOrd);
+                });
+            };
 
-          const sucursal = () => {
-            this.sService
-              .obtenerSucs(usuario.token)
-              .subscribe((sucursales: Sucursal) => {
-                this.sucursales = sucursales.sucursalesDB;
+            const diseniador = () => {
+              const data = {
+                token: usuario.token,
+                foranea: '',
+              };
 
-                const suc = sucursales.sucursalesDB.find(
-                  (suc) => suc._id === this.pedido?.sucursal?._id
-                );
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
+              this.userService
+                .obtenerUsuarios(data)
+                .subscribe((usuarios: Usuario) => {
+                  const usersDise = usuarios.usuariosDB.filter(
+                    (user) => user?.role?.diseniador
+                  );
+                  this.diseniadores =
+                    this.filtrarEstadosCat.filtrarActivos(usersDise);
 
-                this.formaInfo.controls.sucursal.setValue(suc);
-              });
-          };
+                  const userDise = usersDise.find(
+                    (userDise) => userDise._id === this.pedido?.diseniador?._id
+                  );
 
-          fechaRegistro();
-          fechaEntrega();
-          prioridad();
-          etapa();
-          diseniador();
-          color();
-          origen();
-          vendedor();
-          sucursal();
+                  if (
+                    !usuario?.usuarioDB?.role?.restricciones?.pedido
+                      ?.informacion?.diseniador?.editar
+                  ) {
+                    this.formaInfo.controls.diseniador.disable();
+                  }
+                  this.formaInfo.controls.diseniador.setValue(userDise);
+                  // console.log(userDise);
+                });
+            };
 
-          if (this.pedido) {
-            time.unsubscribe();
-          }
+            const color = () => {
+              const data = {
+                token: usuario.token,
+                foranea: '',
+              };
 
-          if (this.contatorTime > 11) {
-            time.unsubscribe();
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
+
+              this.coloresService
+                .obtenerColores(data)
+                .subscribe((colores: Colores) => {
+                  this.estados = colores.coloresDB;
+                  const esUser: Array<ColorDB> =
+                    this.usuario.role.restricciones.pedido.informacion.estado
+                      .disponibles;
+
+                  const estadoPedido = this.pedido.color;
+
+                  const mapEstados: Array<ColorDB> = _.uniqBy(
+                    [...esUser, estadoPedido],
+                    '_id'
+                  );
+
+                  this.colores =
+                    this.filtrarEstadosCat.filtrarActivos(mapEstados);
+
+                  if (
+                    !usuario?.usuarioDB?.role?.restricciones?.pedido
+                      ?.informacion?.estado?.editar
+                  ) {
+                    this.formaInfo.controls.color.disable();
+                  }
+
+                  if (this.pedido.color) {
+                    const col = mapEstados.find(
+                      (color) => color._id === this.pedido?.color?._id
+                    );
+
+                    this.formaInfo.controls.color.setValue(col);
+                  }
+                });
+            };
+
+            const origen = () => {
+              const data = {
+                token: usuario.token,
+                foranea: '',
+              };
+
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
+
+              this.origenService
+                .obtenerOrigenes(data)
+                .subscribe((origenes: OrigenPedido) => {
+                  const origActivos = this.filtrarEstadosCat.filtrarActivos(
+                    origenes.origenesDB
+                  );
+                  this.origenes = origActivos;
+
+                  const org = origenes.origenesDB.find(
+                    (org) => org._id === this.pedido?.origen?._id
+                  );
+
+                  if (
+                    !usuario?.usuarioDB?.role?.restricciones?.pedido
+                      ?.informacion?.origen.editar
+                  ) {
+                    this.formaInfo.controls.origen.disable();
+                  }
+
+                  this.formaInfo.controls.origen.setValue(org);
+                });
+            };
+
+            const vendedor = () => {
+              const data = {
+                token: usuario.token,
+                foranea: '',
+              };
+
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
+
+              this.userService
+                .obtenerUsuarios(data)
+                .subscribe((usuarios: Usuario) => {
+                  const usersVend = usuarios.usuariosDB.filter(
+                    (user) => user?.role?.vendedor
+                  );
+                  this.vendedores =
+                    this.filtrarEstadosCat.filtrarActivos(usersVend);
+
+                  const userVend = usersVend.find(
+                    (userVend) => userVend._id === this.pedido?.vendedor?._id
+                  );
+
+                  if (
+                    !usuario?.usuarioDB?.role?.restricciones?.pedido
+                      ?.informacion?.vendedor?.editar
+                  ) {
+                    this.formaInfo.controls.vendedor.disable();
+                  }
+                  this.formaInfo.controls.vendedor.setValue(userVend);
+                });
+            };
+
+            const sucursal = () => {
+              const data = {
+                token: usuario.token,
+                foranea: '',
+              };
+
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
+
+              this.sService
+                .obtenerSucs(data)
+                .subscribe((sucursales: Sucursal) => {
+                  const sucActivas = this.filtrarEstadosCat.filtrarActivos(
+                    sucursales.sucursalesDB
+                  );
+                  this.sucursales = sucActivas;
+
+                  const suc = sucursales.sucursalesDB.find(
+                    (suc) => suc._id === this.pedido?.sucursal?._id
+                  );
+
+                  if (
+                    !usuario?.usuarioDB?.role?.restricciones?.pedido
+                      ?.informacion?.sucursal?.editar
+                  ) {
+                    this.formaInfo.controls.sucursal.disable();
+                  }
+                  this.formaInfo.controls.sucursal.setValue(suc);
+                });
+            };
+
+            fechaRegistro();
+            fechaEntrega();
+            prioridad();
+            etapa();
+            diseniador();
+            color();
+            origen();
+            vendedor();
+            sucursal();
+
+            if (this.pedido) {
+              time.unsubscribe();
+            }
+
+            if (this.contatorTime > 11) {
+              time.unsubscribe();
+            }
           }
         });
     });
   }
 
+  filtrarEtapas(): void {
+    const etapasRole: Array<EtapaDB> =
+      this.usuario?.role?.restricciones?.pedido?.informacion?.etapa
+        ?.disponibles;
+
+    const etapas: Array<EtapaDB> = this.etapasOrds;
+
+    this.etapas = etapasRole.filter((etapa) => {
+      return etapas.map((etapaRole) => {
+        return etapa._id === etapaRole._id;
+      });
+    });
+
+    this.etapas = this.filtrarEstadosCat.filtrarActivos(this.etapas);
+  }
+
+  filtrarEstados(): void {
+    const estadosRole: Array<ColorDB> =
+      this.usuario?.role?.restricciones?.pedido?.informacion?.estado
+        ?.disponibles;
+
+    const estados: Array<ColorDB> = this.estados;
+
+    this.colores = estadosRole.filter((color) => {
+      return estados.map((estadoRole) => {
+        return color._id === estadoRole._id;
+      });
+    });
+
+    this.colores = this.filtrarEstadosCat.filtrarActivos(this.colores);
+  }
+
+  cargarDistribucion(): void {
+    this.store.dispatch(loadingActions.cargarLoading());
+    this.store
+      .select('login')
+      // .pipe(first())
+      .subscribe((usuario) => {
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
+
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+
+          this.userService.obtenerDistribucion(data).subscribe((resp) => {
+            if (resp.ok) {
+              this.distribucion = resp.distDB;
+              this.store.dispatch(loadingActions.quitarLoading());
+            } else {
+              Swal.fire(
+                'Mensaje',
+                'Error al cargar la distribución de pedidos',
+                'error'
+              );
+              this.store.dispatch(loadingActions.quitarLoading());
+            }
+
+            if (!resp) {
+              this.store.dispatch(loadingActions.quitarLoading());
+            }
+          });
+        }
+      });
+  }
+
   cargarSucursales(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.sService
-          .obtenerSucs(usuario.token)
-          .subscribe((sucursales: Sucursal) => {
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
+
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+
+          this.sService.obtenerSucs(data).subscribe((sucursales: Sucursal) => {
             // console.log(sucursales.sucursalesDB);
             // this.store.dispatch(loadingActions.cargarLoading());
 
@@ -249,6 +526,7 @@ export class InformacionComponent implements OnInit {
               // this.store.dispatch(loadingActions.quitarLoading());
             }
           });
+        }
       });
   }
 
@@ -322,6 +600,33 @@ export class InformacionComponent implements OnInit {
     this.formaEditar.controls.telefono.reset();
     this.formaEditar.controls.correo.reset();
     this.formaEditar.controls.observacion.reset();
+  }
+
+  obtenerPedido(): void {
+    this.store
+      .select('login')
+      // .pipe(first())
+      .subscribe((usuario) => {
+        if (usuario.usuarioDB) {
+          const data = {
+            id: this.pedido._id,
+            token: usuario.token,
+            foranea: '',
+          };
+
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+
+          this.pedidoService.obtenerPedido(data).subscribe((pedido: Pedido) => {
+            this.pedido = pedido.pedidoDB;
+
+            // console.log(this.pedido);
+          });
+        }
+      });
   }
 
   get validarSucursal(): ValidarTexto {
@@ -448,80 +753,410 @@ export class InformacionComponent implements OnInit {
   }
 
   editarCliente(): void {
+    this.store.dispatch(loadingActions.cargarLoading());
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearCliente = {
-          nombre: this.formaEditar.controls.nombre.value,
-          cedula: this.formaEditar.controls.cedula.value,
-          ruc: this.formaEditar.controls.ruc.value,
-          telefono: this.formaEditar.controls.telefono.value,
-          correo: this.formaEditar.controls.correo.value,
-          observacion: this.formaEditar.controls.observacion.value,
-          sucursal: this.formaEditar.controls.sucursales.value._id,
-          estado: this.formaEditar.controls.estado.value,
-          token: usuario.token,
-          id: this.pedido.cliente._id,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearCliente = {
+            nombre: this.formaEditar.controls.nombre.value,
+            cedula: this.formaEditar.controls.cedula.value,
+            ruc: this.formaEditar.controls.ruc.value,
+            telefono: this.formaEditar.controls.telefono.value,
+            correo: this.formaEditar.controls.correo.value,
+            observacion: this.formaEditar.controls.observacion.value,
+            sucursal: this.formaEditar.controls.sucursales.value._id,
+            estado: this.formaEditar.controls.estado.value,
+            token: usuario.token,
+            id: this.pedido.cliente._id,
+            foranea: '',
+          };
 
-        this.store.dispatch(loadingActions.cargarLoading());
-        this.clienteService
-          .editarCliente(data)
-          .subscribe((cliente: Cliente) => {
-            if (cliente.ok) {
-              this.displayDialogEditar = false;
-              Swal.fire('Mensaje', 'Cliente editado', 'success');
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
 
-              this.limpiarFormulario();
-            } else {
-              Swal.fire('Mensaje', 'Error al editar cliente', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          this.clienteService
+            .editarCliente(data)
+            .subscribe((cliente: Cliente) => {
+              if (cliente.ok) {
+                this.displayDialogEditar = false;
+                Swal.fire('Mensaje', 'Cliente editado', 'success');
 
-            if (!cliente) {
-              Swal.fire('Mensaje', 'Error al editar cliente', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+                this.limpiarFormulario();
+                this.store.dispatch(loadingActions.quitarLoading());
+              } else {
+                Swal.fire('Mensaje', 'Error al editar cliente', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
+
+              if (!cliente) {
+                Swal.fire('Mensaje', 'Error al editar cliente', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
+            });
+        }
       });
   }
 
   editarInformacionPedido(): void {
+    if (
+      !this.formaInfo.controls.prioridad.value ||
+      !this.formaInfo.controls.etapa.value ||
+      !this.formaInfo.controls.vendedor.value
+    ) {
+      this.formaInfo.markAllAsTouched();
+      return;
+    }
+
+    this.store.dispatch(loadingActions.cargarLoading());
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data = {
-          token: usuario.token,
-          id: this.pedido._id,
-          fechaEntrega: this.formaInfo.controls.fechaEntrega.value,
-          prioridad: this.formaInfo.controls.prioridad.value?._id || null,
-          etapa: this.formaInfo.controls.etapa.value._id || null,
-          diseniador: this.formaInfo.controls.diseniador.value?._id || null,
-          color: this.formaInfo.controls.color.value?._id || null,
-          origen: this.formaInfo.controls.origen.value?._id || null,
-          vendedor: this.formaInfo.controls.vendedor.value?._id || null,
-          sucursal: this.formaInfo.controls.sucursal.value?._id || null,
-        };
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            id: this.pedido._id,
+            fechaEntrega: this.formaInfo.controls.fechaEntrega.value,
+            prioridad: this.formaInfo.controls.prioridad.value?._id || null,
+            etapa: this.formaInfo.controls.etapa.value?._id || null,
+            diseniador: this.formaInfo.controls.diseniador.value?._id || null,
+            color: this.formaInfo.controls.color.value?._id || null,
+            origen: this.formaInfo.controls.origen.value?._id || null,
+            vendedor: this.formaInfo.controls.vendedor.value?._id || null,
+            sucursal: this.formaInfo.controls.sucursal.value?._id || null,
+            archivado: this.pedido.archivado,
+            foranea: '',
+          };
 
-        this.store.dispatch(loadingActions.cargarLoading());
-        this.pedidoService.editarInfo(data).subscribe((pedido: Pedido) => {
-          // socket
-          if (pedido.ok) {
-            Swal.fire('Mensaje', 'Pedido editado', 'success');
-            this.store.dispatch(loadingActions.quitarLoading());
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
           } else {
-            Swal.fire('Mensaje', 'Error al editar pedido', 'error');
-            this.store.dispatch(loadingActions.quitarLoading());
+            data.foranea = usuario.usuarioDB.foranea;
           }
 
-          if (!pedido) {
-            Swal.fire('Mensaje', 'Error al editar pedido', 'error');
-            this.store.dispatch(loadingActions.quitarLoading());
-          }
-        });
+          this.pedidoService.editarInfo(data).subscribe((pedido: Pedido) => {
+            if (pedido.ok) {
+              this.guardarHistorial();
+              Swal.fire('Mensaje', 'Pedido editado', 'success');
+
+              this.store.dispatch(loadingActions.quitarLoading());
+            } else {
+              Swal.fire('Mensaje', 'Error al editar pedido', 'error');
+              this.store.dispatch(loadingActions.quitarLoading());
+            }
+
+            if (!pedido) {
+              Swal.fire('Mensaje', 'Error al editar pedido', 'error');
+              this.store.dispatch(loadingActions.quitarLoading());
+            }
+          });
+        }
       });
+  }
+
+  archivarPedido(): void {
+    if (
+      !this.formaInfo.controls.prioridad.value ||
+      !this.formaInfo.controls.etapa.value ||
+      !this.formaInfo.controls.vendedor.value
+    ) {
+      this.formaInfo.markAllAsTouched();
+      return;
+    }
+    this.store
+      .select('login')
+      // .pipe(first())
+      .subscribe((usuario) => {
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            id: this.pedido._id,
+            fechaEntrega: this.formaInfo.controls.fechaEntrega.value,
+            prioridad: this.formaInfo.controls.prioridad.value?._id || null,
+            etapa: this.formaInfo.controls.etapa.value._id || null,
+            diseniador: this.formaInfo.controls.diseniador.value?._id || null,
+            color: this.formaInfo.controls.color.value?._id || null,
+            origen: this.formaInfo.controls.origen.value?._id || null,
+            vendedor: this.formaInfo.controls.vendedor.value?._id || null,
+            sucursal: this.formaInfo.controls.sucursal.value?._id || null,
+            archivado: true,
+            foranea: '',
+          };
+
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+
+          this.store.dispatch(loadingActions.cargarLoading());
+          this.pedidoService.editarInfo(data).subscribe((pedido: Pedido) => {
+            // socket
+            if (pedido.ok) {
+              this.guardarHistorial();
+
+              Swal.fire('Mensaje', 'Pedido archivado', 'success');
+              this.store.dispatch(loadingActions.quitarLoading());
+            } else {
+              Swal.fire('Mensaje', 'Error al archivar pedido', 'error');
+              this.store.dispatch(loadingActions.quitarLoading());
+            }
+
+            if (!pedido) {
+              Swal.fire('Mensaje', 'Error al archivar pedido', 'error');
+              this.store.dispatch(loadingActions.quitarLoading());
+            }
+          });
+        }
+      });
+  }
+
+  desArchivarPedido(): void {
+    if (
+      !this.formaInfo.controls.prioridad.value ||
+      !this.formaInfo.controls.etapa.value ||
+      !this.formaInfo.controls.vendedor.value
+    ) {
+      this.formaInfo.markAllAsTouched();
+      return;
+    }
+    this.store
+      .select('login')
+      // .pipe(first())
+      .subscribe((usuario) => {
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            id: this.pedido._id,
+            fechaEntrega: this.formaInfo.controls.fechaEntrega.value,
+            prioridad: this.formaInfo.controls.prioridad.value?._id || null,
+            etapa: this.formaInfo.controls.etapa.value._id || null,
+            diseniador: this.formaInfo.controls.diseniador.value?._id || null,
+            color: this.formaInfo.controls.color.value?._id || null,
+            origen: this.formaInfo.controls.origen.value?._id || null,
+            vendedor: this.formaInfo.controls.vendedor.value?._id || null,
+            sucursal: this.formaInfo.controls.sucursal.value?._id || null,
+            archivado: false,
+            foranea: '',
+          };
+
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+
+          this.store.dispatch(loadingActions.cargarLoading());
+          this.pedidoService.editarInfo(data).subscribe((pedido: Pedido) => {
+            // socket
+            if (pedido.ok) {
+              this.guardarHistorial();
+
+              Swal.fire('Mensaje', 'Pedido desarchivado', 'success');
+              this.store.dispatch(loadingActions.quitarLoading());
+            } else {
+              Swal.fire('Mensaje', 'Error al desarchivar pedido', 'error');
+              this.store.dispatch(loadingActions.quitarLoading());
+            }
+
+            if (!pedido) {
+              Swal.fire('Mensaje', 'Error al desarchivar pedido', 'error');
+              this.store.dispatch(loadingActions.quitarLoading());
+            }
+          });
+        }
+      });
+  }
+
+  mostrarDistribucion(): void {
+    this.cargarDistribucion();
+    this.displayDialogDist = true;
+  }
+
+  guardarHistorial(): void {
+    if (
+      !this.formaInfo.controls.prioridad.value ||
+      !this.formaInfo.controls.etapa.value ||
+      !this.formaInfo.controls.vendedor.value
+    ) {
+      this.formaInfo.markAllAsTouched();
+      return;
+    }
+
+    const idPrioridad = this.formaInfo.controls.prioridad.value?._id;
+    const idEtapa = this.formaInfo.controls.etapa.value._id;
+    const idEstado = this.formaInfo.controls.color.value?._id;
+    const idVendedor = this.formaInfo.controls.vendedor.value?._id;
+    const idDiseniador = this.formaInfo.controls.diseniador.value?._id;
+
+    let estadoPriod = false;
+    let estadoEtapa = false;
+    let estadoEstado = false;
+    let estadoVendedor = false;
+    let estadoDiseniador = false;
+
+    idPrioridad === this.pedido?.prioridad?._id
+      ? (estadoPriod = true)
+      : (estadoPriod = false);
+    idEtapa === this.pedido?.etapa?._id
+      ? (estadoEtapa = true)
+      : (estadoEtapa = false);
+    idEstado === this.pedido?.color?._id
+      ? (estadoEstado = true)
+      : (estadoEstado = false);
+    idVendedor === this.pedido?.vendedor?._id
+      ? (estadoVendedor = true)
+      : (estadoVendedor = false);
+    idDiseniador === this.pedido?.diseniador?._id
+      ? (estadoDiseniador = true)
+      : (estadoDiseniador = false);
+
+    if (
+      estadoPriod &&
+      estadoEtapa &&
+      estadoEstado &&
+      estadoVendedor &&
+      estadoDiseniador
+    ) {
+      return;
+    }
+    this.store
+      .select('login')
+      // .pipe(first())
+      .subscribe((usuario) => {
+        if (usuario.usuarioDB) {
+          const data = {
+            historial: {
+              priorOrg: this.pedido?.prioridad?._id,
+              etapaOrg: this.pedido?.etapa?._id,
+              estadoOrg: this.pedido?.color?._id,
+              vendedorOrg: this.pedido?.vendedor?._id,
+              diseniadorOrg: this.pedido?.diseniador?._id,
+              priorAct: idPrioridad,
+              etapaAct: idEtapa,
+              estadoAct: idEstado,
+              vendedorAct: idVendedor,
+              diseniadorAct: idDiseniador,
+              fecha: moment().format('DD/MM/YYYY hh:mm a'),
+              idPedido: this.pedido._id,
+              usuario: usuario.usuarioDB._id,
+            },
+            token: usuario.token,
+            foranea: '',
+          };
+
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+
+          this.pedidoService.guardarHistorial(data).subscribe();
+          this.obtenerPedido();
+        }
+      });
+  }
+
+  obtenerHistorial(): void {
+    this.displayDialogHist = true;
+
+    this.store
+      .select('login')
+      // .pipe(first())
+      .subscribe((usuario) => {
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            idPedido: this.pedido._id,
+            foranea: '',
+          };
+
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+
+          this.pedidoService.obtenerHistorial(data).subscribe((historial) => {
+            this.historiales = historial.historialesDB;
+            // console.log(this.historiales);
+          });
+        }
+      });
+  }
+
+  botonAcciones(): void {
+    let archivarDesactivar;
+    const time = timer(0, 300)
+      .pipe(take(2))
+      .subscribe((resp) => {
+        if (this.pedido) {
+          if (this.pedido.archivado) {
+            archivarDesactivar = {
+              label: 'Guardar y Desarchivar',
+              icon: 'pi pi-refresh',
+              command: () => {
+                this.desArchivarPedido();
+              },
+            };
+          } else {
+            archivarDesactivar = {
+              label: 'Guardar y archivar',
+              icon: 'pi pi-save',
+              command: () => {
+                this.archivarPedido();
+              },
+            };
+          }
+
+          this.items = [
+            {
+              label: 'Guardar cambios',
+              icon: 'pi pi-check',
+              command: () => {
+                this.editarInformacionPedido();
+              },
+            },
+            archivarDesactivar,
+            {
+              label: 'Historial de cambios',
+              icon: 'pi pi-history',
+              command: () => {
+                this.obtenerHistorial();
+              },
+            },
+          ];
+          time.unsubscribe();
+        }
+      });
+  }
+
+  cargarPedidoSocket(): void {
+    this.clienteSocket.escuchar('cargar-pedido').subscribe((resp) => {
+      this.store.select('login').subscribe((usuario) => {
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+            id: this.pedido._id,
+          };
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+
+          this.pedidoService.obtenerPedido(data).subscribe((pedido: Pedido) => {
+            this.pedido = pedido.pedidoDB;
+          });
+        }
+      });
+    });
   }
 }
 
@@ -536,4 +1171,5 @@ interface CrearCliente {
   estado: boolean;
   token: string;
   id?: string;
+  foranea: string;
 }

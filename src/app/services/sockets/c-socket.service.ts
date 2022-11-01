@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import { AppState } from '../../reducers/globarReducers';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CSocketService {
-
   private socketCliente: Socket;
   public socketStatus = false;
 
-  constructor() {
+  constructor(private store: Store<AppState>) {
     this.socketCliente = io(environment.urlClient);
     this.checkStatus();
   }
@@ -19,8 +20,21 @@ export class CSocketService {
   checkStatus(): void {
     // escuchar el servidor
     this.socketCliente.on('connect', () => {
-      console.log('Conectado al servidor de clientes');
-      this.socketStatus = true;
+      this.store.select('login').subscribe((usuario) => {
+        if (usuario.usuarioDB) {
+          let foranea = '';
+
+          if (usuario.usuarioDB.empresa) {
+            foranea = usuario.usuarioDB._id;
+          } else {
+            foranea = usuario.usuarioDB.foranea;
+          }
+
+          console.log('Conectado al servidor de clientes');
+          this.socketCliente.emit('room', foranea);
+          this.socketStatus = true;
+        }
+      });
     });
 
     this.socketCliente.on('disconnect', () => {

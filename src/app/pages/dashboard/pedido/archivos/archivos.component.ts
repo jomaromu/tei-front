@@ -10,16 +10,19 @@ import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import { timer } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { Validaciones, ValidarTexto } from 'src/app/classes/validaciones';
-import { PedidoDB } from 'src/app/interfaces/pedido';
-import { TipoArchivo, TipoArchivoDB } from 'src/app/interfaces/tipoArchivo';
-import { AppState } from 'src/app/reducers/globarReducers';
-import { TipoArchivoService } from 'src/app/services/tipo-archivo.service';
+import { Validaciones, ValidarTexto } from '../../../../classes/validaciones';
+import { PedidoDB } from '../../../../interfaces/pedido';
+import { TipoArchivo, TipoArchivoDB } from '../../../../interfaces/tipoArchivo';
+import { AppState } from '../../../../reducers/globarReducers';
+import { TipoArchivoService } from '../../../../services/tipo-archivo.service';
 import { ArchivosService } from '../../../../services/archivos.service';
 import { Archivo, ArchivoDB } from '../../../../interfaces/archivo';
 import * as loadingActions from '../../../../reducers/loading/loading.actions';
 import Swal from 'sweetalert2';
 import { ActivatedRoute } from '@angular/router';
+import { FiltrarEstados } from '../../../../classes/filtrar-estados';
+import { ArchivosSocketService } from '../../../../services/sockets/archivos-socket.service';
+import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-archivos',
@@ -40,19 +43,27 @@ export class ArchivosComponent implements OnInit, OnChanges {
 
   myFile: any;
 
+  archivosPermitidos =
+    'image/*, application/pdf, application/vnd.ms-powerpoint, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
   constructor(
     private store: Store<AppState>,
     private fb: FormBuilder,
     private tipoArchivoService: TipoArchivoService,
     private validadores: Validaciones,
     private archivoService: ArchivosService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private filtrarEstados: FiltrarEstados,
+    private archivosSocket: ArchivosSocketService,
+    private breakPointObserver: BreakpointObserver
   ) {}
 
   ngOnInit(): void {
     this.crearFormulario();
     this.cargarPedido();
     this.obtenerArchivos();
+    this.mediaQuery();
+    this.cargarArchivosSokcet();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -89,14 +100,29 @@ export class ArchivosComponent implements OnInit, OnChanges {
   cargarTiposArchivos(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.tipoArchivoService
-          .obtenerTiposArchivos(usuario.token)
-          .subscribe((tiposArchivos: TipoArchivo) => {
-            this.tiposArchivos = tiposArchivos.tiposArchivosDB;
-            this.forma.controls.tipo.setValue(this.tiposArchivos[0]?._id);
-          });
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
+
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+          this.tipoArchivoService
+            .obtenerTiposArchivos(data)
+            .subscribe((tiposArchivos: TipoArchivo) => {
+              const tiposArchActivos = this.filtrarEstados.filtrarActivos(
+                tiposArchivos.tiposArchivosDB
+              );
+              this.tiposArchivos = tiposArchActivos;
+              this.forma.controls.tipo.setValue(this.tiposArchivos[0]?._id);
+            });
+        }
       });
   }
 
@@ -104,34 +130,43 @@ export class ArchivosComponent implements OnInit, OnChanges {
     this.store.dispatch(loadingActions.cargarLoading());
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.route.queryParams.subscribe((resp) => {
-          const pedido = resp.id;
+        if (usuario.usuarioDB) {
+          this.route.queryParams.subscribe((resp) => {
+            const pedido = resp.id;
 
-          const data = {
-            pedido,
-            token: usuario.token,
-          };
+            const data = {
+              pedido,
+              token: usuario.token,
+              foranea: '',
+            };
 
-          this.archivoService
-            .obtenerArchivos(data)
-            .subscribe((archivos: Archivo) => {
-              if (archivos.ok) {
-                this.store.dispatch(loadingActions.quitarLoading());
-                this.archivosPedido = archivos.archivosDB;
-                // console.log(this.archivosPedido);
-              } else {
-                Swal.fire('Mensaje', 'Error obtener archivos', 'error');
-                this.store.dispatch(loadingActions.quitarLoading());
-              }
+            if (usuario.usuarioDB.empresa) {
+              data.foranea = usuario.usuarioDB._id;
+            } else {
+              data.foranea = usuario.usuarioDB.foranea;
+            }
 
-              if (!archivos) {
-                Swal.fire('Mensaje', 'Error al obtener archivos', 'error');
-                this.store.dispatch(loadingActions.quitarLoading());
-              }
-            });
-        });
+            this.archivoService
+              .obtenerArchivos(data)
+              .subscribe((archivos: Archivo) => {
+                if (archivos.ok) {
+                  this.archivosPedido = archivos.archivosDB;
+                  this.store.dispatch(loadingActions.quitarLoading());
+                  // console.log(this.archivosPedido);
+                } else {
+                  Swal.fire('Mensaje', 'Error obtener archivos', 'error');
+                  this.store.dispatch(loadingActions.quitarLoading());
+                }
+
+                if (!archivos) {
+                  Swal.fire('Mensaje', 'Error al obtener archivos', 'error');
+                  this.store.dispatch(loadingActions.quitarLoading());
+                }
+              });
+          });
+        }
       });
   }
 
@@ -205,45 +240,55 @@ export class ArchivosComponent implements OnInit, OnChanges {
     this.store.dispatch(loadingActions.cargarLoading());
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearArchivo = {
-          archivo: this.archivo,
-          nombre: this.forma.controls.nombre.value,
-          tipo: this.forma.controls.tipo.value,
-          pedido: this.pedido._id,
-          idCreador: usuario.usuarioDB._id,
-          fecha: moment().format('DD/MM/YYYY'),
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearArchivo = {
+            archivo: this.archivo,
+            nombre: this.forma.controls.nombre.value,
+            tipo: this.forma.controls.tipo.value,
+            pedido: this.pedido._id,
+            idCreador: usuario.usuarioDB._id,
+            fecha: moment().format('DD/MM/YYYY'),
+            foranea: '',
+          };
 
-        const fd: FormData = new FormData();
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
 
-        fd.append('archivo', data.archivo);
-        fd.append('nombre', data.nombre);
-        fd.append('tipo', data.tipo);
-        fd.append('pedido', data.pedido);
-        fd.append('idCreador', data.idCreador);
-        fd.append('fecha', data.fecha);
+          const fd: FormData = new FormData();
 
-        this.archivoService
-          .subirArchivo(fd, usuario.token)
-          .subscribe((archivo: Archivo) => {
-            if (archivo.ok) {
-              this.store.dispatch(loadingActions.quitarLoading());
-              this.displayDialogCrear = false;
-              Swal.fire('Mensaje', 'Archivo creado', 'success');
-              this.obtenerArchivos();
-              this.limpiarFormulario();
-            } else {
-              Swal.fire('Mensaje', 'Error al subir archivo', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          fd.append('archivo', data.archivo);
+          fd.append('nombre', data.nombre);
+          fd.append('tipo', data.tipo);
+          fd.append('pedido', data.pedido);
+          fd.append('idCreador', data.idCreador);
+          fd.append('fecha', data.fecha);
+          fd.append('foranea', data.foranea);
 
-            if (!archivo) {
-              Swal.fire('Mensaje', 'Error al subir archivo', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+          this.archivoService
+            .subirArchivo(fd, usuario.token)
+            .subscribe((archivo: Archivo) => {
+              if (archivo.ok) {
+                this.displayDialogCrear = false;
+                Swal.fire('Mensaje', 'Archivo creado', 'success');
+                this.obtenerArchivos();
+                this.limpiarFormulario();
+                this.store.dispatch(loadingActions.quitarLoading());
+              } else {
+                Swal.fire('Mensaje', 'Error al subir archivo', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
+
+              if (!archivo) {
+                Swal.fire('Mensaje', 'Error al subir archivo', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
+            });
+        }
       });
   }
 
@@ -281,35 +326,71 @@ export class ArchivosComponent implements OnInit, OnChanges {
 
         this.store
           .select('login')
-          .pipe(first())
+          // .pipe(first())
           .subscribe((usuario) => {
-            const nombreArchivo = `${archivoPedido.nombre}.${archivoPedido.ext}`;
-            const data = {
-              id: archivoPedido._id,
-              nombreArchivo,
-              token: usuario.token,
-            };
+            if (usuario.usuarioDB) {
+              const nombreArchivo = `${archivoPedido.nombre}.${archivoPedido.ext}`;
+              const data = {
+                id: archivoPedido._id,
+                nombreArchivo,
+                token: usuario.token,
+                foranea: '',
+              };
 
-            this.archivoService
-              .eliminarArchivo(data)
-              .subscribe((archivo: Archivo) => {
-                if (archivo.ok) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  this.obtenerArchivos();
-                  this.limpiarFormulario();
-                  Swal.fire('Mensaje', 'Archivo borrado', 'success');
-                } else {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar el archivo', 'error');
-                }
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
 
-                if (!archivo) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar el archivo', 'error');
-                }
-              });
+              this.archivoService
+                .eliminarArchivo(data)
+                .subscribe((archivo: Archivo) => {
+                  if (archivo.ok) {
+                    this.obtenerArchivos();
+                    this.limpiarFormulario();
+                    Swal.fire('Mensaje', 'Archivo borrado', 'success');
+                    this.store.dispatch(loadingActions.quitarLoading());
+                  } else {
+                    this.store.dispatch(loadingActions.quitarLoading());
+                    Swal.fire('Mensaje', 'Error al borrar el archivo', 'error');
+                  }
+
+                  if (!archivo) {
+                    this.store.dispatch(loadingActions.quitarLoading());
+                    Swal.fire('Mensaje', 'Error al borrar el archivo', 'error');
+                  }
+                });
+            }
           });
       }
+    });
+  }
+
+  mediaQuery(): void {
+    this.breakPointObserver
+      .observe(['(max-width: 544px)'])
+      .subscribe((state: BreakpointState) => {
+        const time = timer(0, 300).subscribe((resp) => {
+          const fielset = document.querySelector('#wrap-tabla') as HTMLElement;
+          const pFieldset4Content = document.querySelector(
+            '#p-fieldset-4-content'
+          ) as HTMLElement;
+
+          if (fielset && pFieldset4Content) {
+            if (state.matches) {
+              fielset.style.padding = '0';
+              pFieldset4Content.style.padding = '0';
+            }
+            time.unsubscribe();
+          }
+        });
+      });
+  }
+
+  cargarArchivosSokcet(): void {
+    this.archivosSocket.escuchar('cargar-archivos').subscribe((resp) => {
+      this.obtenerArchivos();
     });
   }
 }
@@ -331,4 +412,5 @@ interface CrearArchivo {
   pedido: string;
   idCreador: string;
   fecha: string;
+  foranea: string;
 }

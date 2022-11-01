@@ -1,5 +1,5 @@
-<app-menu></app-menu>
 <app-loading></app-loading>
+<app-menu></app-menu>
 
 <!-- TABLA CLIENTES -->
 <section id="wrap-clientes">
@@ -32,6 +32,7 @@
 
     <!-- tabla -->
     <p-table
+      #dt
       [value]="clientes"
       [rows]="10"
       [paginator]="true"
@@ -43,7 +44,23 @@
       currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} Clientes"
       [rowsPerPageOptions]="[10, 25, 50]"
       [resizableColumns]="true"
+      [globalFilterFields]="['nombre', 'telefono']"
     >
+      <ng-template pTemplate="caption">
+        <div
+          style="display: flex; justify-content: flex-end; flex-direction: row"
+        >
+          <span class="p-input-icon-left ml-auto">
+            <i class="pi pi-search"></i>
+            <input
+              pInputText
+              type="text"
+              (input)="dt.filterGlobal($event.target.value, 'contains')"
+              placeholder="Nombre/Teléfono"
+            />
+          </span>
+        </div>
+      </ng-template>
       <ng-template pTemplate="header">
         <tr>
           <th>#</th>
@@ -57,18 +74,18 @@
       <ng-template pTemplate="body" let-cliente let-i="rowIndex">
         <tr>
           <td>{{ i + 1 }}</td>
-          <td>{{ cliente.nombre }}</td>
-          <td>{{ cliente.telefono }}</td>
-          <td>{{ cliente.correo }}</td>
+          <td>{{ cliente?.nombre }}</td>
+          <td>{{ cliente?.telefono }}</td>
+          <td>{{ cliente?.correo }}</td>
           <td>
             <span
-              [ngClass]="{ 'badge-activo': cliente.estado }"
-              *ngIf="cliente.estado"
+              [ngClass]="{ 'badge-activo': cliente?.estado }"
+              *ngIf="cliente?.estado"
               >Activo</span
             >
             <span
-              [ngClass]="{ 'badge-inactivo': !cliente.estado }"
-              *ngIf="!cliente.estado"
+              [ngClass]="{ 'badge-inactivo': !cliente?.estado }"
+              *ngIf="!cliente?.estado"
               >Inactivo</span
             >
           </td>
@@ -105,6 +122,7 @@
     [resizable]="false"
     [style]="{ width: '500px' }"
     [breakpoints]="{ '530px': '95%' }"
+    (onHide)="closeDialog()"
   >
     <section id="wrap-form-cliente">
       <!-- Sucursales -->
@@ -252,7 +270,7 @@
     <!-- Estado -->
     <p-inputSwitch formControlName="estado" name="estado"></p-inputSwitch>
 
-    <ng-template pTemplate="footer">
+    <div class="btn-footer">
       <button
         pButton
         pRipple
@@ -269,7 +287,7 @@
         class="p-button-text"
         (click)="btnGuardar('crear')"
       ></button>
-    </ng-template>
+    </div>
   </p-dialog>
 </form>
 
@@ -283,6 +301,7 @@
     [resizable]="false"
     [style]="{ width: '500px' }"
     [breakpoints]="{ '530px': '95%' }"
+    (onHide)="closeDialog()"
   >
     <section id="wrap-form-cliente">
       <!-- Sucursales -->
@@ -429,7 +448,7 @@
     <!-- Estado -->
     <p-inputSwitch formControlName="estado" name="estado"></p-inputSwitch>
 
-    <ng-template pTemplate="footer">
+    <div class="btn-footer">
       <button
         pButton
         pRipple
@@ -446,6 +465,6 @@
         class="p-button-text"
         (click)="btnGuardar('editar')"
       ></button>
-    </ng-template>
+    </div>
   </p-dialog>
 </form>

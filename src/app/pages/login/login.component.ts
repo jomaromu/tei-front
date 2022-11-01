@@ -9,6 +9,8 @@ import { AppState } from '../../reducers/globarReducers';
 import Swal from 'sweetalert2';
 import * as userActions from '../../reducers/login/login.actions';
 import { Usuario } from '../../interfaces/resp-worker';
+import { Validaciones, ValidarTexto } from 'src/app/classes/validaciones';
+import * as loadinActions from '../../reducers/loading/loading.actions';
 
 @Component({
   selector: 'app-login',
@@ -17,6 +19,8 @@ import { Usuario } from '../../interfaces/resp-worker';
 })
 export class LoginComponent implements OnInit {
   public formulario: FormGroup;
+  public formaResetPass: FormGroup;
+  displayDialog = false;
 
   @ViewChild('alertWarning', { static: true })
   alertWarning: ElementRef<HTMLElement>;
@@ -25,11 +29,13 @@ export class LoginComponent implements OnInit {
     private fb: FormBuilder,
     private userService: UserService,
     private store: Store<AppState>,
-    private router: Router
+    private router: Router,
+    private validadores: Validaciones
   ) {}
 
   ngOnInit(): void {
     this.crearFormulario();
+    this.crearFormularioReset();
   }
 
   crearFormulario(): void {
@@ -42,6 +48,12 @@ export class LoginComponent implements OnInit {
         ],
       ],
       password: ['', [Validators.required]],
+    });
+  }
+
+  crearFormularioReset(): void {
+    this.formaResetPass = this.fb.group({
+      email: [],
     });
   }
 
@@ -63,6 +75,13 @@ export class LoginComponent implements OnInit {
     } else {
       return true;
     }
+  }
+
+  get validarRecuperarPass(): ValidarTexto {
+    return this.validadores.validarCorreo({
+      requerido: true,
+      value: this.formaResetPass.controls.email.value,
+    });
   }
 
   entrar(): void {
@@ -91,22 +110,76 @@ export class LoginComponent implements OnInit {
 
       const usuario = {
         correo: correo.toLowerCase().trim(),
-        password: password.toLowerCase().trim(),
+        password: password,
       };
 
-      this.userService.login(usuario).subscribe((resp: Usuario) => {
-        // console.log(resp);
-        if (resp.ok === false) {
+      this.userService.login(usuario).subscribe((usuario: Usuario) => {
+        // console.log(usuario);
+        if (usuario.ok === false) {
           // alert
           sweetEffectAlert.play();
-          Swal.fire('Notificación', `${resp.mensaje}`, 'warning');
+          Swal.fire('Notificación', `${usuario.mensaje}`, 'warning');
         } else {
-          // console.log(resp);
-          this.store.dispatch(userActions.crearToken({ token: resp.token }));
+          // console.log(usuario);
+          this.store.dispatch(userActions.crearToken({ token: usuario.token }));
+
+          const estado: boolean = usuario.usuarioDB.estado;
+
+          if (estado) {
+            this.router.navigateByUrl('/dashboard');
+          } else {
+            this.router.navigateByUrl('/no-permitido');
+          }
           // this.router.navigateByUrl('/dashboard');
-          this.router.navigate(['dashboard/mi-bandeja']);
         }
       });
     }
+  }
+
+  recuperarPass(): void {
+    this.displayDialog = true;
+  }
+
+  closeDialog(): void {
+    this.displayDialog = false;
+    this.formaResetPass.controls.email.reset();
+  }
+
+  btnRecuperarPass(): void {
+    if (!this.validarRecuperarPass.valido) {
+      this.formaResetPass.markAllAsTouched();
+      return;
+    }
+
+    this.store.dispatch(loadinActions.cargarLoading());
+
+    const data = {
+      correo: (
+        this.formaResetPass.controls.email.value as string
+      ).toLocaleLowerCase(),
+      reset_pass: true,
+    };
+
+    this.userService.recuperarPassword(data).subscribe((resp) => {
+      if (resp.ok) {
+        this.displayDialog = false;
+        this.formaResetPass.controls.email.reset();
+        Swal.fire(
+          'Mensaje',
+          'Un enlace para recuperar su contraseña ha sido enviado a su correo electrónico',
+          'warning'
+        );
+        this.store.dispatch(loadinActions.quitarLoading());
+      } else {
+        this.displayDialog = false;
+        this.formaResetPass.controls.email.reset();
+        Swal.fire(
+          'Mensaje',
+          'Hubo un error al tratar de recuperar su contraseña, intentelo más tarde',
+          'error'
+        );
+        this.store.dispatch(loadinActions.quitarLoading());
+      }
+    });
   }
 }

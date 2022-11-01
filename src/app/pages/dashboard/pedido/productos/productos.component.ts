@@ -5,6 +5,7 @@ import {
   OnInit,
   SimpleChanges,
 } from '@angular/core';
+import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { timer } from 'rxjs';
@@ -12,7 +13,7 @@ import { first } from 'rxjs/operators';
 import { Validaciones, ValidarTexto } from '../../../../classes/validaciones';
 import { Producto, ProductoDB } from '../../../../interfaces/producto';
 import { AppState } from '../../../../reducers/globarReducers';
-import { ProductoService } from 'src/app/services/producto.service';
+import { ProductoService } from '../../../../services/producto.service';
 import { ProductoPedidoService } from '../../../../services/producto-pedido.service';
 import { PedidoDB } from '../../../../interfaces/pedido';
 import {
@@ -21,7 +22,12 @@ import {
 } from '../../../../interfaces/producto-pedido';
 import Swal from 'sweetalert2';
 import * as loadingActions from '../../../../reducers/loading/loading.actions';
-import { CalculosProductosPedidos } from 'src/app/classes/calculos-productos-pedidos';
+import {
+  CalculosProductosPedidos,
+  TotalesPagos,
+} from '../../../../classes/calculos-productos-pedidos';
+import { FiltrarEstados } from '../../../../classes/filtrar-estados';
+import { ProductoPedidoSocket } from '../../../../services/sockets/productos-pedido.service';
 
 @Component({
   selector: 'app-productos',
@@ -30,11 +36,7 @@ import { CalculosProductosPedidos } from 'src/app/classes/calculos-productos-ped
 })
 export class ProductosComponent implements OnInit, OnChanges {
   @Input() pedido: PedidoDB;
-  totales = {
-    subtotal: 0,
-    itbms: 0,
-    total: 0,
-  };
+  totales: TotalesPagos;
   forma: FormGroup;
   productos: Array<ProductoDB>;
   productosPedidos: Array<ProductoPedidoDB>;
@@ -45,13 +47,18 @@ export class ProductosComponent implements OnInit, OnChanges {
     private productoService: ProductoService,
     private validadores: Validaciones,
     private productoPedSer: ProductoPedidoService,
-    private calculosService: CalculosProductosPedidos
+    private calculosService: CalculosProductosPedidos,
+    private filtrarEstados: FiltrarEstados,
+    private breakPointObserver: BreakpointObserver,
+    private pPedidoSocket: ProductoPedidoSocket
   ) {}
 
   ngOnInit(): void {
     this.crearFormulario();
     this.cargarPedido();
     this.cargarProductosPedidos();
+    this.mediaQuery();
+    this.cargarProductosPedidosSocket();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -82,33 +89,64 @@ export class ProductosComponent implements OnInit, OnChanges {
   }
 
   cargarProductosPedidos(): void {
+    this.store.dispatch(loadingActions.cargarLoading());
     this.store
       .select('login')
       // .pipe(take(4))
       .subscribe((usuario) => {
-        // console.log(this.pedido);
-        if (this.pedido) {
-          const data = {
-            pedido: this.pedido._id,
-            token: usuario.token,
-          };
+        if (usuario.usuarioDB) {
+          if (this.pedido) {
+            const data = {
+              pedido: this.pedido._id,
+              token: usuario.token,
+              foranea: '',
+            };
 
-          this.productoPedSer
-            .obtenerProductosPedidos(data)
-            .pipe(first())
-            .subscribe((productosPedidos: ProductoPedido) => {
-              const prodPedidos = this.calculosService.calcularCostos(
-                productosPedidos.productosPedidos
-              );
+            if (usuario.usuarioDB.empresa) {
+              data.foranea = usuario.usuarioDB._id;
+            } else {
+              data.foranea = usuario.usuarioDB.foranea;
+            }
 
-              this.productosPedidos = prodPedidos;
+            this.productoPedSer
+              .obtenerProductosPedidos(data)
+              .pipe(first())
+              .subscribe((productosPedidos: ProductoPedido) => {
+                if (productosPedidos.ok) {
+                  const prodPedidos = this.calculosService.calcularCostos(
+                    productosPedidos.productosPedidos
+                  );
 
-              this.totales = [
-                ...new Set(
-                  this.calculosService.calcularTotales(this.productosPedidos)
-                ),
-              ][0];
-            });
+                  this.productosPedidos = prodPedidos;
+                  // console.log(this.productosPedidos);
+
+                  this.totales = [
+                    ...new Set(
+                      this.calculosService.calcularTotales(
+                        this.productosPedidos
+                      )
+                    ),
+                  ][0];
+                  this.store.dispatch(loadingActions.quitarLoading());
+                } else {
+                  Swal.fire(
+                    'Mensaje',
+                    'Error al cargar agregar el producto',
+                    'error'
+                  );
+                  this.store.dispatch(loadingActions.quitarLoading());
+                }
+
+                if (!productosPedidos) {
+                  Swal.fire(
+                    'Mensaje',
+                    'Error al cargar agregar el producto',
+                    'error'
+                  );
+                  this.store.dispatch(loadingActions.quitarLoading());
+                }
+              });
+          }
         }
       });
   }
@@ -118,17 +156,30 @@ export class ProductosComponent implements OnInit, OnChanges {
 
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data = {
-          criterio,
-          token: usuario.token,
-        };
-        this.productoService
-          .obtenerProductoCriterio(data)
-          .subscribe((productos: Producto) => {
-            this.productos = productos.productosDB;
-          });
+        if (usuario.usuarioDB) {
+          const data = {
+            criterio,
+            token: usuario.token,
+            foranea: '',
+          };
+
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+
+          this.productoService
+            .obtenerProductoCriterio(data)
+            .subscribe((productos: Producto) => {
+              const prodActivos = this.filtrarEstados.filtrarActivos(
+                productos.productosDB
+              );
+              this.productos = prodActivos;
+            });
+        }
       });
   }
 
@@ -188,39 +239,48 @@ export class ProductosComponent implements OnInit, OnChanges {
   crearProductoPedido(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data = {
-          token: usuario.token,
-          producto: this.forma.controls.producto.value._id,
-          cantidad: Number(this.forma.controls.cantidad.value),
-          precio: Number(this.forma.controls.precio.value),
-          itbms: Boolean(this.forma.controls.itbms.value),
-          pedido: this.pedido._id,
-        };
-        this.store.dispatch(loadingActions.cargarLoading());
-        this.productoPedSer
-          .crearProductoPedido(data)
-          .subscribe((productoPedido: ProductoPedido) => {
-            if (productoPedido.ok) {
-              // Swal.fire('Mensaje', 'Producto pedido creado', 'success');
-              this.store.dispatch(loadingActions.quitarLoading());
-              this.cargarProductosPedidos();
-              this.limpiarFormulario();
-            } else {
-              Swal.fire('Mensaje', 'Error al crear producto pedido', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            producto: this.forma.controls.producto.value._id,
+            cantidad: Number(this.forma.controls.cantidad.value),
+            precio: Number(this.forma.controls.precio.value),
+            itbms: Boolean(this.forma.controls.itbms.value),
+            pedido: this.pedido._id,
+            foranea: '',
+          };
 
-            if (!productoPedido) {
-              Swal.fire(
-                'Mensaje',
-                'Error al Error al crear producto pedido',
-                'error'
-              );
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+          // this.store.dispatch(loadingActions.cargarLoading());
+          this.productoPedSer
+            .crearProductoPedido(data)
+            .subscribe((productoPedido: ProductoPedido) => {
+              if (productoPedido.ok) {
+                // Swal.fire('Mensaje', 'Producto pedido creado', 'success');
+                // this.store.dispatch(loadingActions.quitarLoading());
+                this.cargarProductosPedidos();
+                this.limpiarFormulario();
+              } else {
+                Swal.fire('Mensaje', 'Error al crear producto pedido', 'error');
+                // this.store.dispatch(loadingActions.quitarLoading());
+              }
+
+              if (!productoPedido) {
+                Swal.fire(
+                  'Mensaje',
+                  'Error al Error al crear producto pedido',
+                  'error'
+                );
+                // this.store.dispatch(loadingActions.quitarLoading());
+              }
+            });
+        }
       });
   }
 
@@ -243,42 +303,51 @@ export class ProductosComponent implements OnInit, OnChanges {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.store.dispatch(loadingActions.cargarLoading());
+        // this.store.dispatch(loadingActions.cargarLoading());
 
         this.store
           .select('login')
-          .pipe(first())
+          // .pipe(first())
           .subscribe((usuario) => {
-            const data = {
-              token: usuario.token,
-              id,
-            };
-            this.store.dispatch(loadingActions.cargarLoading());
-            this.productoPedSer
-              .eliminarProductoPedido(data)
-              .subscribe((productoPedido: ProductoPedido) => {
-                if (productoPedido.ok) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Producto pedido borrado', 'success');
-                  this.cargarProductosPedidos();
-                } else {
-                  Swal.fire(
-                    'Mensaje',
-                    'Error al borrar producto pedido',
-                    'error'
-                  );
-                  this.store.dispatch(loadingActions.quitarLoading());
-                }
+            if (usuario.usuarioDB) {
+              const data = {
+                token: usuario.token,
+                id,
+                foranea: '',
+              };
 
-                if (!productoPedido) {
-                  Swal.fire(
-                    'Mensaje',
-                    'Error al Error al borrar producto pedido',
-                    'error'
-                  );
-                  this.store.dispatch(loadingActions.quitarLoading());
-                }
-              });
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
+
+              this.productoPedSer
+                .eliminarProductoPedido(data)
+                .subscribe((productoPedido: ProductoPedido) => {
+                  if (productoPedido.ok) {
+                    // this.store.dispatch(loadingActions.quitarLoading());
+                    Swal.fire('Mensaje', 'Producto pedido borrado', 'success');
+                    this.cargarProductosPedidos();
+                  } else {
+                    Swal.fire(
+                      'Mensaje',
+                      'Error al borrar producto pedido',
+                      'error'
+                    );
+                    // this.store.dispatch(loadingActions.quitarLoading());
+                  }
+
+                  if (!productoPedido) {
+                    Swal.fire(
+                      'Mensaje',
+                      'Error al Error al borrar producto pedido',
+                      'error'
+                    );
+                    // this.store.dispatch(loadingActions.quitarLoading());
+                  }
+                });
+            }
           });
       }
     });
@@ -292,5 +361,35 @@ export class ProductosComponent implements OnInit, OnChanges {
     } else {
       pDropDown.style.border = '1px solid red';
     }
+  }
+
+  mediaQuery(): void {
+    this.breakPointObserver
+      .observe(['(max-width: 768px)'])
+      .subscribe((state: BreakpointState) => {
+        const time = timer(0, 300).subscribe((resp) => {
+          const botones = document.querySelector(
+            '.p-inputnumber-buttons-stacked .p-inputnumber-button-group'
+          ) as HTMLElement;
+
+          if (botones) {
+            if (state.matches) {
+              botones.style.display = 'none';
+            } else {
+              botones.style.display = 'flex';
+            }
+
+            time.unsubscribe();
+          }
+        });
+      });
+  }
+
+  cargarProductosPedidosSocket(): void {
+    this.pPedidoSocket
+      .escuchar('cargar-productos-pedidos')
+      .subscribe((resp) => {
+        this.cargarProductosPedidos();
+      });
   }
 }

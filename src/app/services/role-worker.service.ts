@@ -23,7 +23,11 @@ export class RoleWorkerService {
 
   editarRole(data: any): Observable<any> {
     const url = `${environment.urlRoleWorker}/colrole/editarRole`;
-    const header = new HttpHeaders({ id: data.id, token: data.token });
+    const header = new HttpHeaders({
+      id: data.id,
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http
       .put(url, data, { headers: header })
@@ -32,16 +36,23 @@ export class RoleWorkerService {
 
   editarRestricciones(data: any): Observable<any> {
     const url = `${environment.urlRoleWorker}/colrole/editarRestricciones`;
-    const header = new HttpHeaders({ id: data.id, token: data.token });
+    const header = new HttpHeaders({
+      id: data.id,
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http
       .put(url, data, { headers: header })
       .pipe(map((resp) => resp));
   }
 
-  obtenerRoles(token: string): Observable<any> {
+  obtenerRoles(data: any): Observable<any> {
     const url = `${environment.urlRoleWorker}/colrole/obtenerTodos`;
-    const header = new HttpHeaders({ token });
+    const header = new HttpHeaders({
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(
       map((resp: any) => {
@@ -52,7 +63,11 @@ export class RoleWorkerService {
 
   eliminarRole(data: any): Observable<any> {
     const url = `${environment.urlRoleWorker}/colrole/eliminarRole`;
-    const header = new HttpHeaders({ id: data.id, token: data.token });
+    const header = new HttpHeaders({
+      id: data.id,
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }

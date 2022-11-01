@@ -2,8 +2,10 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+// modulos
 import { PrioridadRoutingModule } from './prioridad-routing.module';
 import { SharedModule } from 'src/app/shared/shared.module';
+import { LoadingModule } from 'src/app/shared/loading/loading.module';
 
 import { PrioridadComponent } from './prioridad.component';
 
@@ -15,7 +17,7 @@ import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputSwitchModule } from 'primeng/inputswitch';
-import {OrderListModule} from 'primeng/orderlist';
+import { OrderListModule } from 'primeng/orderlist';
 
 // providers
 import { Validaciones } from '../../../classes/validaciones';
@@ -35,7 +37,8 @@ import { Validaciones } from '../../../classes/validaciones';
     InputTextModule,
     DropdownModule,
     InputSwitchModule,
-    OrderListModule
+    OrderListModule,
+    LoadingModule,
   ],
   providers: [Validaciones],
 })

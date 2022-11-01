@@ -26,13 +26,13 @@ export class OrigenPedidoComponent implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private origenesService: OrigenPedidoService,
     private validadores: Validaciones,
-    private origenSocketService: OrigenSocketService
+    // private origenSocketService: OrigenSocketService
   ) {}
 
   ngOnInit(): void {
     this.crearFormulario();
     this.cargarOrigenes();
-    this.crearOrigenesSocket();
+
   }
 
   crearFormulario(): void {
@@ -48,28 +48,39 @@ export class OrigenPedidoComponent implements OnInit, OnDestroy {
   }
 
   cargarOrigenes(): void {
+    this.store.dispatch(loadingActions.cargarLoading());
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.origenesService
-          .obtenerOrigenes(usuario.token)
-          .subscribe((origenes: OrigenPedido) => {
-            this.store.dispatch(loadingActions.cargarLoading());
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
 
-            if (origenes.ok) {
-              this.origenes = origenes.origenesDB;
-              this.store.dispatch(loadingActions.quitarLoading());
-            } else {
-              Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+          this.origenesService
+            .obtenerOrigenes(data)
+            .subscribe((origenes: OrigenPedido) => {
+              if (origenes.ok) {
+                this.origenes = origenes.origenesDB;
+                this.store.dispatch(loadingActions.quitarLoading());
+              } else {
+                Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
 
-            if (!origenes) {
-              Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+              if (!origenes) {
+                Swal.fire('Mensaje', 'Error al cargar las sucursales', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
+            });
+        }
       });
   }
 
@@ -117,7 +128,7 @@ export class OrigenPedidoComponent implements OnInit, OnDestroy {
       } else {
         if (tipo === 'crear') {
           this.crearOrigen();
-          this.crearOrigenesSocket();
+
         }
 
         if (tipo === 'editar') {
@@ -128,75 +139,87 @@ export class OrigenPedidoComponent implements OnInit, OnDestroy {
   }
 
   crearOrigen(): void {
+    // this.store.dispatch(loadingActions.cargarLoading());;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearOrigen = {
-          nombre: this.forma.controls.nombre.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearOrigen = {
+            nombre: this.forma.controls.nombre.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        this.origenesService
-          .crearOrigen(data)
-          .subscribe((origen: OrigenPedido) => {
-            this.store.dispatch(loadingActions.cargarLoading());
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
 
-            if (origen.ok) {
-              this.store.dispatch(loadingActions.quitarLoading());
-              this.displayDialogCrear = false;
-              Swal.fire('Mensaje', 'Origen creado', 'success');
-              this.cargarOrigenes();
-              this.limpiarFormulario();
-            } else {
-              Swal.fire(
-                'Mensaje',
-                `Error al crear origen: ${origen.err.message}`,
-                'error'
-              );
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          this.origenesService
+            .crearOrigen(data)
+            .subscribe((origen: OrigenPedido) => {
+              if (origen.ok) {
+                this.displayDialogCrear = false;
+                Swal.fire('Mensaje', 'Origen creado', 'success');
+                this.cargarOrigenes();
+                this.limpiarFormulario();
+              } else {
+                Swal.fire(
+                  'Mensaje',
+                  `Error al crear origen: ${origen.err.message}`,
+                  'error'
+                );
+              }
 
-            if (!origen) {
-              Swal.fire('Mensaje', 'Error al crear origen', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+              if (!origen) {
+                Swal.fire('Mensaje', 'Error al crear origen', 'error');
+              }
+            });
+        }
       });
   }
 
   editarOrigen(): void {
+    // this.store.dispatch(loadingActions.cargarLoading());;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearOrigen = {
-          nombre: this.forma.controls.nombre.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-          id: this.origen._id,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearOrigen = {
+            nombre: this.forma.controls.nombre.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            id: this.origen._id,
+            foranea: '',
+          };
 
-        this.store.dispatch(loadingActions.cargarLoading());
-        this.origenesService
-          .editarOrigenID(data)
-          .subscribe((origen: OrigenPedido) => {
-            if (origen.ok) {
-              this.displayDialogEditar = false;
-              Swal.fire('Mensaje', 'Origen editado', 'success');
-              this.cargarOrigenes();
-              this.limpiarFormulario();
-            } else {
-              Swal.fire('Mensaje', 'Error al editar origen', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
 
-            if (!origen) {
-              Swal.fire('Mensaje', 'Error al editar origen', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+          this.origenesService
+            .editarOrigenID(data)
+            .subscribe((origen: OrigenPedido) => {
+              if (origen.ok) {
+                this.displayDialogEditar = false;
+                Swal.fire('Mensaje', 'Origen editado', 'success');
+                this.cargarOrigenes();
+                this.limpiarFormulario();
+              } else {
+                Swal.fire('Mensaje', `${origen.err.message}`, 'error');
+              }
+
+              if (!origen) {
+                Swal.fire('Mensaje', 'Error al editar origen', 'error');
+              }
+            });
+        }
       });
   }
 
@@ -212,52 +235,50 @@ export class OrigenPedidoComponent implements OnInit, OnDestroy {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.store.dispatch(loadingActions.cargarLoading());
+        // this.store.dispatch(loadingActions.cargarLoading());;
 
         this.store
           .select('login')
-          .pipe(first())
+          // .pipe(first())
           .subscribe((usuario) => {
-            const data = {
-              id: origen._id,
-              token: usuario.token,
-            };
+            if (usuario.usuarioDB) {
+              const data = {
+                id: origen._id,
+                token: usuario.token,
+                foranea: '',
+              };
 
-            this.origenesService
-              .eliminarOrigenID(data)
-              .subscribe((origen: OrigenPedido) => {
-                if (origen.ok) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Origen borrado', 'success');
-                  this.cargarOrigenes();
-                  this.limpiarFormulario();
-                } else {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar origen', 'error');
-                }
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
 
-                if (!origen) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar origen', 'error');
-                }
-              });
+              this.origenesService
+                .eliminarOrigenID(data)
+                .subscribe((origen: OrigenPedido) => {
+                  if (origen.ok) {
+                    Swal.fire('Mensaje', 'Origen borrado', 'success');
+                    this.cargarOrigenes();
+                    this.limpiarFormulario();
+                  } else {
+                    Swal.fire('Mensaje', `${origen.err.message}`, 'error');
+                  }
+
+                  if (!origen) {
+                    Swal.fire('Mensaje', 'Error al borrar origen', 'error');
+                  }
+                });
+            }
           });
       }
     });
   }
 
-  // sockets
-  crearOrigenesSocket(): void {
-    this.origenSocketService
-      .escuchar('cargar-origenes')
-      .subscribe((categorias) => {
-        // console.log('ok');
-        this.cargarOrigenes();
-      });
-  }
+
 
   ngOnDestroy(): void {
-    this.origenSocketService.destruirSocket('cargar-origenes');
+    // this.origenSocketService.destruirSocket('cargar-origenes');
   }
 }
 
@@ -266,6 +287,7 @@ interface CrearOrigen {
   estado: boolean;
   token: string;
   id?: string;
+  foranea: string;
 }
 
 /*

@@ -1,0 +1,171 @@
+@import "../../../../../styles.scss";
+
+* {
+  font-family: $font-family;
+}
+
+@media screen and(max-width: 576px) {
+  button#btnNuevo {
+    margin-left: -25px !important;
+    margin-top: -25px !important;
+  }
+
+  section#wrap-perfil {
+    margin-top: 40px;
+  }
+}
+
+@media screen and(max-width: 544px) {
+  section#wrap-form-perfil {
+    display: flex;
+    flex-direction: column;
+    // justify-content: center;
+    align-items: center;
+  }
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.badge-activo {
+  background-color: rgba(83, 179, 86, 0.5);
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-weight: bold;
+  color: rgb(5, 92, 8);
+}
+
+.badge-inactivo {
+  background-color: tomato;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-weight: bold;
+  color: darken($color: $white, $amount: 2);
+}
+
+.btnHeader {
+  background-color: $primary;
+  border: none !important;
+}
+
+.btnHeader:hover {
+  background-color: $secondary !important;
+}
+
+#wrap-perfil {
+  // border: 1px solid red;
+  margin: 100px auto;
+  width: 90%;
+}
+
+#wrap-tabla {
+  background-color: white;
+  padding: 25px;
+}
+
+#wrap-form-perfil {
+  // border: 1px solid red;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  padding: 25px 0;
+  column-gap: 15px;
+  row-gap: 35px;
+  position: relative;
+}
+
+.p-inputtext,
+.p-dropdown {
+  width: 100%;
+}
+
+// tarjeta
+
+.card {
+  border: none;
+
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.card:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background-color: lighten($color: $primary, $amount: 55);
+  transform: scaleY(1);
+  transition: all 0.5s;
+  transform-origin: bottom;
+}
+
+.card:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background-color: $primary;
+  transform: scaleY(0);
+  transition: all 0.5s;
+  transform-origin: bottom;
+}
+
+.card:hover::after {
+  transform: scaleY(1);
+}
+
+.fonts {
+  font-size: 11px;
+}
+
+.social-list {
+  display: flex;
+  list-style: none;
+  justify-content: center;
+  padding: 0;
+}
+
+.social-list li {
+  padding: 10px;
+  color: $primary;
+  font-size: 19px;
+}
+
+.buttons button:nth-child(1) {
+  border: 1px solid $primary !important;
+  color: $primary;
+  height: 40px;
+}
+
+.buttons button:nth-child(1):hover {
+  border: 1px solid $primary !important;
+  color: #fff;
+  height: 40px;
+  background-color: $primary;
+}
+
+.buttons button:nth-child(2) {
+  border: 1px solid $primary !important;
+  background-color: $primary;
+  color: #fff;
+  height: 40px;
+}
+
+#footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 25px;
+}
+
+#formulario {
+  // border: 1px solid blue;
+}

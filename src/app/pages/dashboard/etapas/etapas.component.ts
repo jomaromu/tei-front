@@ -10,7 +10,7 @@ import * as loadingActions from '../../../reducers/loading/loading.actions';
 import { environment } from '../../../../environments/environment';
 import Swal from 'sweetalert2';
 import { Etapa, EtapaDB, EtapaOrdenada } from '../../../interfaces/etapas';
-import { Usuario } from 'src/app/interfaces/resp-worker';
+import { Usuario } from '../../../interfaces/resp-worker';
 
 @Component({
   selector: 'app-etapas',
@@ -111,99 +111,125 @@ export class EtapasComponent implements OnInit {
   btnEditarOrdenEtapas(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data = {
-          colEtapas: environment.colEtapas,
-          etapas: this.etapasOrdenadas,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data = {
+            colEtapas: environment.colEtapas,
+            etapas: this.etapasOrdenadas,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        this.etapaService
-          .actualizarEtapasOrdenadas(data)
-          .subscribe((etapasOrdenaas: EtapaOrdenada) => {
-            if (etapasOrdenaas.ok) {
-              this.displayDialogOrdenar = false;
-              Swal.fire('Mensaje', 'Etapas ordenadas', 'success');
-            } else {
-              this.displayDialogOrdenar = false;
-              Swal.fire(
-                'Mensaje',
-                `Error al crear ordenar las etapas`,
-                'error'
-              );
-            }
-          });
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+
+          this.etapaService
+            .actualizarEtapasOrdenadas(data)
+            .subscribe((etapasOrdenaas: EtapaOrdenada) => {
+              if (etapasOrdenaas.ok) {
+                this.displayDialogOrdenar = false;
+                Swal.fire('Mensaje', 'Etapas ordenadas', 'success');
+              } else {
+                this.displayDialogOrdenar = false;
+                Swal.fire(
+                  'Mensaje',
+                  `Error al crear ordenar las etapas`,
+                  'error'
+                );
+              }
+            });
+        }
       });
   }
 
   crearEtapa(): void {
+    // this.store.dispatch(loadingActions.cargarLoading());;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearEtapa = {
-          nombre: this.forma.controls.nombre.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearEtapa = {
+            nombre: this.forma.controls.nombre.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        this.etapaService.crearEtapa(data).subscribe((etapa: Etapa) => {
-          this.store.dispatch(loadingActions.cargarLoading());
-
-          if (etapa.ok) {
-            this.store.dispatch(loadingActions.quitarLoading());
-            this.displayDialogCrear = false;
-            Swal.fire('Mensaje', 'Etapa creada', 'success');
-            this.crudEtapasOrdenadas(usuario, 'crear', etapa.etapaDB);
-            this.limpiarFormulario();
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
           } else {
-            Swal.fire(
-              'Mensaje',
-              `Error al crear etapa: ${etapa.err.message}`,
-              'error'
-            );
-            this.store.dispatch(loadingActions.quitarLoading());
+            data.foranea = usuario.usuarioDB.foranea;
           }
 
-          if (!etapa) {
-            Swal.fire('Mensaje', 'Error al crear etapa', 'error');
-            this.store.dispatch(loadingActions.quitarLoading());
-          }
-        });
+          this.etapaService.crearEtapa(data).subscribe((etapa: Etapa) => {
+            if (etapa.ok) {
+              this.displayDialogCrear = false;
+              Swal.fire('Mensaje', 'Etapa creada', 'success');
+              this.crudEtapasOrdenadas(usuario, 'crear', etapa.etapaDB);
+              this.limpiarFormulario();
+              this.store.dispatch(loadingActions.quitarLoading());
+            } else {
+              Swal.fire(
+                'Mensaje',
+                `Error al crear etapa: ${etapa.err.message}`,
+                'error'
+              );
+              this.store.dispatch(loadingActions.quitarLoading());
+            }
+
+            if (!etapa) {
+              Swal.fire('Mensaje', 'Error al crear etapa', 'error');
+              this.store.dispatch(loadingActions.quitarLoading());
+            }
+          });
+        }
       });
   }
 
   editarEtapa(): void {
+    // this.store.dispatch(loadingActions.cargarLoading());;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearEtapa = {
-          nombre: this.forma.controls.nombre.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-          id: this.etapa._id,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearEtapa = {
+            nombre: this.forma.controls.nombre.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            id: this.etapa._id,
+            foranea: '',
+          };
 
-        this.store.dispatch(loadingActions.cargarLoading());
-        this.etapaService.editarEtapa(data).subscribe((etapa: Etapa) => {
-          if (etapa.ok) {
-            this.displayDialogEditar = false;
-            Swal.fire('Mensaje', 'Etapa editada', 'success');
-            this.crudEtapasOrdenadas(usuario, 'editar');
-            this.limpiarFormulario();
-            this.store.dispatch(loadingActions.quitarLoading());
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
           } else {
-            Swal.fire('Mensaje', 'Error al editar etapa', 'error');
-            this.store.dispatch(loadingActions.quitarLoading());
+            data.foranea = usuario.usuarioDB.foranea;
           }
 
-          if (!etapa) {
-            Swal.fire('Mensaje', 'Error al editar etapa', 'error');
-            this.store.dispatch(loadingActions.quitarLoading());
-          }
-        });
+          this.etapaService.editarEtapa(data).subscribe((etapa: Etapa) => {
+            if (etapa.ok) {
+              this.displayDialogEditar = false;
+              Swal.fire('Mensaje', 'Etapa editada', 'success');
+              this.crudEtapasOrdenadas(usuario, 'editar');
+              this.limpiarFormulario();
+              this.store.dispatch(loadingActions.quitarLoading());
+            } else {
+              Swal.fire('Mensaje', `${etapa.err.message}`, 'error');
+              this.store.dispatch(loadingActions.quitarLoading());
+            }
+
+            if (!etapa) {
+              Swal.fire('Mensaje', 'Error al editar etapa', 'error');
+              this.store.dispatch(loadingActions.quitarLoading());
+            }
+          });
+        }
       });
   }
 
@@ -219,33 +245,44 @@ export class EtapasComponent implements OnInit {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.store.dispatch(loadingActions.cargarLoading());
+        // this.store.dispatch(loadingActions.cargarLoading());;
 
         this.store
           .select('login')
-          .pipe(first())
+          // .pipe(first())
           .subscribe((usuario) => {
-            const data = {
-              id: etapa._id,
-              token: usuario.token,
-            };
+            if (usuario.usuarioDB) {
+              const data = {
+                id: etapa._id,
+                token: usuario.token,
+                foranea: '',
+              };
 
-            this.etapaService.eliminarEtapa(data).subscribe((etapa: Etapa) => {
-              if (etapa.ok) {
-                this.store.dispatch(loadingActions.quitarLoading());
-                Swal.fire('Mensaje', 'Etapa borrada', 'success');
-                this.crudEtapasOrdenadas(usuario, 'eliminar');
-                this.limpiarFormulario();
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
               } else {
-                this.store.dispatch(loadingActions.quitarLoading());
-                Swal.fire('Mensaje', 'Error al borrar etapa', 'error');
+                data.foranea = usuario.usuarioDB.foranea;
               }
 
-              if (!etapa) {
-                this.store.dispatch(loadingActions.quitarLoading());
-                Swal.fire('Mensaje', 'Error al borrar etapa', 'error');
-              }
-            });
+              this.etapaService
+                .eliminarEtapa(data)
+                .subscribe((etapa: Etapa) => {
+                  if (etapa.ok) {
+                    Swal.fire('Mensaje', 'Etapa borrada', 'success');
+                    this.crudEtapasOrdenadas(usuario, 'eliminar');
+                    this.limpiarFormulario();
+                    this.store.dispatch(loadingActions.quitarLoading());
+                  } else {
+                    Swal.fire('Mensaje', `${etapa.err.message}`, 'error');
+                    this.store.dispatch(loadingActions.quitarLoading());
+                  }
+
+                  if (!etapa) {
+                    Swal.fire('Mensaje', 'Error al borrar etapa', 'error');
+                    this.store.dispatch(loadingActions.quitarLoading());
+                  }
+                });
+            }
           });
       }
     });
@@ -254,33 +291,42 @@ export class EtapasComponent implements OnInit {
   ordenarEtapas(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data = {
-          colEtapas: environment.colEtapas,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data = {
+            colEtapas: environment.colEtapas,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        const pet1 = this.etapaService.obtenerEtapas(usuario.token);
-        const pet2 = this.etapaService.obtenerEtapasOrdenadas(data);
-
-        forkJoin([pet1, pet2]).subscribe((mixEtapas: Array<any>) => {
-          const etapas: Etapa = mixEtapas[0];
-          const etapasOrdenadas: EtapaOrdenada = mixEtapas[1];
-
-          if (!etapasOrdenadas.etapasOrdenadaDB) {
-            return;
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
           }
 
-          this.etapasOrdenadas = etapasOrdenadas.etapasOrdenadaDB.etapas.map(
-            (etapaOriginal, index) =>
-              etapas.etapasDB.find((etapaOrdenada, index2) => {
-                if (etapaOrdenada) {
-                  return etapaOriginal._id === etapaOrdenada._id;
-                }
-              })
-          );
-        });
+          const pet1 = this.etapaService.obtenerEtapas(data);
+          const pet2 = this.etapaService.obtenerEtapasOrdenadas(data);
+
+          forkJoin([pet1, pet2]).subscribe((mixEtapas: Array<any>) => {
+            const etapas: Etapa = mixEtapas[0];
+            const etapasOrdenadas: EtapaOrdenada = mixEtapas[1];
+
+            if (!etapasOrdenadas.etapasOrdenadaDB) {
+              return;
+            }
+
+            this.etapasOrdenadas = etapasOrdenadas.etapasOrdenadaDB.etapas.map(
+              (etapaOriginal, index) =>
+                etapas.etapasDB.find((etapaOrdenada, index2) => {
+                  if (etapaOrdenada) {
+                    return etapaOriginal._id === etapaOrdenada._id;
+                  }
+                })
+            );
+          });
+        }
       });
   }
 
@@ -288,15 +334,25 @@ export class EtapasComponent implements OnInit {
     const data = {
       colEtapas: environment.colEtapas,
       token: usuario.token,
+      foranea: '',
     };
 
     const data2 = {
       colEtapas: environment.colEtapas,
       etapas: this.etapasOrdenadas,
       token: usuario.token,
+      foranea: '',
     };
 
-    const pet1 = this.etapaService.obtenerEtapas(usuario.token);
+    if (usuario.usuarioDB.empresa) {
+      data.foranea = usuario.usuarioDB._id;
+      data2.foranea = usuario.usuarioDB._id;
+    } else {
+      data.foranea = usuario.usuarioDB.foranea;
+      data2.foranea = usuario.usuarioDB.foranea;
+    }
+
+    const pet1 = this.etapaService.obtenerEtapas(data);
     const pet2 = this.etapaService.obtenerEtapasOrdenadas(data);
 
     forkJoin([pet1, pet2]).subscribe((mixEtapas: Array<any>) => {
@@ -339,4 +395,5 @@ interface CrearEtapa {
   estado: boolean;
   token: string;
   id?: string;
+  foranea: string;
 }

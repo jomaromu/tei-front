@@ -10,9 +10,12 @@ import { map } from 'rxjs/operators';
 export class TipoArchivoService {
   constructor(private http: HttpClient) {}
 
-  obtenerTiposArchivos(token: string): Observable<any> {
+  obtenerTiposArchivos(data: any): Observable<any> {
     const url = `${environment.urlTipoArchivo}/tipoArchivo/obtenerTiposArchivos`;
-    const header = new HttpHeaders({ token });
+    const header = new HttpHeaders({
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(
       map((resp: any) => {
@@ -41,7 +44,7 @@ export class TipoArchivoService {
 
   editarTipoArchivo(data: any): Observable<any> {
     const url = `${environment.urlTipoArchivo}/tipoArchivo/editarTipoArchivo`;
-    const header = new HttpHeaders({ id: data.id, token: data.token });
+    const header = new HttpHeaders({ token: data.token });
 
     return this.http
       .put(url, data, { headers: header })
@@ -50,7 +53,11 @@ export class TipoArchivoService {
 
   eliminarTipoArchivo(data: any): Observable<any> {
     const url = `${environment.urlTipoArchivo}/tipoArchivo/eliminarTipoArchivo`;
-    const header = new HttpHeaders({ id: data.id, token: data.token });
+    const header = new HttpHeaders({
+      id: data.id,
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }

@@ -18,13 +18,20 @@
   }
 
   #logo > img {
-    width: 90%;
+    border: 3px solid rgb(10, 115, 119);
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    object-fit: fill;
+
+    // border: 1px solid red;
   }
 
   #perfil {
     display: flex;
     flex-direction: column;
     text-align: center;
+    padding: 7px;
 
     a {
       text-decoration: none;

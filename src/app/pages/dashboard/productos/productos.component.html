@@ -1,5 +1,5 @@
-<app-menu></app-menu>
 <app-loading></app-loading>
+<app-menu></app-menu>
 
 <!-- TABLA PRODUTOS -->
 <section id="wrap-productos">
@@ -32,6 +32,7 @@
 
     <!-- tabla -->
     <p-table
+      #dt
       [value]="productos"
       [rows]="10"
       [paginator]="true"
@@ -43,7 +44,23 @@
       currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} Productos"
       [rowsPerPageOptions]="[10, 25, 50]"
       [resizableColumns]="true"
+      [globalFilterFields]="['nombre']"
     >
+      <ng-template pTemplate="caption">
+        <div
+          style="display: flex; justify-content: flex-end; flex-direction: row"
+        >
+          <span class="p-input-icon-left ml-auto">
+            <i class="pi pi-search"></i>
+            <input
+              pInputText
+              type="text"
+              (input)="dt.filterGlobal($event.target.value, 'contains')"
+              placeholder="Nombre"
+            />
+          </span>
+        </div>
+      </ng-template>
       <ng-template pTemplate="header">
         <tr>
           <th>#</th>
@@ -57,18 +74,18 @@
       <ng-template pTemplate="body" let-producto let-i="rowIndex">
         <tr>
           <td>{{ i + 1 }}</td>
-          <td>{{ producto.nombre }}</td>
-          <td>{{ producto.precio | currency }}</td>
+          <td>{{ producto?.nombre }}</td>
+          <td>{{ producto?.precio | currency }}</td>
           <td>{{ producto?.categoria?.nombre }}</td>
           <td>
             <span
-              [ngClass]="{ 'badge-activo': producto.estado }"
-              *ngIf="producto.estado"
+              [ngClass]="{ 'badge-activo': producto?.estado }"
+              *ngIf="producto?.estado"
               >Activo</span
             >
             <span
-              [ngClass]="{ 'badge-inactivo': !producto.estado }"
-              *ngIf="!producto.estado"
+              [ngClass]="{ 'badge-inactivo': !producto?.estado }"
+              *ngIf="!producto?.estado"
               >Inactivo</span
             >
           </td>
@@ -105,6 +122,7 @@
     [resizable]="false"
     [style]="{ width: '500px' }"
     [breakpoints]="{ '530px': '95%' }"
+    (onHide)="closeDialog()"
   >
     <section id="wrap-form-producto">
       <!-- Categorias -->
@@ -193,7 +211,7 @@
     </section>
     <p-inputSwitch formControlName="estado" name="estado"></p-inputSwitch>
 
-    <ng-template pTemplate="footer">
+    <div class="btn-footer">
       <button
         pButton
         pRipple
@@ -210,7 +228,7 @@
         class="p-button-text"
         (click)="btnGuardar('crear')"
       ></button>
-    </ng-template>
+    </div>
   </p-dialog>
 </form>
 
@@ -224,6 +242,7 @@
     [resizable]="false"
     [style]="{ width: '500px' }"
     [breakpoints]="{ '530px': '95%' }"
+    (onHide)="closeDialog()"
   >
     <section id="wrap-form-producto">
       <!-- Categorias -->
@@ -311,7 +330,7 @@
     <!-- Estado -->
     <p-inputSwitch formControlName="estado" name="estado"></p-inputSwitch>
 
-    <ng-template pTemplate="footer">
+    <div class="btn-footer">
       <button
         pButton
         pRipple
@@ -328,6 +347,6 @@
         class="p-button-text"
         (click)="btnGuardar('editar')"
       ></button>
-    </ng-template>
+    </div>
   </p-dialog>
 </form>

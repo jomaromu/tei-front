@@ -2,8 +2,10 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+// modulos
 import { MetodosPagoRoutingModule } from './metodos-pago-routing.module';
 import { SharedModule } from '../../../shared/shared.module';
+import { LoadingModule } from 'src/app/shared/loading/loading.module';
 
 import { MetodosPagoComponent } from './metodos-pago.component';
 
@@ -34,6 +36,7 @@ import { Validaciones } from '../../../classes/validaciones';
     DropdownModule,
     InputSwitchModule,
     DialogModule,
+    LoadingModule,
   ],
   providers: [Validaciones],
 })

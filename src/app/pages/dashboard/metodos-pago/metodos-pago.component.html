@@ -1,5 +1,5 @@
-<app-menu></app-menu>
 <app-loading></app-loading>
+<app-menu></app-menu>
 
 <!-- TABLA METODOS -->
 <section id="wrap-metodos">
@@ -32,6 +32,7 @@
 
     <!-- tabla -->
     <p-table
+      #dt
       [value]="metodos"
       [rows]="10"
       [paginator]="true"
@@ -43,7 +44,23 @@
       currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} Métodos de pago"
       [rowsPerPageOptions]="[10, 25, 50]"
       [resizableColumns]="true"
+      [globalFilterFields]="['nombre']"
     >
+      <ng-template pTemplate="caption">
+        <div
+          style="display: flex; justify-content: flex-end; flex-direction: row"
+        >
+          <span class="p-input-icon-left ml-auto">
+            <i class="pi pi-search"></i>
+            <input
+              pInputText
+              type="text"
+              (input)="dt.filterGlobal($event.target.value, 'contains')"
+              placeholder="Nombre"
+            />
+          </span>
+        </div>
+      </ng-template>
       <ng-template pTemplate="header">
         <tr>
           <th>#</th>
@@ -55,16 +72,16 @@
       <ng-template pTemplate="body" let-metodo let-i="rowIndex">
         <tr>
           <td>{{ i + 1 }}</td>
-          <td>{{ metodo.nombre }}</td>
+          <td>{{ metodo?.nombre }}</td>
           <td>
             <span
-              [ngClass]="{ 'badge-activo': metodo.estado }"
-              *ngIf="metodo.estado"
+              [ngClass]="{ 'badge-activo': metodo?.estado }"
+              *ngIf="metodo?.estado"
               >Activo</span
             >
             <span
-              [ngClass]="{ 'badge-inactivo': !metodo.estado }"
-              *ngIf="!metodo.estado"
+              [ngClass]="{ 'badge-inactivo': !metodo?.estado }"
+              *ngIf="!metodo?.estado"
               >Inactivo</span
             >
           </td>
@@ -101,6 +118,7 @@
     [resizable]="false"
     [style]="{ width: '500px' }"
     [breakpoints]="{ '530px': '95%' }"
+    (onHide)="closeDialog()"
   >
     <section id="wrap-form-metodo">
       <!-- Nombre -->

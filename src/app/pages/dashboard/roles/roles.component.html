@@ -1,5 +1,5 @@
-<app-menu></app-menu>
 <app-loading></app-loading>
+<app-menu></app-menu>
 
 <!-- TABLA ROLES -->
 <section id="wrap-role">
@@ -32,6 +32,7 @@
 
     <!-- tabla -->
     <p-table
+      #dt
       [value]="roles"
       [rows]="10"
       [paginator]="true"
@@ -43,7 +44,23 @@
       currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} Roles"
       [rowsPerPageOptions]="[10, 25, 50]"
       [resizableColumns]="true"
+      [globalFilterFields]="['nombre']"
     >
+      <ng-template pTemplate="caption">
+        <div
+          style="display: flex; justify-content: flex-end; flex-direction: row"
+        >
+          <span class="p-input-icon-left ml-auto">
+            <i class="pi pi-search"></i>
+            <input
+              pInputText
+              type="text"
+              (input)="dt.filterGlobal($event.target.value, 'contains')"
+              placeholder="Nombre"
+            />
+          </span>
+        </div>
+      </ng-template>
       <ng-template pTemplate="header">
         <tr>
           <th>#</th>
@@ -55,16 +72,16 @@
       <ng-template pTemplate="body" let-role let-i="rowIndex">
         <tr>
           <td>{{ i + 1 }}</td>
-          <td>{{ role.nombre }}</td>
+          <td>{{ role?.nombre }}</td>
           <td>
             <span
-              [ngClass]="{ 'badge-activo': role.estado }"
-              *ngIf="role.estado"
+              [ngClass]="{ 'badge-activo': role?.estado }"
+              *ngIf="role?.estado"
               >Activo</span
             >
             <span
-              [ngClass]="{ 'badge-inactivo': !role.estado }"
-              *ngIf="!role.estado"
+              [ngClass]="{ 'badge-inactivo': !role?.estado }"
+              *ngIf="!role?.estado"
               >Inactivo</span
             >
           </td>
@@ -109,6 +126,7 @@
     [resizable]="false"
     [style]="{ width: '500px' }"
     [breakpoints]="{ '530px': '95%' }"
+    (onHide)="closeDialog()"
   >
     <section id="wrap-form-role">
       <!-- Nombre -->
@@ -332,93 +350,459 @@
     [style]="{ width: '500px' }"
     [breakpoints]="{ '530px': '95%' }"
   >
-    <section>
-      <p-accordion
-        [multiple]="true"
-        [style]="{ width: '100%', padding: '10px' }"
-      >
-        <p-accordionTab header="Sidebar">
-          <section id="acordeon-catalogo">
-            <div>
+    <p-accordion [multiple]="true" [style]="{ width: '100%', padding: '10px' }">
+      <!-- SIDEBAR -->
+      <p-accordionTab header="Sidebar">
+        <section class="acordeon-catalogo">
+          <!-- <div>
               <label for="">Catálogo</label>
               <p-inputSwitch formControlName="catalogo"></p-inputSwitch>
+            </div> -->
+
+          <div>
+            <label for="">Pedidos</label>
+            <p-inputSwitch formControlName="bandeja"></p-inputSwitch>
+          </div>
+
+          <div>
+            <label for="">Configuración</label>
+            <p-inputSwitch formControlName="configuracion"></p-inputSwitch>
+          </div>
+
+          <div>
+            <label for="">Sucursales</label>
+            <p-inputSwitch formControlName="sucursales"></p-inputSwitch>
+          </div>
+
+          <div>
+            <label for="">Colaboradores</label>
+            <p-inputSwitch formControlName="colaboradores"></p-inputSwitch>
+          </div>
+
+          <div>
+            <label for="">Clientes</label>
+            <p-inputSwitch formControlName="clientes"></p-inputSwitch>
+          </div>
+
+          <div>
+            <label for="">Categorias</label>
+            <p-inputSwitch formControlName="categorias"></p-inputSwitch>
+          </div>
+
+          <div>
+            <label for="">Productos</label>
+            <p-inputSwitch formControlName="productos"></p-inputSwitch>
+          </div>
+
+          <div>
+            <label for="">Roles</label>
+            <p-inputSwitch formControlName="roles"></p-inputSwitch>
+          </div>
+
+          <div>
+            <label for="">Origen</label>
+            <p-inputSwitch formControlName="origen"></p-inputSwitch>
+          </div>
+
+          <div>
+            <label for="">Prioridad</label>
+            <p-inputSwitch formControlName="prioridad"></p-inputSwitch>
+          </div>
+
+          <div>
+            <label for="">Etapas</label>
+            <p-inputSwitch formControlName="etapas"></p-inputSwitch>
+          </div>
+
+          <div>
+            <label for="">Estado</label>
+            <p-inputSwitch formControlName="colores"></p-inputSwitch>
+          </div>
+
+          <div>
+            <label for="">Metodos</label>
+            <p-inputSwitch formControlName="metodos"></p-inputSwitch>
+          </div>
+
+          <div>
+            <label for="">Modalidad</label>
+            <p-inputSwitch formControlName="modalidad"></p-inputSwitch>
+          </div>
+
+          <div>
+            <label for="">Tipo archivos</label>
+            <p-inputSwitch formControlName="tipoArchivo"></p-inputSwitch>
+          </div>
+        </section>
+      </p-accordionTab>
+
+      <!-- Pedidos -->
+      <p-accordionTab header="Pedidos">
+        <!-- COLUMNAS -->
+        <p-accordionTab header="Columnas">
+          <section class="acordeon-catalogo">
+            <div style="grid-template-columns: 1/3">
+              <label for="">Buscador general</label>
+              <p-inputSwitch formControlName="buscadorGeneral"></p-inputSwitch>
+            </div>
+            <div>
+              <label for="">Crear pedido</label>
+              <p-inputSwitch formControlName="crearPedido"></p-inputSwitch>
             </div>
 
             <div>
-              <label for="">Sucursales</label>
-              <p-inputSwitch formControlName="sucursales"></p-inputSwitch>
+              <label for="">Borrar pedido</label>
+              <p-inputSwitch formControlName="borrarPedido"></p-inputSwitch>
             </div>
 
             <div>
-              <label for="">Colaboradores</label>
-              <p-inputSwitch formControlName="colaboradores"></p-inputSwitch>
+              <label for="">Ver ID</label>
+              <p-inputSwitch formControlName="verID"></p-inputSwitch>
             </div>
 
             <div>
-              <label for="">Clientes</label>
-              <p-inputSwitch formControlName="clientes"></p-inputSwitch>
+              <label for="">Ver fecha</label>
+              <p-inputSwitch formControlName="verFecha"></p-inputSwitch>
             </div>
 
             <div>
-              <label for="">Categorias</label>
-              <p-inputSwitch formControlName="categorias"></p-inputSwitch>
+              <label for="">Ver vendedor</label>
+              <p-inputSwitch formControlName="verVendedor"></p-inputSwitch>
             </div>
 
             <div>
-              <label for="">Productos</label>
-              <p-inputSwitch formControlName="productos"></p-inputSwitch>
+              <label for="">Ver cliente</label>
+              <p-inputSwitch formControlName="verCliente"></p-inputSwitch>
             </div>
 
             <div>
-              <label for="">Roles</label>
-              <p-inputSwitch formControlName="roles"></p-inputSwitch>
+              <label for="">Ver teléfono</label>
+              <p-inputSwitch formControlName="verTelefono"></p-inputSwitch>
             </div>
 
             <div>
-              <label for="">Origen</label>
-              <p-inputSwitch formControlName="origen"></p-inputSwitch>
+              <label for="">Ver sucursal</label>
+              <p-inputSwitch formControlName="verSucursal"></p-inputSwitch>
             </div>
 
             <div>
-              <label for="">Prioridad</label>
-              <p-inputSwitch formControlName="prioridad"></p-inputSwitch>
+              <label for="">Ver total</label>
+              <p-inputSwitch formControlName="verTotal"></p-inputSwitch>
             </div>
 
             <div>
-              <label for="">Etapas</label>
-              <p-inputSwitch formControlName="etapas"></p-inputSwitch>
+              <label for="">Ver saldo</label>
+              <p-inputSwitch formControlName="verSaldo"></p-inputSwitch>
             </div>
 
             <div>
-              <label for="">Colores</label>
-              <p-inputSwitch formControlName="colores"></p-inputSwitch>
+              <label for="">Ver prioridad</label>
+              <p-inputSwitch formControlName="verPrioridad"></p-inputSwitch>
             </div>
 
             <div>
-              <label for="">Metodos</label>
-              <p-inputSwitch formControlName="metodos"></p-inputSwitch>
+              <label for="">Ver etapa</label>
+              <p-inputSwitch formControlName="verEtapa"></p-inputSwitch>
+            </div>
+
+            <div>
+              <label for="">Ver estado</label>
+              <p-inputSwitch formControlName="verEstado"></p-inputSwitch>
+            </div>
+
+            <div>
+              <label for="">Ver diseñador</label>
+              <p-inputSwitch formControlName="verDise"></p-inputSwitch>
             </div>
           </section>
         </p-accordionTab>
-        <p-accordionTab header="Bandeja"> Content 2 </p-accordionTab>
-        <p-accordionTab header="Pedido">
-          <section>
-            <p-accordion
-              [multiple]="true"
-              [style]="{ width: '100%', padding: '10px' }"
-            >
-              <p-accordionTab header="Información"> Content 1 </p-accordionTab>
-              <p-accordionTab header="Producto"> Content 2 </p-accordionTab>
-              <p-accordionTab header="Archivos"> Content 3 </p-accordionTab>
-              <p-accordionTab header="Seguimiento"> Content 3 </p-accordionTab>
-              <p-accordionTab header="Pagos"> Content 3 </p-accordionTab>
-            </p-accordion>
+
+        <!-- ETAPAS -->
+        <p-accordionTab header="Etapas">
+          <section class="acordeon-catalogo">
+            <div *ngFor="let etapa of etapas">
+              <label for="">{{ etapa?.nombre }}</label>
+              <p-checkbox
+                [value]="etapa?._id"
+                [formControl]="formaRestricciones.get('etapasSeleccionadas')"
+              ></p-checkbox>
+            </div>
           </section>
         </p-accordionTab>
-      </p-accordion>
-    </section>
 
-    <ng-template pTemplate="footer">
+        <!-- SUCURSALES -->
+        <p-accordionTab header="Sucursales">
+          <section class="acordeon-catalogo">
+            <div *ngFor="let sucursal of sucursales">
+              <label for="">{{ sucursal?.nombre }}</label>
+              <p-checkbox
+                [value]="sucursal?._id"
+                [formControl]="
+                  formaRestricciones.get('sucursalesSeleccionadas')
+                "
+              ></p-checkbox>
+            </div>
+          </section>
+        </p-accordionTab>
+
+        <!-- CONDICION -->
+        <p-accordionTab header="Condición">
+          <section class="acordeon-catalogo">
+            <div>
+              <label for="">Ver Propias</label>
+              <p-inputSwitch formControlName="verPropias"></p-inputSwitch>
+            </div>
+          </section>
+        </p-accordionTab>
+      </p-accordionTab>
+
+      <!-- PEDIDO -->
+      <p-accordionTab header="Pedido">
+        <section>
+          <p-accordion
+            [multiple]="true"
+            [style]="{ width: '100%', padding: '10px' }"
+          >
+            <!-- INFORMACION -->
+            <p-accordionTab header="Información">
+              <section class="acordeon-catalogo">
+                <div>
+                  <label for="">Ver información</label>
+                  <p-inputSwitch
+                    formControlName="verPestaniaInfo"
+                  ></p-inputSwitch>
+                </div>
+
+                <div>
+                  <label for="">Ver Cliente</label>
+                  <p-inputSwitch
+                    formControlName="verInfoCliente"
+                  ></p-inputSwitch>
+                </div>
+
+                <div>
+                  <label for="">Ver teléfono</label>
+                  <p-inputSwitch
+                    formControlName="verInfoTelCliente"
+                  ></p-inputSwitch>
+                </div>
+
+                <div>
+                  <label for="">Ver Correo</label>
+                  <p-inputSwitch
+                    formControlName="verInfoCorreo"
+                  ></p-inputSwitch>
+                </div>
+
+                <div>
+                  <label for="">Editar cliente</label>
+                  <p-inputSwitch
+                    formControlName="verInfoEditarCliente"
+                  ></p-inputSwitch>
+                </div>
+
+                <div>
+                  <label for="">Editar F. Entrega</label>
+                  <p-inputSwitch
+                    formControlName="editarFechaEntrega"
+                  ></p-inputSwitch>
+                </div>
+              </section>
+
+              <p-accordionTab header="Prioridad">
+                <section class="acordeon-catalogo">
+                  <div style="grid-column: 1/3">
+                    <label for="">Editar Prioridad</label>
+                    <p-inputSwitch
+                      formControlName="editarInfoPrioridad"
+                    ></p-inputSwitch>
+                  </div>
+                  <!-- <div *ngFor="let prioridad of prioridades">
+                    <label for="">{{ prioridad?.nombre }}</label>
+                    <p-checkbox
+                      [value]="prioridad?._id"
+                      [formControl]="
+                        formaRestricciones.get('prioridadesSeleccionadas')
+                      "
+                    ></p-checkbox>
+                  </div> -->
+                </section>
+              </p-accordionTab>
+              <p-accordionTab header="Etapa">
+                <section class="acordeon-catalogo">
+                  <div style="grid-column: 1/3">
+                    <label for="">Editar Etapa</label>
+                    <p-inputSwitch
+                      formControlName="editarInfoEtapa"
+                    ></p-inputSwitch>
+                  </div>
+                  <div *ngFor="let etapaInfo of etapasInfo">
+                    <label for="">{{ etapaInfo?.nombre }}</label>
+                    <p-checkbox
+                      [value]="etapaInfo?._id"
+                      [formControl]="
+                        formaRestricciones.get('etapaInfoSeleccionadas')
+                      "
+                    ></p-checkbox>
+                  </div>
+                </section>
+              </p-accordionTab>
+              <p-accordionTab header="Diseñador">
+                <section class="acordeon-catalogo">
+                  <div>
+                    <label for="">Editar Diseñador</label>
+                    <p-inputSwitch
+                      formControlName="editarInfoDise"
+                    ></p-inputSwitch>
+                  </div>
+                  <div>
+                    <label for="">Ver Distribución</label>
+                    <p-inputSwitch
+                      formControlName="verInfoDistribucion"
+                    ></p-inputSwitch>
+                  </div>
+                  <!-- <div *ngFor="let diseniador of diseniadores">
+                    <label for="">{{ diseniador?.nombre }}</label>
+                    <p-checkbox
+                      [value]="diseniador?._id"
+                      [formControl]="
+                        formaRestricciones.get('diseniadoresSeleccionados')
+                      "
+                    ></p-checkbox>
+                  </div> -->
+                </section>
+              </p-accordionTab>
+              <p-accordionTab header="Estado">
+                <section class="acordeon-catalogo">
+                  <div style="grid-column: 1/3">
+                    <label for="">Editar Estado</label>
+                    <p-inputSwitch
+                      formControlName="editarInfoEstado"
+                    ></p-inputSwitch>
+                  </div>
+                  <div *ngFor="let estado of estados">
+                    <label for="">{{ estado?.nombre }}</label>
+                    <p-checkbox
+                      [value]="estado?._id"
+                      [formControl]="
+                        formaRestricciones.get('estadosSeleccionados')
+                      "
+                    ></p-checkbox>
+                  </div>
+                </section>
+              </p-accordionTab>
+              <p-accordionTab header="Origen">
+                <section class="acordeon-catalogo">
+                  <div style="grid-column: 1/3">
+                    <label for="">Editar Origen</label>
+                    <p-inputSwitch
+                      formControlName="editarInfoOrigen"
+                    ></p-inputSwitch>
+                  </div>
+                  <!-- <div *ngFor="let origen of origenes">
+                    <label for="">{{ origen?.nombre }}</label>
+                    <p-checkbox
+                      [value]="origen?._id"
+                      [formControl]="
+                        formaRestricciones.get('origenesSeleccionados')
+                      "
+                    ></p-checkbox>
+                  </div> -->
+                </section>
+              </p-accordionTab>
+              <p-accordionTab header="Vendedor">
+                <section class="acordeon-catalogo">
+                  <div style="grid-column: 1/3">
+                    <label for="">Editar Vendedor</label>
+                    <p-inputSwitch
+                      formControlName="editarInfoVendedor"
+                    ></p-inputSwitch>
+                  </div>
+                  <!-- <div *ngFor="let vendedor of vendedores">
+                    <label for="">{{ vendedor?.nombre }}</label>
+                    <p-checkbox
+                      [value]="vendedor?._id"
+                      [formControl]="
+                        formaRestricciones.get('vendedoresSeleccionados')
+                      "
+                    ></p-checkbox>
+                  </div> -->
+                </section>
+              </p-accordionTab>
+              <p-accordionTab header="Sucursal">
+                <section class="acordeon-catalogo">
+                  <div style="grid-column: 1/3">
+                    <label for="">Editar Sucursal</label>
+                    <p-inputSwitch
+                      formControlName="editarInfoSucursal"
+                    ></p-inputSwitch>
+                  </div>
+                  <!-- <div *ngFor="let sucursalInfo of sucursalesInfo">
+                    <label for="">{{ sucursalInfo?.nombre }}</label>
+                    <p-checkbox
+                      [value]="sucursalInfo?._id"
+                      [formControl]="
+                        formaRestricciones.get('sucursalesInfoSeleccionadas')
+                      "
+                    ></p-checkbox>
+                  </div> -->
+                </section>
+              </p-accordionTab>
+            </p-accordionTab>
+
+            <!-- PRODUCTO -->
+            <p-accordionTab header="Producto">
+              <section class="acordeon-catalogo">
+                <div style="grid-column: 1 / 3">
+                  <label for="">Ver productos</label>
+                  <p-inputSwitch
+                    formControlName="verPestaniProductos"
+                  ></p-inputSwitch>
+                </div>
+              </section>
+            </p-accordionTab>
+
+            <!-- ARCHIVOS -->
+            <p-accordionTab header="Archivos">
+              <section class="acordeon-catalogo">
+                <div style="grid-column: 1 / 3">
+                  <label for="">Ver archivos</label>
+                  <p-inputSwitch
+                    formControlName="verPestaniArchivos"
+                  ></p-inputSwitch>
+                </div>
+              </section>
+            </p-accordionTab>
+
+            <!-- SEGUIMIENTO -->
+            <p-accordionTab header="Seguimiento">
+              <section class="acordeon-catalogo">
+                <div style="grid-column: 1 / 3">
+                  <label for="">Ver seguimiento</label>
+                  <p-inputSwitch
+                    formControlName="verPestaniSegs"
+                  ></p-inputSwitch>
+                </div>
+              </section>
+            </p-accordionTab>
+
+            <!-- PAGOS -->
+            <p-accordionTab header="Pagos">
+              <section class="acordeon-catalogo">
+                <div style="grid-column: 1 / 3">
+                  <label for="">Ver pagos</label>
+                  <p-inputSwitch
+                    formControlName="verPestaniPagos"
+                  ></p-inputSwitch>
+                </div>
+              </section>
+            </p-accordionTab>
+          </p-accordion>
+        </section>
+      </p-accordionTab>
+    </p-accordion>
+
+    <div class="btn-footer">
       <button
         pButton
         pRipple
@@ -435,6 +819,6 @@
         class="p-button-text"
         (click)="btnEditarRestricciones()"
       ></button>
-    </ng-template>
+    </div>
   </p-dialog>
 </form>

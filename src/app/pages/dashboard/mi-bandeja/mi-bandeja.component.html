@@ -1,3 +1,4 @@
+<app-loading></app-loading>
 <app-menu></app-menu>
 
 <section id="wrap-mi-bandeja">
@@ -12,48 +13,64 @@
     >
       <div class="p-toolbar-group-left">
         <!-- Nuevo pedido -->
+
         <button
-          *ngIf="usuario?.usuarioDB?.role?.vendedor"
+          *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.crearPedido"
           pButton
           pRipple
-          label="Nuevo"
-          icon="pi pi-plus"
-          class="p-button-success btnHeader"
+          [label]="objBtnNuevo.label"
+          [icon]="objBtnNuevo.icon"
+          class="p-button-success btnHeader btn-small"
           (click)="showDialog('crear')"
           style="height: 45px"
         ></button>
 
         <!-- Filtros -->
+        <!-- <button
+          pButton
+          label="Clear"
+          class="p-button-outlined"
+          icon="pi pi-filter-slash"
+          (click)="clear(dt)"
+        ></button> -->
+
         <button
           pButton
           pRipple
-          label="Filtros"
-          icon="pi pi-filter"
-          class="p-button-primary"
-          (click)="showDialog('filtros')"
+          [label]="objBtnFiltros.label"
+          [icon]="objBtnFiltros.icon"
+          class="p-button-primary btn-small"
+          (click)="limpiarFiltros(dt)"
           style="height: 45px; margin-left: 15px"
         ></button>
       </div>
 
-      <div class="p-toolbar-group-right">
+      <div
+        class="p-toolbar-group-right"
+        *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.borrarPedido"
+      >
         <!-- Eliminar pedido -->
         <button
           pButton
           pRipple
           icon="pi pi-trash"
-          class="p-button-danger btnHeader"
+          class="p-button-danger btnHeader btn-small"
           (click)="showDialog('eliminar')"
           style="height: 45px"
+          [disabled]="pedidosSeleccionados?.length === 0"
+          [ngClass]="{
+            'no-drop': pedidosSeleccionados?.length === 0
+          }"
         ></button>
       </div>
     </p-toolbar>
 
-    <!-- table -->
+    <!-- table normal-->
     <p-table
+      #dt
       [value]="pedidos"
       [rows]="150"
       [paginator]="true"
-      selectionMode="single"
       responsiveLayout="scroll"
       [showCurrentPageReport]="true"
       [autoLayout]="true"
@@ -61,23 +78,337 @@
       currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} Pedidos"
       [rowsPerPageOptions]="[50, 100, 150]"
       [resizableColumns]="true"
+      [(selection)]="pedidosSeleccionados"
+      stateStorage="local"
+      stateKey="state-table"
+      [globalFilterFields]="[
+        'pedidoDB.idReferencia',
+        'pedidoDB.cliente.nombre',
+        'pedidoDB.cliente.telefono'
+      ]"
     >
+      <ng-template pTemplate="caption">
+        <div
+          id="filtrosGenerales"
+          *ngIf="
+            usuario?.usuarioDB?.role?.restricciones?.bandeja?.buscadorGeneral
+          "
+        >
+          <p-checkbox
+            label="Archivados"
+            (onChange)="verArchivados()"
+            [binary]="true"
+            [(ngModel)]="archivados"
+          ></p-checkbox>
+
+          <div id="box-busqueda" class="p-input-icon-left ml-auto">
+            <i class="pi pi-search"></i>
+            <input
+              id="inputBusqueda"
+              pInputText
+              type="text"
+              (change)="setLocalStorage($event)"
+              placeholder="ID/Cliente/Teléfono"
+              [style]="{ width: '100%' }"
+            />
+          </div>
+        </div>
+      </ng-template>
       <ng-template pTemplate="header">
         <tr>
-          <th>ID</th>
-          <th>Fecha</th>
-          <th>Vendedor</th>
-          <th>Cliente</th>
-          <th>Teléfono</th>
-          <th>Sucursal</th>
-          <th>Total</th>
-          <th>Saldo</th>
-          <th>Prioridad</th>
-          <th>Etapa</th>
-          <th>Estado</th>
-          <th>Diseñador</th>
+          <th
+            *ngIf="
+              usuario?.usuarioDB?.role?.restricciones?.bandeja?.borrarPedido
+            "
+            style="width: 3rem"
+          ></th>
+          <th *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.verID">
+            <div
+              style="
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+              "
+            >
+              <span> ID </span>
+              <p-columnFilter
+                type="text"
+                field="pedidoDB.idReferencia"
+                display="menu"
+                [matchModeOptions]="matchModeOptions"
+                [showAddButton]="false"
+                [showOperator]="false"
+                [hideOnClear]="true"
+              ></p-columnFilter>
+            </div>
+          </th>
+          <th
+            *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.verFecha"
+          >
+            <div
+              style="
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+              "
+            >
+              <span> Fecha </span>
+              <p-columnFilter
+                type="text"
+                field="pedidoDB.fechaRegistro"
+                display="menu"
+                [matchModeOptions]="matchModeOptions"
+                [showAddButton]="false"
+                [showOperator]="false"
+                [hideOnClear]="true"
+              >
+              </p-columnFilter>
+            </div>
+          </th>
+          <th
+            *ngIf="
+              usuario?.usuarioDB?.role?.restricciones?.bandeja?.verVendedor
+            "
+          >
+            <div
+              style="
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+              "
+            >
+              <span> Vendedor </span>
+              <p-columnFilter
+                type="text"
+                field="pedidoDB.vendedor.nombre"
+                display="menu"
+                [matchModeOptions]="matchModeOptions"
+                [showAddButton]="false"
+                [showOperator]="false"
+                [hideOnClear]="true"
+              ></p-columnFilter>
+            </div>
+          </th>
+          <th
+            *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.verCliente"
+          >
+            <div
+              style="
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+              "
+            >
+              <span> Cliente </span>
+              <p-columnFilter
+                type="text"
+                field="pedidoDB.cliente.nombre"
+                display="menu"
+                [matchModeOptions]="matchModeOptions"
+                [showAddButton]="false"
+                [showOperator]="false"
+                [hideOnClear]="true"
+              >
+              </p-columnFilter>
+            </div>
+          </th>
+          <th
+            *ngIf="
+              usuario?.usuarioDB?.role?.restricciones?.bandeja?.verTelefono
+            "
+          >
+            <div
+              style="
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+              "
+            >
+              <span> Teléfono </span>
+              <p-columnFilter
+                type="text"
+                field="pedidoDB.cliente.telefono"
+                display="menu"
+                [matchModeOptions]="matchModeOptions"
+                [showAddButton]="false"
+                [showOperator]="false"
+                [hideOnClear]="true"
+              ></p-columnFilter>
+            </div>
+          </th>
+          <th
+            *ngIf="
+              usuario?.usuarioDB?.role?.restricciones?.bandeja?.verSucursal
+            "
+          >
+            <div
+              style="
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+              "
+            >
+              <span> Sucursal </span>
+              <p-columnFilter
+                type="text"
+                field="pedidoDB.sucursal.nombre"
+                display="menu"
+                [matchModeOptions]="matchModeOptions"
+                [showAddButton]="false"
+                [showOperator]="false"
+                [hideOnClear]="true"
+              ></p-columnFilter>
+            </div>
+          </th>
+          <th
+            *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.verTotal"
+          >
+            <div
+              style="
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+              "
+            >
+              <span> Total </span>
+              <p-columnFilter
+                type="numeric"
+                field="totales.total"
+                display="menu"
+                currency="USD"
+                [matchModeOptions]="matchModeOptionsNumber"
+                [showAddButton]="false"
+                [showOperator]="false"
+                [hideOnClear]="true"
+              ></p-columnFilter>
+            </div>
+          </th>
+          <th
+            *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.verSaldo"
+          >
+            <div
+              style="
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+              "
+            >
+              <span> Saldo </span>
+              <p-columnFilter
+                type="numeric"
+                field="totales.saldo"
+                display="menu"
+                currency="USD"
+                [matchModeOptions]="matchModeOptionsNumber"
+                [showAddButton]="false"
+                [showOperator]="false"
+                [hideOnClear]="true"
+              ></p-columnFilter>
+            </div>
+          </th>
+          <th
+            *ngIf="
+              usuario?.usuarioDB?.role?.restricciones?.bandeja?.verPrioridad
+            "
+          >
+            <div
+              style="
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+              "
+            >
+              <span> Prioridad </span>
+              <p-columnFilter
+                type="text"
+                field="pedidoDB.prioridad.nombre"
+                display="menu"
+                [matchModeOptions]="matchModeOptions"
+                [showAddButton]="false"
+                [showOperator]="false"
+                [hideOnClear]="true"
+              ></p-columnFilter>
+            </div>
+          </th>
+          <th
+            *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.verEtapa"
+          >
+            <div
+              style="
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+              "
+            >
+              <span> Etapa </span>
+              <p-columnFilter
+                type="text"
+                field="pedidoDB.etapa.nombre"
+                display="menu"
+                [matchModeOptions]="matchModeOptions"
+                [showAddButton]="false"
+                [showOperator]="false"
+                [hideOnClear]="true"
+              ></p-columnFilter>
+            </div>
+          </th>
+          <th
+            *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.verEstado"
+          >
+            <div
+              style="
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+              "
+            >
+              <span> Estado </span>
+              <p-columnFilter
+                type="text"
+                field="pedidoDB.color.nombre"
+                display="menu"
+                [matchModeOptions]="matchModeOptions"
+                [showAddButton]="false"
+                [showOperator]="false"
+                [hideOnClear]="true"
+              ></p-columnFilter>
+            </div>
+          </th>
+          <th *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.verDise">
+            <div
+              style="
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+              "
+            >
+              <span> Diseñador </span>
+              <p-columnFilter
+                type="text"
+                field="pedidoDB.diseniador.nombre"
+                display="menu"
+                [matchModeOptions]="matchModeOptions"
+                [showAddButton]="false"
+                [showOperator]="false"
+                [hideOnClear]="true"
+              ></p-columnFilter>
+            </div>
+          </th>
         </tr>
       </ng-template>
+
       <ng-template pTemplate="body" let-pedido>
         <!-- <tr>
           <td>
@@ -92,38 +423,77 @@
           (dblclick)="abrirPedido(pedido?.pedidoDB)"
           style="cursor: pointer"
         >
-          <td>
+          <td
+            *ngIf="
+              usuario?.usuarioDB?.role?.restricciones?.bandeja?.borrarPedido
+            "
+          >
+            <p-tableCheckbox [value]="pedido"></p-tableCheckbox>
+          </td>
+          <td *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.verID">
             {{ pedido?.pedidoDB?.idReferencia }}
           </td>
-          <td>
+          <td
+            *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.verFecha"
+          >
             {{ pedido?.pedidoDB?.fechaRegistro }}
           </td>
-          <td>
+          <td
+            *ngIf="
+              usuario?.usuarioDB?.role?.restricciones?.bandeja?.verVendedor
+            "
+          >
             {{ pedido?.pedidoDB?.vendedor?.nombre || "sin Vendedor" }}
           </td>
-          <td>
+          <td
+            *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.verCliente"
+          >
             {{ pedido?.pedidoDB?.cliente?.nombre || "Sin cliente" }}
           </td>
-          <td>
+          <td
+            *ngIf="
+              usuario?.usuarioDB?.role?.restricciones?.bandeja?.verTelefono
+            "
+          >
             {{ pedido?.pedidoDB?.cliente?.telefono || "Sin teléfono" }}
           </td>
-          <td>
+          <td
+            *ngIf="
+              usuario?.usuarioDB?.role?.restricciones?.bandeja?.verSucursal
+            "
+          >
             {{ pedido?.pedidoDB?.sucursal?.nombre || "Sin sucursal" }}
           </td>
-          <td>
+          <td
+            *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.verTotal"
+          >
             {{ pedido?.totales?.total || 0 | currency }}
           </td>
-          <td>
-            {{ 0 | currency }}
+          <td
+            *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.verSaldo"
+          >
+            {{ pedido?.totales?.saldo || 0 | currency }}
           </td>
-          <td>
+          <td
+            *ngIf="
+              usuario?.usuarioDB?.role?.restricciones?.bandeja?.verPrioridad
+            "
+          >
             {{ pedido?.pedidoDB?.prioridad?.nombre }}
           </td>
-          <td>
+          <td
+            *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.verEtapa"
+          >
             {{ pedido?.pedidoDB?.etapa?.nombre }}
           </td>
-          <td>{{ pedido?.pedidoDB?.color?.nombre || "Sin estado" }}</td>
-          <td>{{ pedido?.pedidoDB?.diseniador?.nombre || "Sin diseñador" }}</td>
+          <td
+            *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.verEstado"
+          >
+            {{ pedido?.pedidoDB?.color?.nombre || "Sin estado" }}
+          </td>
+          <td *ngIf="usuario?.usuarioDB?.role?.restricciones?.bandeja?.verDise">
+            {{ pedido?.pedidoDB?.diseniador?.nombre || "Sin diseñador" }}
+          </td>
         </tr>
       </ng-template>
     </p-table>

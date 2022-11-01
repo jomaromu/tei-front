@@ -46,36 +46,47 @@ export class TipoArchivoComponent implements OnInit {
   }
 
   cargarTiposArchivos(): void {
+    this.store.dispatch(loadingActions.cargarLoading());
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.tipoArchivoService
-          .obtenerTiposArchivos(usuario.token)
-          .subscribe((tiposArchivos: TipoArchivo) => {
-            this.store.dispatch(loadingActions.cargarLoading());
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
 
-            if (tiposArchivos.ok) {
-              this.tiposArchivos = tiposArchivos.tiposArchivosDB;
-              this.store.dispatch(loadingActions.quitarLoading());
-            } else {
-              Swal.fire(
-                'Mensaje',
-                'Error al cargar los tipos de archivos',
-                'error'
-              );
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+          this.tipoArchivoService
+            .obtenerTiposArchivos(data)
+            .subscribe((tiposArchivos: TipoArchivo) => {
+              if (tiposArchivos.ok) {
+                this.tiposArchivos = tiposArchivos.tiposArchivosDB;
+                this.store.dispatch(loadingActions.quitarLoading());
+              } else {
+                Swal.fire(
+                  'Mensaje',
+                  'Error al cargar los tipos de archivos',
+                  'error'
+                );
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
 
-            if (!tiposArchivos) {
-              Swal.fire(
-                'Mensaje',
-                'Error al cargar los tipos de archivos',
-                'error'
-              );
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+              if (!tiposArchivos) {
+                Swal.fire(
+                  'Mensaje',
+                  'Error al cargar los tipos de archivos',
+                  'error'
+                );
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
+            });
+        }
       });
   }
 
@@ -133,71 +144,82 @@ export class TipoArchivoComponent implements OnInit {
   }
 
   crearTipoArchivo(): void {
+    // this.store.dispatch(loadingActions.cargarLoading());;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearTipoArchivo = {
-          nombre: this.forma.controls.nombre.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearTipoArchivo = {
+            nombre: this.forma.controls.nombre.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        this.tipoArchivoService
-          .crearTipoArchivo(data)
-          .subscribe((tipoArchivo: TipoArchivo) => {
-            this.store.dispatch(loadingActions.cargarLoading());
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+          this.tipoArchivoService
+            .crearTipoArchivo(data)
+            .subscribe((tipoArchivo: TipoArchivo) => {
+              if (tipoArchivo.ok) {
+                this.displayDialogCrear = false;
+                Swal.fire('Mensaje', 'Tipo archivo creado', 'success');
+                this.cargarTiposArchivos();
+                this.limpiarFormulario();
+              } else {
+                Swal.fire('Mensaje', `${tipoArchivo?.err?.message}`, 'error');
+              }
 
-            if (tipoArchivo.ok) {
-              this.store.dispatch(loadingActions.quitarLoading());
-              this.displayDialogCrear = false;
-              Swal.fire('Mensaje', 'Tipo archivo creado', 'success');
-              this.cargarTiposArchivos();
-              this.limpiarFormulario();
-            } else {
-              Swal.fire('Mensaje', `Error al crear tipo archivo`, 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-
-            if (!tipoArchivo) {
-              Swal.fire('Mensaje', 'Error al crear tipo archivo', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+              if (!tipoArchivo) {
+                Swal.fire('Mensaje', 'Error al crear tipo archivo', 'error');
+              }
+            });
+        }
       });
   }
 
   editarTipoArchivo(): void {
+    // this.store.dispatch(loadingActions.cargarLoading());;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearTipoArchivo = {
-          nombre: this.forma.controls.nombre.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-          id: this.tipoArchivo._id,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearTipoArchivo = {
+            nombre: this.forma.controls.nombre.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            id: this.tipoArchivo._id,
+            foranea: '',
+          };
 
-        this.store.dispatch(loadingActions.cargarLoading());
-        this.tipoArchivoService
-          .editarTipoArchivo(data)
-          .subscribe((tipoArchivo: TipoArchivo) => {
-            if (tipoArchivo.ok) {
-              this.displayDialogEditar = false;
-              Swal.fire('Mensaje', 'tipo archivo editado', 'success');
-              this.cargarTiposArchivos();
-              this.limpiarFormulario();
-            } else {
-              Swal.fire('Mensaje', 'Error al editar tipo archivo', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
 
-            if (!tipoArchivo) {
-              Swal.fire('Mensaje', 'Error al editar tipo archivo', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+          this.tipoArchivoService
+            .editarTipoArchivo(data)
+            .subscribe((tipoArchivo: TipoArchivo) => {
+              if (tipoArchivo.ok) {
+                this.displayDialogEditar = false;
+                Swal.fire('Mensaje', 'tipo archivo editado', 'success');
+                this.cargarTiposArchivos();
+                this.limpiarFormulario();
+              } else {
+                Swal.fire('Mensaje', `${tipoArchivo?.err?.message}`, 'error');
+              }
+
+              if (!tipoArchivo) {
+                Swal.fire('Mensaje', 'Error al editar tipo archivo', 'error');
+              }
+            });
+        }
       });
   }
 
@@ -213,35 +235,49 @@ export class TipoArchivoComponent implements OnInit {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.store.dispatch(loadingActions.cargarLoading());
+        // this.store.dispatch(loadingActions.cargarLoading());;
 
         this.store
           .select('login')
-          .pipe(first())
+          // .pipe(first())
           .subscribe((usuario) => {
-            const data = {
-              id: tipoArchivo._id,
-              token: usuario.token,
-            };
+            if (usuario.usuarioDB) {
+              const data = {
+                id: tipoArchivo._id,
+                token: usuario.token,
+                foranea: '',
+              };
 
-            this.tipoArchivoService
-              .eliminarTipoArchivo(data)
-              .subscribe((tipoArchivo: TipoArchivo) => {
-                if (tipoArchivo.ok) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'tipo archivo borrado', 'success');
-                  this.cargarTiposArchivos();
-                  this.limpiarFormulario();
-                } else {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar tipo archivo', 'error');
-                }
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
 
-                if (!tipoArchivo) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar tipo archivo', 'error');
-                }
-              });
+              this.tipoArchivoService
+                .eliminarTipoArchivo(data)
+                .subscribe((tipoArchivo: TipoArchivo) => {
+                  if (tipoArchivo.ok) {
+                    Swal.fire('Mensaje', 'tipo archivo borrado', 'success');
+                    this.cargarTiposArchivos();
+                    this.limpiarFormulario();
+                  } else {
+                    Swal.fire(
+                      'Mensaje',
+                      `${tipoArchivo?.err?.message}`,
+                      'error'
+                    );
+                  }
+
+                  if (!tipoArchivo) {
+                    Swal.fire(
+                      'Mensaje',
+                      'Error al borrar tipo archivo',
+                      'error'
+                    );
+                  }
+                });
+            }
           });
       }
     });
@@ -255,6 +291,7 @@ interface CrearTipoArchivo {
   estado: boolean;
   token: string;
   id?: string;
+  foranea: string;
 }
 
 /*

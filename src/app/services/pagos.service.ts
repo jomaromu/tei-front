@@ -21,7 +21,11 @@ export class PagosService {
 
   obtenerPagosPorPedido(data: any): Observable<any> {
     const url = `${environment.urlPagos}/pago/obtenerPagosPorPedido`;
-    const header = new HttpHeaders({ token: data.token, pedido: data.pedido });
+    const header = new HttpHeaders({
+      token: data.token,
+      pedido: data.pedido,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(map((resp) => resp));
   }

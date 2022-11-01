@@ -1,9 +1,41 @@
+@import "../../../../../../styles.scss";
+
+@media screen and(max-width: 444px) {
+  section#wrap-form-pedido {
+    padding: 0 !important;
+    // border: 1px solid red;
+    width: 100%;
+    column-gap: 5px;
+    grid-template-columns: repeat(2, 50%);
+  }
+}
+
 #wrap-form-pedido {
+  // border: 1px solid red;
   display: grid;
-  grid-template-columns: repeat(2, 50%);
+  justify-content: center;
+  grid-template-columns: repeat(2, 45%);
   padding: 25px 0;
   column-gap: 15px;
   row-gap: 35px;
   position: relative;
-  min-height: auto;
+  height: auto;
+  // overflow: hidden;
+}
+
+form.formulario {
+  // border: 1px solid blue !important;
+}
+
+#footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 25px;
+}
+
+.inputs {
+  // border: 1px solid green;
+  // position: relative !important;
 }

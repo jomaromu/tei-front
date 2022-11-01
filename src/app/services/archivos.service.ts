@@ -29,7 +29,11 @@ export class ArchivosService {
 
   obtenerArchivos(data: any): Observable<any> {
     const url = `${environment.urlArchivos}/archivo/obtenerArchivos`;
-    const header = new HttpHeaders({ token: data.token, pedido: data.pedido });
+    const header = new HttpHeaders({
+      token: data.token,
+      pedido: data.pedido,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(map((resp) => resp));
   }
@@ -40,8 +44,23 @@ export class ArchivosService {
       token: data.token,
       id: data.id,
       nombreArchivo: data.nombreArchivo,
+      foranea: data.foranea,
     });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
+  }
+
+  eliminarArchivos(data: any): Observable<any> {
+    const url = `${environment.urlArchivos}/archivo/eliminarArchivos`;
+    const header = new HttpHeaders({
+      token: data.token,
+      idPedido: data.idPedido,
+      archivos: data.archivos,
+      foranea: data.foranea,
+    });
+
+    return this.http
+      .put(url, data, { headers: header })
+      .pipe(map((resp) => resp));
   }
 }

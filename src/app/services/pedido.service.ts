@@ -26,9 +26,45 @@ export class PedidoService {
     );
   }
 
-  obtenerPedidos(token: string): Observable<any> {
+  obtenerPedidos(data: any): Observable<any> {
     const url = `${environment.urlPedido}/pedidos/obtenerPedidos`;
-    const header = new HttpHeaders({ token });
+    const header = new HttpHeaders({
+      token: data.token,
+      sucursales: data.sucursales || '',
+      etapas: data.etapas || '',
+      verPropias: data.verPropias || '',
+      criterio: data.criterio || '',
+      foranea: data.foranea,
+    });
+
+    return this.http.get(url, { headers: header }).pipe(
+      map((resp: Array<any>) => {
+        return resp;
+      })
+    );
+  }
+
+  buscarPedidos(data: any): Observable<any> {
+    const url = `${environment.urlPedido}/pedidos/buscarPedidos`;
+    const header = new HttpHeaders({
+      token: data.token,
+      criterio: data.criterio,
+      foranea: data.foranea,
+    });
+
+    return this.http.get(url, { headers: header }).pipe(
+      map((resp: Array<any>) => {
+        return resp;
+      })
+    );
+  }
+
+  buscarArchivados(data: any): Observable<any> {
+    const url = `${environment.urlPedido}/pedidos/buscarArchivados`;
+    const header = new HttpHeaders({
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(
       map((resp: Array<any>) => {
@@ -39,7 +75,11 @@ export class PedidoService {
 
   obtenerPedido(data: any): Observable<any> {
     const url = `${environment.urlPedido}/pedidos/obtenerPedido`;
-    const header = new HttpHeaders({ token: data.token, id: data.id });
+    const header = new HttpHeaders({
+      token: data.token,
+      id: data.id,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(
       map((resp: any) => {
@@ -53,6 +93,47 @@ export class PedidoService {
     const header = new HttpHeaders({ token: data.token });
 
     return this.http.post(url, data, { headers: header }).pipe(
+      map((resp: any) => {
+        return resp;
+      })
+    );
+  }
+
+  eliminarPedido(data: any): Observable<any> {
+    const url = `${environment.urlPedido}/pedidos/eliminarPedido`;
+    const header = new HttpHeaders({
+      token: data.token,
+      idPedido: data.idPedido,
+      foranea: data.foranea,
+    });
+
+    return this.http.delete(url, { headers: header }).pipe(
+      map((resp: any) => {
+        return resp;
+      })
+    );
+  }
+
+  guardarHistorial(data: any): Observable<any> {
+    const url = `${environment.urlPedido}/pedidos/guardarHistorial`;
+    const header = new HttpHeaders({ token: data.token });
+
+    return this.http.post(url, data, { headers: header }).pipe(
+      map((resp: any) => {
+        return resp;
+      })
+    );
+  }
+
+  obtenerHistorial(data: any): Observable<any> {
+    const url = `${environment.urlPedido}/pedidos/obtenerHistorial`;
+    const header = new HttpHeaders({
+      token: data.token,
+      idPedido: data.idPedido,
+      foranea: data.foranea,
+    });
+
+    return this.http.get(url, { headers: header }).pipe(
       map((resp: any) => {
         return resp;
       })

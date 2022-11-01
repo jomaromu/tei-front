@@ -117,107 +117,132 @@ export class PrioridadComponent implements OnInit {
   btnEditarOrdenPrioridades(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data = {
-          colPrioridad: environment.colPrioridad,
-          prioridades: this.prioridadesOrdendas,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data = {
+            colPrioridad: environment.colPrioridad,
+            prioridades: this.prioridadesOrdendas,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        this.prioridadService
-          .actualizarPrioriadesOrdenadas(data)
-          .subscribe((prioridadOrdenada: PrioridadOrdenada) => {
-            if (prioridadOrdenada.ok) {
-              this.displayDialogOrdenar = false;
-              Swal.fire('Mensaje', 'Prioridades ordenadas', 'success');
-            } else {
-              this.displayDialogOrdenar = false;
-              Swal.fire(
-                'Mensaje',
-                `Error al crear ordenar las prioridades`,
-                'error'
-              );
-            }
-          });
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+
+          this.prioridadService
+            .actualizarPrioriadesOrdenadas(data)
+            .subscribe((prioridadOrdenada: PrioridadOrdenada) => {
+              if (prioridadOrdenada.ok) {
+                this.displayDialogOrdenar = false;
+                Swal.fire('Mensaje', 'Prioridades ordenadas', 'success');
+              } else {
+                this.displayDialogOrdenar = false;
+                Swal.fire(
+                  'Mensaje',
+                  `Error al crear ordenar las prioridades`,
+                  'error'
+                );
+              }
+            });
+        }
       });
   }
 
   crearPrioridad(): void {
+    // this.store.dispatch(loadingActions.cargarLoading());;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearPriodad = {
-          nombre: this.forma.controls.nombre.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearPriodad = {
+            nombre: this.forma.controls.nombre.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        this.prioridadService
-          .crearPrioridad(data)
-          .subscribe((prioridad: Prioridad) => {
-            this.store.dispatch(loadingActions.cargarLoading());
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
 
-            if (prioridad.ok) {
-              this.store.dispatch(loadingActions.quitarLoading());
-              this.displayDialogCrear = false;
-              Swal.fire('Mensaje', 'Prioridad creada', 'success');
-              this.crudPrioridadesOrdenadas(
-                usuario,
-                'crear',
-                prioridad.prioridadDB
-              );
-              this.limpiarFormulario();
-            } else {
-              Swal.fire(
-                'Mensaje',
-                `Error al crear prioridad: ${prioridad.err.message}`,
-                'error'
-              );
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          this.prioridadService
+            .crearPrioridad(data)
+            .subscribe((prioridad: Prioridad) => {
+              if (prioridad.ok) {
+                this.displayDialogCrear = false;
+                Swal.fire('Mensaje', 'Prioridad creada', 'success');
+                this.crudPrioridadesOrdenadas(
+                  usuario,
+                  'crear',
+                  prioridad.prioridadDB
+                );
+                this.limpiarFormulario();
+                this.store.dispatch(loadingActions.quitarLoading());
+              } else {
+                Swal.fire(
+                  'Mensaje',
+                  `Error al crear prioridad: ${prioridad.err.message}`,
+                  'error'
+                );
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
 
-            if (!prioridad) {
-              Swal.fire('Mensaje', 'Error al crear prioridad', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+              if (!prioridad) {
+                Swal.fire('Mensaje', 'Error al crear prioridad', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
+            });
+        }
       });
   }
 
   editarPrioridad(): void {
+    // this.store.dispatch(loadingActions.cargarLoading());;
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data: CrearPriodad = {
-          nombre: this.forma.controls.nombre.value,
-          estado: this.forma.controls.estado.value,
-          token: usuario.token,
-          id: this.prioridad._id,
-        };
+        if (usuario.usuarioDB) {
+          const data: CrearPriodad = {
+            nombre: this.forma.controls.nombre.value,
+            estado: this.forma.controls.estado.value,
+            token: usuario.token,
+            id: this.prioridad._id,
+            foranea: '',
+          };
 
-        this.store.dispatch(loadingActions.cargarLoading());
-        this.prioridadService
-          .editarPrioridad(data)
-          .subscribe((prioridad: Prioridad) => {
-            if (prioridad.ok) {
-              this.displayDialogEditar = false;
-              Swal.fire('Mensaje', 'Prioridad editada', 'success');
-              this.crudPrioridadesOrdenadas(usuario, 'editar');
-              this.limpiarFormulario();
-              this.store.dispatch(loadingActions.quitarLoading());
-            } else {
-              Swal.fire('Mensaje', 'Error al editar prioridad', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+          this.prioridadService
+            .editarPrioridad(data)
+            .subscribe((prioridad: Prioridad) => {
+              if (prioridad.ok) {
+                this.displayDialogEditar = false;
+                Swal.fire('Mensaje', 'Prioridad editada', 'success');
+                this.crudPrioridadesOrdenadas(usuario, 'editar');
+                this.limpiarFormulario();
+                this.store.dispatch(loadingActions.quitarLoading());
+              } else {
+                Swal.fire('Mensaje', ` ${prioridad.err.message}`, 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
 
-            if (!prioridad) {
-              Swal.fire('Mensaje', 'Error al editar prioridad', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
-            }
-          });
+              if (!prioridad) {
+                Swal.fire('Mensaje', 'Error al editar prioridad', 'error');
+                this.store.dispatch(loadingActions.quitarLoading());
+              }
+            });
+        }
       });
   }
 
@@ -233,35 +258,43 @@ export class PrioridadComponent implements OnInit {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.store.dispatch(loadingActions.cargarLoading());
-
+        // this.store.dispatch(loadingActions.cargarLoading());;
         this.store
           .select('login')
-          .pipe(first())
+          // .pipe(first())
           .subscribe((usuario) => {
-            const data = {
-              id: prioridad._id,
-              token: usuario.token,
-            };
+            if (usuario.usuarioDB) {
+              const data = {
+                id: prioridad._id,
+                token: usuario.token,
+                foranea: '',
+              };
 
-            this.prioridadService
-              .eliminarPrioridad(data)
-              .subscribe((prioridad: Prioridad) => {
-                if (prioridad.ok) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Prioridad borrada', 'success');
-                  this.crudPrioridadesOrdenadas(usuario, 'eliminar');
-                  this.limpiarFormulario();
-                } else {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar prioridad', 'error');
-                }
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
 
-                if (!prioridad) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar prioridad', 'error');
-                }
-              });
+              this.prioridadService
+                .eliminarPrioridad(data)
+                .subscribe((prioridad: Prioridad) => {
+                  if (prioridad.ok) {
+                    Swal.fire('Mensaje', 'Prioridad borrada', 'success');
+                    this.crudPrioridadesOrdenadas(usuario, 'eliminar');
+                    this.limpiarFormulario();
+                    this.store.dispatch(loadingActions.quitarLoading());
+                  } else {
+                    Swal.fire('Mensaje', ` ${prioridad.err.message}`, 'error');
+                    this.store.dispatch(loadingActions.quitarLoading());
+                  }
+
+                  if (!prioridad) {
+                    Swal.fire('Mensaje', 'Error al borrar prioridad', 'error');
+                    this.store.dispatch(loadingActions.quitarLoading());
+                  }
+                });
+            }
           });
       }
     });
@@ -270,34 +303,43 @@ export class PrioridadComponent implements OnInit {
   ordenarPrioridades(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data = {
-          colPrioridad: environment.colPrioridad,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data = {
+            colPrioridad: environment.colPrioridad,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        const pet1 = this.prioridadService.obtenerPrioridades(usuario.token);
-        const pet2 = this.prioridadService.obtenerPrioridadesOrdenadas(data);
-
-        forkJoin([pet1, pet2]).subscribe((mixPrioridades: Array<any>) => {
-          const prioriades: Prioridad = mixPrioridades[0];
-          const prioridadesOrdendas: PrioridadOrdenada = mixPrioridades[1];
-
-          if (!prioridadesOrdendas.prioridadesOrdenadaDB) {
-            return;
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
           }
 
-          this.prioridadesOrdendas =
-            prioridadesOrdendas.prioridadesOrdenadaDB.prioridades.map(
-              (prioridadOriginal, index) =>
-                prioriades.prioridadesDB.find((prioridadOrdenada, index2) => {
-                  if (prioridadOrdenada) {
-                    return prioridadOriginal._id === prioridadOrdenada._id;
-                  }
-                })
-            );
-        });
+          const pet1 = this.prioridadService.obtenerPrioridades(data);
+          const pet2 = this.prioridadService.obtenerPrioridadesOrdenadas(data);
+
+          forkJoin([pet1, pet2]).subscribe((mixPrioridades: Array<any>) => {
+            const prioriades: Prioridad = mixPrioridades[0];
+            const prioridadesOrdendas: PrioridadOrdenada = mixPrioridades[1];
+
+            if (!prioridadesOrdendas.prioridadesOrdenadaDB) {
+              return;
+            }
+
+            this.prioridadesOrdendas =
+              prioridadesOrdendas.prioridadesOrdenadaDB.prioridades.map(
+                (prioridadOriginal, index) =>
+                  prioriades.prioridadesDB.find((prioridadOrdenada, index2) => {
+                    if (prioridadOrdenada) {
+                      return prioridadOriginal._id === prioridadOrdenada._id;
+                    }
+                  })
+              );
+          });
+        }
       });
   }
 
@@ -309,15 +351,25 @@ export class PrioridadComponent implements OnInit {
     const data = {
       colPrioridad: environment.colPrioridad,
       token: usuario.token,
+      foranea: '',
     };
 
     const data2 = {
       colPrioridad: environment.colPrioridad,
       prioridades: this.prioridadesOrdendas,
       token: usuario.token,
+      foranea: '',
     };
 
-    const pet1 = this.prioridadService.obtenerPrioridades(usuario.token);
+    if (usuario.usuarioDB.empresa) {
+      data.foranea = usuario.usuarioDB._id;
+      data2.foranea = usuario.usuarioDB._id;
+    } else {
+      data.foranea = usuario.usuarioDB.foranea;
+      data2.foranea = usuario.usuarioDB.foranea;
+    }
+
+    const pet1 = this.prioridadService.obtenerPrioridades(data);
     const pet2 = this.prioridadService.obtenerPrioridadesOrdenadas(data);
 
     forkJoin([pet1, pet2]).subscribe((mixPrioridades: Array<any>) => {
@@ -361,6 +413,7 @@ interface CrearPriodad {
   estado: boolean;
   token: string;
   id?: string;
+  foranea: string;
 }
 
 /*

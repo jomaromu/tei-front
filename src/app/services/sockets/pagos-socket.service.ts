@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import { AppState } from '../../reducers/globarReducers';
 // import { Socket } from 'ngx-socket-io';
 import { environment } from '../../../environments/environment';
 
@@ -11,7 +13,7 @@ export class PagosSocketService {
   private socketPago: Socket;
   public socketStatus = false;
 
-  constructor() {
+  constructor(private store: Store<AppState>) {
     this.socketPago = io(environment.urlPagos);
     this.checkStatus();
   }
@@ -19,8 +21,20 @@ export class PagosSocketService {
   checkStatus(): void {
     // escuchar el servidor
     this.socketPago.on('connect', () => {
-      console.log('Conectado al servidor de pagos');
-      this.socketStatus = true;
+      this.store.select('login').subscribe((usuario) => {
+        if (usuario.usuarioDB) {
+          let foranea = '';
+
+          if (usuario.usuarioDB.empresa) {
+            foranea = usuario.usuarioDB._id;
+          } else {
+            foranea = usuario.usuarioDB.foranea;
+          }
+          console.log('Conectado al servidor de pagos');
+          this.socketPago.emit('room', foranea);
+          this.socketStatus = true;
+        }
+      });
     });
 
     this.socketPago.on('disconnect', () => {

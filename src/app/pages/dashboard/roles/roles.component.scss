@@ -20,6 +20,11 @@
       justify-content: center;
     }
   }
+
+  section.acordeon-catalogo {
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 .flex-column {
@@ -74,9 +79,9 @@
   position: relative;
 }
 
-#acordeon-catalogo {
+.acordeon-catalogo {
   display: grid;
-  grid-template-columns: repeat(2, 50%);
+  grid-template-columns: repeat(2, 1fr);
 
   div {
     display: flex;
@@ -95,4 +100,12 @@
 .p-inputtext,
 .p-dropdown {
   width: 100%;
+}
+
+.btn-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 25px;
 }

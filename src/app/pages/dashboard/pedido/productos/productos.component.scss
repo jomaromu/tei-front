@@ -1,4 +1,25 @@
+@import "../../../../../styles.scss";
+
+@media screen and(max-width: 768px) {
+  div#wrap-info-producto {
+    width: 100% !important;
+    grid-template-columns: repeat(2, 48%) !important;
+  }
+
+  .p-inputnumber-buttons-stacked .p-inputnumber-button-group {
+    display: none !important;
+  }
+}
+
+@media screen and(max-width: 544px) {
+  div#wrap-info-producto {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 #wrap-info-producto {
+  // border: 1px solid green;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   position: relative;
@@ -12,6 +33,7 @@
     height: 100%;
   }
 }
+
 #btn-agregar {
   // border: 1px solid blue;
   grid-column: 1 / 3;
@@ -36,4 +58,8 @@ p-inputnumber,
 
 .p-float-label {
   height: 100%;
+}
+
+#formulario {
+  // border: 1px solid blue;
 }

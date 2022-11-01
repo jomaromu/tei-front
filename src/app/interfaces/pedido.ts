@@ -1,3 +1,6 @@
+import { TotalesPagos } from '../classes/calculos-productos-pedidos';
+import { ArchivoDB } from './archivo';
+import { PagoDB } from './pagos';
 import { ProductoPedidoDB } from './producto-pedido';
 
 export interface Pedido {
@@ -21,4 +24,14 @@ export interface PedidoDB {
   color: any;
   origen: any;
   productosPedidos: Array<ProductoPedidoDB>;
+  pagos: Array<PagoDB>;
+  archivos: Array<ArchivoDB>;
+  fechaFilter: Date;
+  archivado: boolean;
+  foranea: string;
+}
+
+export interface PedidoDBBandeja {
+  pedidoDB: PedidoDB;
+  totales: TotalesPagos;
 }

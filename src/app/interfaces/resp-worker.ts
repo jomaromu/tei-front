@@ -4,12 +4,13 @@
 //     token: string;
 // }
 
+import { Role } from './roleWorker';
+import { SucursalDB } from './sucursales';
+
 export interface Usuario {
   ok: boolean;
   mensaje: string;
-  err?: {
-    message: string;
-  };
+  err?: any;
   token: string;
   usuarioDB?: UsuarioWorker;
   usuariosDB?: Array<UsuarioWorker>;
@@ -27,7 +28,9 @@ export interface UsuarioWorker {
   nombre: string;
   telefono: string;
   identificacion: string;
-  sucursal: any;
-  role: any;
+  sucursal: SucursalDB;
+  role: Role;
   _id: string;
+  empresa: boolean;
+  foranea: any;
 }

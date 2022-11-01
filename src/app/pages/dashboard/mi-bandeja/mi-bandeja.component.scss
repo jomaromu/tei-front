@@ -8,3 +8,21 @@
 .fuente-blanca > td {
   color: white;
 }
+
+.no-drop {
+  cursor: no-drop;
+}
+
+#filtrosGenerales {
+  // border: 1px solid red;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  width: 100% !important;
+}
+
+#box-busqueda {
+  // border: 1px solid blue;
+  width: 200px;
+  margin-left: 10px;
+}

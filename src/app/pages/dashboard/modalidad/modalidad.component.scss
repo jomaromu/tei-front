@@ -59,9 +59,9 @@
   // background-color: skyblue;
   // border: 1px solid red;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, 70%);
+  column-gap: 2%;
   padding: 25px 0;
-  column-gap: 15px;
   row-gap: 35px;
   position: relative;
 }

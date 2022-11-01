@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { ModalidadRoutingModule } from './modalidad-routing.module';
 import { SharedModule } from '../../../shared/shared.module';
+import { LoadingModule } from 'src/app/shared/loading/loading.module';
 
 import { ModalidadComponent } from './modalidad.component';
 
@@ -34,6 +35,7 @@ import { Validaciones } from '../../../classes/validaciones';
     DropdownModule,
     InputSwitchModule,
     DialogModule,
+    LoadingModule,
   ],
   providers: [Validaciones],
 })

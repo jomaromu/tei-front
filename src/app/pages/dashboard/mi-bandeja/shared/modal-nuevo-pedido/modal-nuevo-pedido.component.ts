@@ -2,12 +2,12 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { environment } from '../../../../../../environments/environment';
-import { first, take } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { AppState } from '../../../../../reducers/globarReducers';
 import { EtapasService } from '../../../../../services/etapas.service';
 import { PrioridadService } from '../../../../../services/prioridad.service';
 import { SucursalService } from '../../../../../services/sucursal.service';
-import { forkJoin, timer } from 'rxjs';
+import { timer } from 'rxjs';
 import { Sucursal, SucursalDB } from '../../../../../interfaces/sucursales';
 import {
   PrioridadDB,
@@ -18,10 +18,16 @@ import { ClientesService } from '../../../../../services/clientes.service';
 import { Cliente, UsuariosDB } from '../../../../../interfaces/clientes';
 import * as moment from 'moment';
 import { isWeekDay } from 'moment-business';
-import { Validaciones, ValidarTexto } from 'src/app/classes/validaciones';
-import { PedidoService } from 'src/app/services/pedido.service';
+import {
+  Validaciones,
+  ValidarTexto,
+} from '../../../../../classes/validaciones';
+import { PedidoService } from '../../../../../services/pedido.service';
 import * as loadingActions from '../../../../../reducers/loading/loading.actions';
 import Swal from 'sweetalert2';
+import { FiltrarEstados } from '../../../../../classes/filtrar-estados';
+import { UsuarioWorker } from '../../../../../interfaces/resp-worker';
+import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-modal-nuevo-pedido',
@@ -43,6 +49,7 @@ export class ModalNuevoPedidoComponent implements OnInit {
   contadorDias = 0;
   fecha: string;
   existeClient = false;
+  usuario: UsuarioWorker;
 
   constructor(
     private fb: FormBuilder,
@@ -52,12 +59,15 @@ export class ModalNuevoPedidoComponent implements OnInit {
     private etapasService: EtapasService,
     private clienteService: ClientesService,
     private validadores: Validaciones,
-    private pedidoService: PedidoService
+    private pedidoService: PedidoService,
+    private filtrarEstados: FiltrarEstados,
+    private breakpointObserver: BreakpointObserver
   ) {}
 
   ngOnInit(): void {
     this.crearFormulario();
     this.manejarPDatePicker();
+    this.cargarUsuario();
   }
 
   crearFormulario(): void {
@@ -71,44 +81,89 @@ export class ModalNuevoPedidoComponent implements OnInit {
     });
   }
 
+  cargarUsuario(): void {
+    this.store
+      .select('login')
+      // .pipe(first())
+      .subscribe((usuario) => {
+        this.usuario = usuario.usuarioDB;
+      });
+  }
+
   showDialog(): void {
     this.cargarSucursales();
     this.cargarPrioridades();
     this.cargarEtapas();
     this.cargarFecha();
     this.existeClient = this.existeCliente();
+
+    this.mediaQuery();
   }
 
   cargarSucursales(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.sucursalService
-          .obtenerSucs(usuario.token)
-          .subscribe((sucursales: Sucursal) => {
-            this.sucursales = sucursales.sucursalesDB;
-            // console.log(sucursales);
-          });
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
+
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+
+          this.sucursalService
+            .obtenerSucs(data)
+            .subscribe((sucursales: Sucursal) => {
+              const sucActivas = this.filtrarEstados.filtrarActivos(
+                sucursales.sucursalesDB
+              );
+              this.sucursales = sucActivas;
+
+              if (this.usuario.sucursal) {
+                const mapSuc = sucActivas.find(
+                  (sucActiva) => sucActiva._id === this.usuario?.sucursal?._id
+                );
+                this.forma.controls.sucursales.setValue(mapSuc);
+              }
+            });
+        }
       });
   }
 
   cargarPrioridades(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data = {
-          colPrioridad: environment.colPrioridad,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data = {
+            colPrioridad: environment.colPrioridad,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        this.prioridadService
-          .obtenerPrioridadesOrdenadas(data)
-          .subscribe((prioridadesDB: PrioridadOrdenada) => {
-            this.prioridades = prioridadesDB.prioridadesOrdenadaDB.prioridades;
-            // console.log(prioridadesDB);
-          });
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+
+          this.prioridadService
+            .obtenerPrioridadesOrdenadas(data)
+            .subscribe((prioridadesDB: PrioridadOrdenada) => {
+              const priodsActivas = this.filtrarEstados.filtrarActivos(
+                prioridadesDB.prioridadesOrdenadaDB?.prioridades
+              );
+              this.prioridades = priodsActivas;
+              // console.log(prioridadesDB);
+            });
+        }
       });
   }
 
@@ -135,39 +190,63 @@ export class ModalNuevoPedidoComponent implements OnInit {
   cargarEtapas(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data = {
-          colEtapas: environment.colEtapas,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data = {
+            colEtapas: environment.colEtapas,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        this.etapasService
-          .obtenerEtapasOrdenadas(data)
-          .subscribe((etapasDB: EtapaOrdenada) => {
-            this.etapas = etapasDB.etapasOrdenadaDB.etapas;
-            // console.log(etapasDB);
-          });
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+
+          this.etapasService
+            .obtenerEtapasOrdenadas(data)
+            .subscribe((etapasDB: EtapaOrdenada) => {
+              const etActivas = this.filtrarEstados.filtrarActivos(
+                etapasDB.etapasOrdenadaDB?.etapas
+              );
+              this.etapas = etActivas;
+              // console.log(etapasDB);
+            });
+        }
       });
   }
 
   buscarClientes(e: Event): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const criterio: string = (e.target as HTMLInputElement).value;
+        if (usuario.usuarioDB) {
+          const criterio: string = (e.target as HTMLInputElement).value;
 
-        const data = {
-          token: usuario.token,
-          criterio,
-        };
+          const data = {
+            token: usuario.token,
+            criterio,
+            foranea: '',
+          };
 
-        this.clienteService
-          .obtenerPorBusqueda(data)
-          .subscribe((clientes: Cliente) => {
-            this.clientes = clientes.usuariosDB;
-          });
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+
+          this.clienteService
+            .obtenerPorBusqueda(data)
+            .subscribe((clientes: Cliente) => {
+              const clientesActivos = this.filtrarEstados.filtrarActivos(
+                clientes.usuariosDB
+              );
+              this.clientes = clientesActivos;
+            });
+        }
       });
   }
 
@@ -297,38 +376,47 @@ export class ModalNuevoPedidoComponent implements OnInit {
   crearPedido(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        const data = {
-          cliente: this.forma.controls.nombre.value._id,
-          vendedor: usuario.usuarioDB._id,
-          sucursal: this.forma.controls.sucursales.value._id,
-          fechaEntrega: this.forma.controls.fechaEntrega.value,
-          fechaRegistro: moment().format('DD/MM/YYYY'),
-          prioridad: this.forma.controls.prioridad.value._id,
-          etapa: this.forma.controls.etapa.value._id,
-          token: usuario.token,
-        };
+        if (usuario.usuarioDB) {
+          const data = {
+            cliente: this.forma.controls.nombre.value._id,
+            vendedor: usuario.usuarioDB._id,
+            sucursal: this.forma.controls.sucursales.value._id,
+            fechaEntrega: this.forma.controls.fechaEntrega.value,
+            fechaRegistro: moment().format('DD/MM/YYYY'),
+            prioridad: this.forma.controls.prioridad.value._id,
+            etapa: this.forma.controls.etapa.value._id,
+            token: usuario.token,
+            foranea: '',
+          };
 
-        this.pedidoService.crearPedido(data).subscribe((pedidos: any) => {
-          this.store.dispatch(loadingActions.cargarLoading());
-
-          if (pedidos.ok) {
-            this.store.dispatch(loadingActions.quitarLoading());
-            this.displayDialogCrear = false;
-            Swal.fire('Mensaje', 'Pedido creado', 'success');
-            this.emitCrearPedido.emit('crear-pedido');
-            this.limpiarFormulario();
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
           } else {
-            Swal.fire('Mensaje', 'Error crear un pedido', 'error');
-            this.store.dispatch(loadingActions.quitarLoading());
+            data.foranea = usuario.usuarioDB.foranea;
           }
 
-          if (!pedidos) {
-            Swal.fire('Mensaje', 'Error crear un pedido', 'error');
-            this.store.dispatch(loadingActions.quitarLoading());
-          }
-        });
+          this.pedidoService.crearPedido(data).subscribe((pedidos: any) => {
+            this.store.dispatch(loadingActions.cargarLoading());
+
+            if (pedidos.ok) {
+              this.store.dispatch(loadingActions.quitarLoading());
+              this.displayDialogCrear = false;
+              Swal.fire('Mensaje', 'Pedido creado', 'success');
+              this.emitCrearPedido.emit('crear-pedido');
+              this.limpiarFormulario();
+            } else {
+              Swal.fire('Mensaje', 'Error crear un pedido', 'error');
+              this.store.dispatch(loadingActions.quitarLoading());
+            }
+
+            if (!pedidos) {
+              Swal.fire('Mensaje', 'Error crear un pedido', 'error');
+              this.store.dispatch(loadingActions.quitarLoading());
+            }
+          });
+        }
       });
   }
 
@@ -336,5 +424,19 @@ export class ModalNuevoPedidoComponent implements OnInit {
     this.closeDialogCrear.emit(false);
     this.displayDialogCrear = false;
     this.limpiarFormulario();
+  }
+
+  mediaQuery(): void {
+    this.breakpointObserver
+      .observe(['(max-width: 444px)'])
+      .subscribe((state: BreakpointState) => {
+        const pCalendar = document.getElementById('nuevoPedidoPicker');
+
+        if (state.matches) {
+          pCalendar.style.width = '43%';
+        } else {
+          pCalendar.style.width = '40%';
+        }
+      });
   }
 }

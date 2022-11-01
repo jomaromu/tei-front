@@ -5,6 +5,7 @@ import { MiBandejaComponent } from './mi-bandeja.component';
 const routes: Routes = [
   {
     path: '',
+    // canActivate: [NoPermitidoGuard],
     component: MiBandejaComponent,
   },
 ];

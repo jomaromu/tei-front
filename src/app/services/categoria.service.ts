@@ -10,9 +10,12 @@ import { map } from 'rxjs/operators';
 export class CategoriaService {
   constructor(private http: HttpClient) {}
 
-  obtenerCategorias(token: string): Observable<any> {
+  obtenerCategorias(data: any): Observable<any> {
     const url = `${environment.urlCategoria}/categoria/obtenerTodasCategorias`;
-    const header = new HttpHeaders({ token });
+    const header = new HttpHeaders({
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(
       map((resp: any) => {
@@ -64,7 +67,11 @@ export class CategoriaService {
 
   eliminarCategoriaID(data: any): Observable<any> {
     const url = `${environment.urlCategoria}/categoria/eliminarCategoriaID`;
-    const header = new HttpHeaders({ token: data.token, id: data.id });
+    const header = new HttpHeaders({
+      token: data.token,
+      id: data.id,
+      foranea: data.foranea,
+    });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }

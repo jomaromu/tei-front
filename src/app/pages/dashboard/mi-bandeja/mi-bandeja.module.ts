@@ -1,9 +1,11 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { LayoutModule } from '@angular/cdk/layout';
 
 import { MiBandejaRoutingModule } from './mi-bandeja-routing.module';
 import { SharedModule } from '../../../shared/shared.module';
+import { LoadingModule } from 'src/app/shared/loading/loading.module';
 
 import { MiBandejaComponent } from './mi-bandeja.component';
 import { ModalNuevoPedidoComponent } from './shared/modal-nuevo-pedido/modal-nuevo-pedido.component';
@@ -23,6 +25,8 @@ import { DropdownModule } from 'primeng/dropdown';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { TabViewModule } from 'primeng/tabview';
 import { CalendarModule } from 'primeng/calendar';
+import { CheckboxModule } from 'primeng/checkbox';
+import { SkeletonModule } from 'primeng/skeleton';
 
 @NgModule({
   declarations: [
@@ -45,6 +49,10 @@ import { CalendarModule } from 'primeng/calendar';
     InputSwitchModule,
     TabViewModule,
     CalendarModule,
+    CheckboxModule,
+    SkeletonModule,
+    LoadingModule,
+    LayoutModule,
   ],
   providers: [Validaciones, OrdenarPedidos],
 })

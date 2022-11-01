@@ -1,17 +1,17 @@
 import {
-  AfterViewChecked,
+  SimpleChanges,
   Component,
   ElementRef,
   OnInit,
   ViewChild,
+  HostListener,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { first } from 'rxjs/operators';
 import { AppState } from '../../reducers/globarReducers';
-import * as loginActions from '../../reducers/login/login.actions';
 import anime from 'animejs/lib/anime.es.js';
 import { UsuarioWorker } from '../../interfaces/resp-worker';
-import { Subscription } from 'rxjs';
+import { Subscription, timer } from 'rxjs';
 import * as menuActions from '../../reducers/abrir-cerrar-sidebar/abrir-cerrar-sidebar-actions';
 
 @Component({
@@ -19,7 +19,7 @@ import * as menuActions from '../../reducers/abrir-cerrar-sidebar/abrir-cerrar-s
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'],
 })
-export class SidebarComponent implements OnInit, AfterViewChecked {
+export class SidebarComponent implements OnInit {
   @ViewChild('catalogo', { static: true }) catalogo: ElementRef<HTMLElement>;
   @ViewChild('wrapSidebar', { static: true })
   wrapSidebar: ElementRef<HTMLElement>;
@@ -29,20 +29,58 @@ export class SidebarComponent implements OnInit, AfterViewChecked {
   constructor(private store: Store<AppState>) {}
 
   ngOnInit(): void {
-    this.cargarWorker();
+    this.cargarUsuario();
     this.animacionRow();
+    this.despliegueInicialSidebar();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    this.cargarUsuario();
+  }
+
+  @HostListener('window:resize', ['$event']) detectarAnchoPag(event) {
+    this.store
+      .select('sidebar')
+      .pipe(first())
+      .subscribe((resp: boolean) => {
+        const anchoWindow = window.innerWidth;
+
+        if (anchoWindow < 768) {
+          if (resp) {
+            this.store.dispatch(menuActions.abrirCerrarSidebar());
+          }
+        } else {
+          if (!resp) {
+            this.store.dispatch(menuActions.abrirCerrarSidebar());
+          }
+        }
+      });
   }
 
   cerrarSidebar(): void {
     this.store.dispatch(menuActions.abrirCerrarSidebar());
   }
 
-  ngAfterViewChecked(): void {
-    this.sub1 = this.store
+  despliegueInicialSidebar(): void {
+    const timerSide = timer(0, 500).subscribe((time) => {
+      const anchoWindow = window.innerWidth;
+      const sidebar = document.getElementById('sidebar');
+
+      if (anchoWindow < 768) {
+        if (sidebar) {
+          this.store.dispatch(menuActions.abrirCerrarSidebar());
+          timerSide.unsubscribe();
+        }
+      }
+    });
+  }
+
+  cargarUsuario(): void {
+    this.store
       .select('login')
       // .pipe(take(2))
-      .subscribe((worker) => {
-        this.usuario = worker.usuarioDB;
+      .subscribe((usuario) => {
+        this.usuario = usuario.usuarioDB;
       });
   }
 
@@ -120,23 +158,6 @@ export class SidebarComponent implements OnInit, AfterViewChecked {
       }
     }, 800);
   }
-
-  cargarWorker(): void {
-    this.store
-      .select('login')
-      .pipe(first())
-      .subscribe((usuario) => {
-        this.store.dispatch(
-          loginActions.obtenerToken({ token: usuario.token })
-        );
-      });
-  }
-
-  // irACatalogo(pathPrincipal: string, categoria: string): void {
-  //   this.router.navigate([`${pathPrincipal}`], {
-  //     queryParams: { cat: categoria },
-  //   });
-  // }
 
   salir(): void {
     localStorage.clear();

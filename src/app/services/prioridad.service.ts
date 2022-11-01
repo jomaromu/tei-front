@@ -21,9 +21,12 @@ export class PrioridadService {
     );
   }
 
-  obtenerPrioridades(token: string): Observable<any> {
+  obtenerPrioridades(data: any): Observable<any> {
     const url = `${environment.urlPrioridad}/prioridad/obtenerPrioridades`;
-    const header = new HttpHeaders({ token });
+    const header = new HttpHeaders({
+      token: data.token,
+      foranea: data.foranea,
+    });
 
     return this.http.get(url, { headers: header }).pipe(
       map((resp: any) => {
@@ -43,7 +46,11 @@ export class PrioridadService {
 
   eliminarPrioridad(data: any): Observable<any> {
     const url = `${environment.urlPrioridad}/prioridad/eliminarPrioridad`;
-    const header = new HttpHeaders({ token: data.token, id: data.id });
+    const header = new HttpHeaders({
+      token: data.token,
+      id: data.id,
+      foranea: data.foranea,
+    });
 
     return this.http.delete(url, { headers: header }).pipe(map((resp) => resp));
   }
@@ -62,6 +69,7 @@ export class PrioridadService {
     const header = new HttpHeaders({
       token: data.token,
       colPrioridad: data.colPrioridad,
+      foranea: data.foranea,
     });
 
     return this.http.get(url, { headers: header }).pipe(

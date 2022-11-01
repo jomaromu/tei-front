@@ -1,0 +1,100 @@
+<app-loading></app-loading>
+
+<section id="body">
+  <div class="lock"></div>
+  <div class="message">
+    <h1>Solicitúd actualización de contraseña</h1>
+    <a
+      style="color: rgb(132, 0, 172); cursor: pointer; font-weight: 500"
+      (click)="showDialog()"
+      >Actualizar contraseña</a
+    >
+    |
+    <a
+      [routerLink]="['/login']"
+      style="color: rgb(132, 0, 172); cursor: pointer; font-weight: 500"
+      >Ir a la Página principal</a
+    >
+    <p>Después de 4 horas ya no podrá acceder a este enlace</p>
+  </div>
+</section>
+
+<!-- DIALOG EDITAR -->
+<form [formGroup]="forma">
+  <p-dialog
+    header="Cambiar contraseña"
+    [(visible)]="displayDialog"
+    [modal]="true"
+    [draggable]="true"
+    [resizable]="false"
+    [style]="{ width: '500px' }"
+    (onHide)="closeDialog()"
+  >
+    <section id="wrap-form-perfil">
+      <!-- Password  -->
+      <div class="field flex-column" [style]="{ width: '100%' }">
+        <span class="p-float-label">
+          <p-password
+            id="float-input"
+            promptLabel="Ingrese la contraseña"
+            weakLabel="Débil"
+            mediumLabel="Intermedio"
+            strongLabel="Fuerte"
+            formControlName="newPass"
+          ></p-password>
+          <label for="float-input">Nueva contraseña</label>
+        </span>
+        <small
+          *ngIf="!validarNewPass.valido && forma.controls.newPass.touched"
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarNewPass.mensaje }}</small
+        >
+      </div>
+
+      <!-- Validar password -->
+      <div class="field flex-column" [style]="{ width: '100%' }">
+        <span class="p-float-label">
+          <p-password
+            id="float-input"
+            promptLabel="Ingrese la contraseña"
+            weakLabel="Débil"
+            mediumLabel="Intermedio"
+            strongLabel="Fuerte"
+            formControlName="oldPass"
+          ></p-password>
+          <label for="float-input">Confirmar contraseña</label>
+        </span>
+        <small
+          *ngIf="!validarOldPass.valido && forma.controls.oldPass.touched"
+          class="p-error"
+          style="word-wrap: break-word"
+          >{{ validarOldPass.mensaje }}</small
+        >
+      </div>
+
+      <label style="grid-column: 1 / 3; color: tomato" for="">{{
+        passIgualesLabel
+      }}</label>
+    </section>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        pRipple
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="closeDialog()"
+      ></button>
+      <button
+        pButton
+        pRipple
+        label="Guardar"
+        icon="pi pi-check"
+        class="p-button-text"
+        (click)="btnGuardar()"
+      ></button>
+    </ng-template>
+  </p-dialog>
+</form>

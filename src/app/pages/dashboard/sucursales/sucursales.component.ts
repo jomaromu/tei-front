@@ -33,14 +33,13 @@ export class SucursalesComponent implements OnInit, AfterViewInit, OnDestroy {
     private http: HttpClient,
     private validadores: Validaciones,
     private fb: FormBuilder,
-    private sucursalService: SucursalService,
-    private sSocketService: SucursalesSocketService
-  ) {}
+    private sucursalService: SucursalService
+  ) // private sSocketService: SucursalesSocketService
+  {}
 
   ngOnInit(): void {
     this.cargarProvincias();
     this.crearFormulario();
-    this.crearSucursalSocket();
   }
 
   crearFormulario(): void {
@@ -82,11 +81,20 @@ export class SucursalesComponent implements OnInit, AfterViewInit, OnDestroy {
     this.store.dispatch(loadingActions.cargarLoading());
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
-        this.sService
-          .obtenerSucs(usuario.token)
-          .subscribe((sucursales: Sucursal) => {
+        if (usuario.usuarioDB) {
+          const data = {
+            token: usuario.token,
+            foranea: '',
+          };
+
+          if (usuario.usuarioDB.empresa) {
+            data.foranea = usuario.usuarioDB._id;
+          } else {
+            data.foranea = usuario.usuarioDB.foranea;
+          }
+          this.sService.obtenerSucs(data).subscribe((sucursales: Sucursal) => {
             if (sucursales.ok) {
               this.sucursales = sucursales.sucursalesDB;
               this.store.dispatch(loadingActions.quitarLoading());
@@ -100,6 +108,7 @@ export class SucursalesComponent implements OnInit, AfterViewInit, OnDestroy {
               this.store.dispatch(loadingActions.quitarLoading());
             }
           });
+        }
       });
   }
 
@@ -187,7 +196,6 @@ export class SucursalesComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         if (tipo === 'crear') {
           this.crearSucursal();
-          this.crearSucursalSocket();
         }
 
         if (tipo === 'editar') {
@@ -200,36 +208,38 @@ export class SucursalesComponent implements OnInit, AfterViewInit, OnDestroy {
   crearSucursal(): void {
     this.store
       .select('login')
-      .pipe(first())
-      .subscribe((resp) => {
+      // .pipe(first())
+      .subscribe((usuario) => {
         const data: CrearSucursal = {
           provincia: this.forma.controls.provincia.value,
           nombre: this.forma.controls.nombre.value,
           telefono: this.forma.controls.telefono.value,
           direccion: this.forma.controls.direccion.value,
           estado: this.forma.controls.estado.value,
-          token: resp.token,
+          token: usuario.token,
+          foranea: '',
         };
+
+        if (usuario.usuarioDB.empresa) {
+          data.foranea = usuario.usuarioDB._id;
+        } else {
+          data.foranea = usuario.usuarioDB.foranea;
+        }
 
         this.sucursalService
           .crearSucursal(data)
           .subscribe((sucursal: Sucursal) => {
-            this.store.dispatch(loadingActions.cargarLoading());
-
             if (sucursal.ok) {
-              this.store.dispatch(loadingActions.quitarLoading());
               this.displayDialogCrear = false;
               Swal.fire('Mensaje', 'Sucursal creada', 'success');
               this.cargarSucursales();
               this.limpiarFormulario();
             } else {
-              Swal.fire('Mensaje', 'Error crear una sucursal', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
+              Swal.fire('Mensaje', `${sucursal?.err?.mensaje}`, 'error');
             }
 
             if (!sucursal) {
               Swal.fire('Mensaje', 'Error crear una sucursal', 'error');
-              this.store.dispatch(loadingActions.quitarLoading());
             }
 
             // console.log(sucursal);
@@ -240,7 +250,7 @@ export class SucursalesComponent implements OnInit, AfterViewInit, OnDestroy {
   editarSucursal(): void {
     this.store
       .select('login')
-      .pipe(first())
+      // .pipe(first())
       .subscribe((usuario) => {
         const data: CrearSucursal = {
           token: usuario.token,
@@ -250,23 +260,27 @@ export class SucursalesComponent implements OnInit, AfterViewInit, OnDestroy {
           direccion: this.forma.controls.direccion.value,
           estado: this.forma.controls.estado.value,
           id: this.sucursal._id,
+          foranea: '',
         };
 
-        this.store.dispatch(loadingActions.cargarLoading());
+        if (usuario.usuarioDB.empresa) {
+          data.foranea = usuario.usuarioDB._id;
+        } else {
+          data.foranea = usuario.usuarioDB.foranea;
+        }
+
         this.sucursalService.editarSucursalID(data).subscribe((sucursal) => {
           if (sucursal.ok) {
             this.cargarSucursales();
             this.limpiarFormulario();
             this.displayDialogEditar = false;
-            Swal.fire('Mensaje', 'Sucursal editada', 'success');
+            Swal.fire('Mensaje', `Sucursal editada`, 'success');
           } else {
-            Swal.fire('Mensaje', 'Error al editar la sucursal', 'error');
-            this.store.dispatch(loadingActions.quitarLoading());
+            Swal.fire('Mensaje', `${sucursal?.err?.mensaje}`, 'error');
           }
 
           if (!sucursal) {
             Swal.fire('Mensaje', 'Error al editar la sucursal', 'error');
-            this.store.dispatch(loadingActions.quitarLoading());
           }
         });
       });
@@ -284,51 +298,49 @@ export class SucursalesComponent implements OnInit, AfterViewInit, OnDestroy {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.store.dispatch(loadingActions.cargarLoading());
-
         this.store
           .select('login')
-          .pipe(first())
+          // .pipe(first())
           .subscribe((usuario) => {
-            const data = {
-              id: sucursal._id,
-              token: usuario.token,
-            };
+            if (usuario.usuarioDB) {
+              const data = {
+                id: sucursal._id,
+                token: usuario.token,
+                foranea: '',
+              };
 
-            this.sucursalService
-              .eliminarSucursalID(data)
-              .subscribe((sucursal) => {
-                if (sucursal.ok) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  this.cargarSucursales();
-                  this.limpiarFormulario();
-                  Swal.fire('Mensaje', 'Sucursal borrada', 'success');
-                } else {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar la sucursal', 'error');
-                }
+              if (usuario.usuarioDB.empresa) {
+                data.foranea = usuario.usuarioDB._id;
+              } else {
+                data.foranea = usuario.usuarioDB.foranea;
+              }
 
-                if (!sucursal) {
-                  this.store.dispatch(loadingActions.quitarLoading());
-                  Swal.fire('Mensaje', 'Error al borrar la sucursal', 'error');
-                }
-              });
+              this.sucursalService
+                .eliminarSucursalID(data)
+                .subscribe((sucursal) => {
+                  if (sucursal.ok) {
+                    this.cargarSucursales();
+                    this.limpiarFormulario();
+                    Swal.fire('Mensaje', 'Sucursal borrada', 'success');
+                  } else {
+                    Swal.fire('Mensaje', `${sucursal?.err?.mensaje}`, 'error');
+                  }
+
+                  if (!sucursal) {
+                    Swal.fire(
+                      'Mensaje',
+                      'Error al borrar la sucursal',
+                      'error'
+                    );
+                  }
+                });
+            }
           });
       }
     });
   }
 
-  // sockets
-  crearSucursalSocket(): void {
-    this.sSocketService.escuchar('cargar-sucursales').subscribe((sucursal) => {
-      console.log('ok');
-      this.cargarSucursales();
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.sSocketService.destruirSocket('cargar-sucursales');
-  }
+  ngOnDestroy(): void {}
 
   /*
     1. Titulo
@@ -358,4 +370,5 @@ interface CrearSucursal {
   estado: boolean;
   token: string;
   id?: string;
+  foranea: string;
 }

@@ -1,10 +1,10 @@
-<app-menu></app-menu>
 <app-loading></app-loading>
+<app-menu></app-menu>
 
 <!-- TABLA COLORES -->
 <section id="wrap-colores">
   <section id="wrap-header">
-    <h3 style="font-weight: bold; margin-bottom: 50px">Colores del pedido</h3>
+    <h3 style="font-weight: bold; margin-bottom: 50px">Estados del pedido</h3>
   </section>
 
   <section id="wrap-tabla" class="card shaddow rounded">
@@ -32,6 +32,7 @@
 
     <!-- tabla -->
     <p-table
+      #dt
       [value]="colores"
       [rows]="10"
       [paginator]="true"
@@ -43,7 +44,23 @@
       currentPageReportTemplate="Mostrando {first} de {last} de {totalRecords} Colores"
       [rowsPerPageOptions]="[10, 25, 50]"
       [resizableColumns]="true"
+      [globalFilterFields]="['nombre']"
     >
+      <ng-template pTemplate="caption">
+        <div
+          style="display: flex; justify-content: flex-end; flex-direction: row"
+        >
+          <span class="p-input-icon-left ml-auto">
+            <i class="pi pi-search"></i>
+            <input
+              pInputText
+              type="text"
+              (input)="dt.filterGlobal($event.target.value, 'contains')"
+              placeholder="Nombre"
+            />
+          </span>
+        </div>
+      </ng-template>
       <ng-template pTemplate="header">
         <tr>
           <th>#</th>
@@ -56,11 +73,11 @@
       <ng-template pTemplate="body" let-color let-i="rowIndex">
         <tr>
           <td>{{ i + 1 }}</td>
-          <td>{{ color.nombre }}</td>
+          <td>{{ color?.nombre }}</td>
           <td>
             <div
               [style]="{
-                backgroundColor: color.color,
+                backgroundColor: color?.color,
                 width: '35px',
                 height: '35px',
                 borderRadius: '100%',
@@ -70,13 +87,13 @@
           </td>
           <td>
             <span
-              [ngClass]="{ 'badge-activo': color.estado }"
-              *ngIf="color.estado"
+              [ngClass]="{ 'badge-activo': color?.estado }"
+              *ngIf="color?.estado"
               >Activo</span
             >
             <span
-              [ngClass]="{ 'badge-inactivo': !color.estado }"
-              *ngIf="!color.estado"
+              [ngClass]="{ 'badge-inactivo': !color?.estado }"
+              *ngIf="!color?.estado"
               >Inactivo</span
             >
           </td>
@@ -113,6 +130,7 @@
     [resizable]="false"
     [style]="{ width: '500px', height: '400px' }"
     [breakpoints]="{ '530px': '95%' }"
+    (onHide)="closeDialog()"
   >
     <section id="wrap-form-colores">
       <!-- Nombre -->
@@ -146,7 +164,7 @@
       </div>
     </section>
 
-    <ng-template pTemplate="footer">
+    <div class="btn-footer">
       <button
         pButton
         pRipple
@@ -163,7 +181,7 @@
         class="p-button-text"
         (click)="btnGuardar('crear')"
       ></button>
-    </ng-template>
+    </div>
   </p-dialog>
 </form>
 
@@ -210,7 +228,7 @@
       </div>
     </section>
 
-    <ng-template pTemplate="footer">
+    <div class="btn-footer">
       <button
         pButton
         pRipple
@@ -227,6 +245,6 @@
         class="p-button-text"
         (click)="btnGuardar('editar')"
       ></button>
-    </ng-template>
+    </div>
   </p-dialog>
 </form>

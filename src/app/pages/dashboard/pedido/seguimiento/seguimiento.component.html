@@ -1,5 +1,3 @@
-<app-loading></app-loading>
-
 <!-- INFORMACION DE SEGUIMIENTO -->
 <p-fieldset
   legend="Información de seguimientos"
@@ -9,11 +7,11 @@
   <p-splitter
     *ngFor="let pPedido of pedido?.productosPedidos"
     [style]="{
-      height: '300px',
-      maxHeight: '300px',
+      height: 'auto',
+      maxHeight: 'auto',
       marginBottom: '45px'
     }"
-    layout="horizontal"
+    [layout]="layout"
   >
     <!-- SEGUIMIENTO DISEÑO -->
     <ng-template pTemplate>

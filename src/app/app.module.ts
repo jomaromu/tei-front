@@ -29,7 +29,7 @@ import { PedidoSocketService } from './services/sockets/pedido-socket.service';
 import { SucursalesSocketService } from './services/sockets/sucursales-socket.service';
 import { PagosSocketService } from './services/sockets/pagos-socket.service';
 import { ArchivosSocketService } from './services/sockets/archivos-socket.service';
-import { ProductosPedidoService } from './services/sockets/productos-pedido.service';
+import { ProductoPedidoSocket } from './services/sockets/productos-pedido.service';
 // import { InterceptorService } from './services/interceptor/interceptor.service';
 
 // const config: SocketIoConfig = { url: environment.url, options: {} };
@@ -61,7 +61,7 @@ import { ProductosPedidoService } from './services/sockets/productos-pedido.serv
     SucursalesSocketService,
     PagosSocketService,
     ArchivosSocketService,
-    ProductosPedidoService,
+    ProductoPedidoSocket,
   ],
   bootstrap: [AppComponent],
   exports: [],

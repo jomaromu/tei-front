@@ -1,25 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { UserService } from '../services/user.service';
-import { catchError, map, mapTo, mergeMap, tap } from 'rxjs/operators';
-import { forkJoin, Observable, of } from 'rxjs';
+import { catchError, map, mergeMap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 import { Usuario } from '../interfaces/resp-worker';
 import * as loginActions from '../reducers/login/login.actions';
-import * as ayudasActions from '../reducers/ayuda/ayuda.actions';
-import { AyudaService } from '../services/ayuda.service';
-import { Ayuda } from '../interfaces/ayuda';
-import { PedidoService } from '../services/pedido.service';
-import * as pedidosActions from '../reducers/pedidos/pedido.actions';
-import { Pedido } from '../interfaces/pedido';
 
 @Injectable()
 export class UserEffects {
-  constructor(
-    private actions$: Actions,
-    private userService: UserService,
-    private ayudaService: AyudaService,
-    private pedidoService: PedidoService
-  ) {}
+  constructor(private actions$: Actions, private userService: UserService) {}
 
   decodificarToken$ = createEffect((): Observable<any> => {
     return this.actions$.pipe(
@@ -49,31 +38,4 @@ export class UserEffects {
       )
     );
   });
-
-  cargarAyudas$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(loginActions.obtenerToken),
-      mergeMap((respToken) =>
-        this.ayudaService.obtenerAyudas(respToken.token).pipe(
-          // tap(data => console.log(data)),
-          map((ayudas: Ayuda) =>
-            ayudasActions.cargarAyudas({ ayudas: ayudas.ayudasDB })
-          )
-        )
-      )
-    );
-  });
-
-  // cargarPedidos$ = createEffect(() => {
-
-  //     return this.actions$.pipe(
-  //         ofType(loginActions.obtenerToken),
-  //         mergeMap(respToken => this.pedidoService.obtenerPedidos(respToken.token)
-  //             .pipe(
-  //                 // tap(data => console.log(data)),
-  //                 map((pedidos: Pedido) => pedidosActions.obtenerPedidos({pedidos})),
-  //             )
-  //         )
-  //     );
-  // });
 }
